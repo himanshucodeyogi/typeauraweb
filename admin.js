@@ -39,6 +39,7 @@
     aitools:  'AI Tools',
     apikeys:  'API Keys',
     crashes:  'Crashes',
+    referrals: 'Referrals',
     releases: 'Releases & Config',
   };
 
@@ -1553,6 +1554,71 @@
 
   /* ═══ Releases & config ══════════════════════════════════════ */
 
+  /* ═══ Referrals ══════════════════════════════════════════════ */
+
+  /* One request for the whole section. The endpoint already aggregates, so
+     there is nothing here worth a second round trip — and this page is read
+     far more often than it changes. */
+  async function loadReferrals(force = false) {
+    let data;
+    try {
+      data = await request('/api/admin/referrals?limit=25', { ttl: 60_000, force });
+    } catch (e) {
+      $('refTopBody').innerHTML = `<tr><td colspan="6" class="a-empty">${esc(e.message)}</td></tr>`;
+      return;
+    }
+
+    const f = data.funnel || {};
+    $('refClaims').textContent    = fmtFull(f.claims || 0);
+    $('refQualified').textContent = fmtFull(f.qualified || 0);
+    $('refPending').textContent   = fmtFull(f.pending || 0);
+
+    /* Null, not 0, when nothing has been claimed: "0%" on an empty program
+       reads as a broken funnel rather than an empty one. */
+    $('refQualifiedFoot').textContent = f.qualify_rate == null
+      ? 'No invites redeemed yet'
+      : `${f.qualify_rate}% of redeemed codes`;
+    $('refClaimsFoot').textContent = data.enabled
+      ? 'Referrals are live'
+      : 'Referrals are switched off';
+
+    const live = data.live_grants || {};
+    $('refLive').textContent = fmtFull(live.devices || 0);
+    /* Headroom handed out, NOT spend — most of a bonus is never used, which is
+       exactly why referrals cost less than the sticker number suggests. */
+    $('refLiveFoot').textContent =
+      `${fmtFull(live.tokens_per_day || 0)} bonus tokens/day granted`;
+
+    const top = Array.isArray(data.top_referrers) ? data.top_referrers : [];
+    $('refTopBody').innerHTML = top.length
+      ? top.map(r => `
+        <tr>
+          <td class="a-primary-cell"><span class="a-mono">${esc(String(r.device_id || r.hw_id || '—').slice(0, 12))}</span></td>
+          <td class="a-num">${fmtFull(r.total || 0)}</td>
+          <td class="a-num">${fmtFull(r.qualified || 0)}</td>
+          <td class="a-num">${fmtFull(r.pending || 0)}</td>
+          <td>${r.capped ? `<span class="a-chip a-chip-warn">${fmtFull(r.capped)}</span>` : '<span class="a-muted">—</span>'}</td>
+          <td class="a-muted">${esc(r.last ? String(r.last).slice(0, 10) : '—')}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="6" class="a-empty">Nobody has invited anyone yet.</td></tr>';
+
+    const c = data.config || {};
+    const rows = [
+      ['Referrer bonus', `+${fmtFull(c.referrer_bonus)} tokens/day`],
+      ['Referee bonus',  `+${fmtFull(c.referee_bonus)} tokens/day`],
+      ['Bonus length',   `${c.bonus_days} days`],
+      ['Stack cap',      `+${fmtFull(c.max_bonus)} tokens/day`],
+      ['Per referrer',   `${c.max_per_day}/day, ${c.max_lifetime} lifetime`],
+      ['Claim window',   `${c.claim_window_days} days after install`],
+      ['In-app prompt',  c.popup_every_n_opens > 0
+        ? `every ${c.popup_every_n_opens} app opens` +
+          (c.popup_cooldown_hours > 0 ? `, at most once per ${c.popup_cooldown_hours}h` : '')
+        : 'off'],
+    ];
+    $('refConfig').innerHTML = rows
+      .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(String(v))}</dd>`).join('');
+  }
+
   async function loadReleases(force = false) {
     /* /api/updates is public and unauthenticated — reading the live version
        costs nothing from the admin budget. There is no admin GET for it. */
@@ -1592,6 +1658,11 @@
     renderSwitch('premium', config.premium_enabled === true);
     renderSwitch('byok',    config.byok_enabled    !== false);
     renderSwitch('gif',     config.gif_enabled     !== false);
+    renderSwitch('referral', config.referral_enabled === true);
+    /* Only seeded when untouched, so a half-typed value is not wiped by a
+       background config refresh. */
+    const ft = $('freeTokensInput');
+    if (ft && !ft.value) ft.value = String(config.free_daily_tokens ?? 10000);
 
     const gated = Array.isArray(config.gated_tools) ? config.gated_tools : [];
     $('gatedTools').innerHTML = GATED_TOOLS.map(name => `
@@ -1644,6 +1715,57 @@
     );
     if (!ok) return;
     writeConfig({ gif_enabled: next }, `GIF keyboard ${next ? 'enabled' : 'disabled'}.`);
+  }
+
+  async function toggleReferral() {
+    const next = !(config.referral_enabled === true);
+    const ok = await confirmAsk(
+      next ? 'Turn referrals on?' : 'Turn referrals off?',
+      next
+        ? 'Every device gets an invite code and can redeem one. Bonuses already granted keep running either way.'
+        : 'The invite screen and the in-app prompt disappear and no new code can be redeemed. Bonuses already granted are NOT revoked — they run to their expiry.',
+      next ? 'Enable referrals' : 'Disable referrals',
+    );
+    if (!ok) return;
+    writeConfig({ referral_enabled: next }, `Referrals ${next ? 'enabled' : 'disabled'}.`);
+  }
+
+  /* The one setting here that changes what existing users get. Confirmed with
+     the actual before/after numbers rather than a generic "are you sure", and
+     the warning names the failure mode that is not obvious: an app build older
+     than the server-authoritative-budget fix keeps showing its hardcoded
+     10,000 and simply fails AI calls above the new cap. */
+  async function saveFreeTokens() {
+    const el = $('freeTokensInput');
+    const status = $('freeTokensStatus');
+    const next = Number(String(el.value).replace(/[^0-9]/g, ''));
+    const current = config.free_daily_tokens ?? 10000;
+    const bounds = config.free_daily_tokens_bounds || { min: 2000, max: 50000 };
+
+    if (!Number.isFinite(next) || next < bounds.min || next > bounds.max) {
+      status.className = 'a-action-status is-bad';
+      status.textContent = `Enter a number between ${fmtFull(bounds.min)} and ${fmtFull(bounds.max)}.`;
+      return;
+    }
+    if (next === current) {
+      status.className = 'a-action-status';
+      status.textContent = 'Already set to that.';
+      return;
+    }
+
+    const lowering = next < current;
+    const ok = await confirmAsk(
+      `Set the Free tier to ${fmtFull(next)} tokens/day?`,
+      `Currently ${fmtFull(current)}. This applies to every device on its next ping.` +
+      (lowering
+        ? ' Users on an app build older than the server-budget fix will keep showing the old number and their AI calls will fail in between — check adoption first.'
+        : ''),
+      lowering ? 'Lower the cap' : 'Raise the cap',
+    );
+    if (!ok) return;
+    status.className = 'a-action-status';
+    status.textContent = '';
+    writeConfig({ free_daily_tokens: next }, `Free tier set to ${fmtFull(next)} tokens/day.`);
   }
 
   async function toggleByok() {
@@ -1714,6 +1836,7 @@
        against Groq and is the slower of the two. */
     apikeys:  () => checkLimits(),
     crashes:  (f) => loadCrashes(page.crash, f),
+    referrals: (f) => loadReferrals(f),
     releases: (f) => loadReleases(f),
   };
 
@@ -1859,6 +1982,8 @@
         case 'toggle-premium': togglePremium(); break;
         case 'toggle-byok':   toggleByok(); break;
         case 'toggle-gif':    toggleGif(); break;
+        case 'toggle-referral': toggleReferral(); break;
+        case 'save-free-tokens': saveFreeTokens(); break;
         case 'toggle-gated':  toggleGated(el.dataset.tool); break;
         case 'active-range':  setActiveRange(Number(el.dataset.range)); break;
         case 'toggle-countries': toggleCountries(); break;

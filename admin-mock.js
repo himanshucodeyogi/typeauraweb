@@ -140,6 +140,30 @@ let config = {
   gif_enabled: true,
   gated_tools: ['Email Composer'],
   ready_countries: ['IN', 'US', 'GB', 'CA', 'AU', 'NZ', 'IE', 'ZA'],
+  referral_enabled: true,
+  free_daily_tokens: 5000,
+  referral: {
+    referrer_bonus: 5000, referee_bonus: 2000, bonus_days: 3,
+    max_bonus: 25000, max_per_day: 5, max_lifetime: 20,
+    claim_window_days: 14, popup_every_n_opens: 3, popup_cooldown_hours: 20,
+  },
+};
+
+/* Shaped to make the interesting cases visible without a live program: a
+   healthy referrer, one that hit the lifetime cap, and one whose invites all
+   sit unqualified — which is what a farm of installs nobody sets up looks
+   like. The qualify rate deliberately sits near the real funnel's 33%. */
+const referrals = {
+  enabled: config.referral_enabled,
+  config: config.referral,
+  funnel: { claims: 48, qualified: 17, pending: 29, capped: 2, qualify_rate: 35.4 },
+  live_grants: { devices: 11, tokens_per_day: 41000 },
+  top_referrers: [
+    { hw_id: 'hw-a1', device_id: 'a1b2c3d4e5f6', total: 21, qualified: 9, pending: 12, capped: 2, last: '2026-09-18T10:12:00Z' },
+    { hw_id: 'hw-b2', device_id: 'b2c3d4e5f6a1', total: 6,  qualified: 5, pending: 1,  capped: 0, last: '2026-09-17T08:02:00Z' },
+    { hw_id: 'hw-c3', device_id: 'c3d4e5f6a1b2', total: 14, qualified: 0, pending: 14, capped: 0, last: '2026-09-16T22:41:00Z' },
+    { hw_id: 'hw-d4', device_id: 'd4e5f6a1b2c3', total: 3,  qualified: 3, pending: 0,  capped: 0, last: '2026-09-12T14:20:00Z' },
+  ],
 };
 
 const keyHealth = [
@@ -306,6 +330,10 @@ export default {
         return { ok: true, unblocked: body.key_hash };
       }
       return { keys: keyLimits };
+    }
+
+    if (route === '/api/admin/referrals') {
+      return { ...referrals, enabled: config.referral_enabled, config: config.referral };
     }
 
     if (route === '/api/admin/set-config') {

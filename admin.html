@@ -45,6 +45,7 @@
   <symbol id="i-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/></symbol>
   <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.7 4H7.3a2 2 0 0 0-1.8 1.1z"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8M12 8v13"/><path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
   <symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a6 6 0 0 1 8 0 6 6 0 0 0 8 0v9a6 6 0 0 1-8 0 6 6 0 0 0-8 0"/></symbol>
@@ -86,6 +87,7 @@
       <button class="a-nav-item" data-section="aitools"><svg><use href="#i-sparkles"/></svg><span>AI Tools</span></button>
       <button class="a-nav-item" data-section="apikeys"><svg><use href="#i-key"/></svg><span>API Keys</span></button>
       <button class="a-nav-item" data-section="crashes"><svg><use href="#i-bug"/></svg><span>Crashes</span><span class="a-nav-count a-hidden" id="navCountCrashes"></span></button>
+      <button class="a-nav-item" data-section="referrals"><svg><use href="#i-gift"/></svg><span>Referrals</span></button>
       <button class="a-nav-item" data-section="releases"><svg><use href="#i-rocket"/></svg><span>Releases</span></button>
     </nav>
 
@@ -324,6 +326,57 @@
       </section>
 
       <!-- ─── Releases & config ──────────────────────────────── -->
+      <section class="a-section" id="sec-referrals">
+        <!-- Qualification rate is the number that matters: the share of invited
+             installs that ever set the keyboard up. If it collapses, either the
+             bar is wrong or the invites are not real people. -->
+        <div class="a-kpi-row">
+          <article class="a-kpi">
+            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-gift"/></svg></span><span class="a-kpi-label">Codes redeemed</span></div>
+            <div class="a-kpi-value" id="refClaims">—</div>
+            <div class="a-kpi-foot" id="refClaimsFoot"></div>
+          </article>
+          <article class="a-kpi">
+            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-check"/></svg></span><span class="a-kpi-label">Qualified</span></div>
+            <div class="a-kpi-value" id="refQualified">—</div>
+            <div class="a-kpi-foot" id="refQualifiedFoot"></div>
+          </article>
+          <article class="a-kpi">
+            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-clock"/></svg></span><span class="a-kpi-label">Waiting on setup</span></div>
+            <div class="a-kpi-value" id="refPending">—</div>
+            <div class="a-kpi-foot">Referrer is not paid until these qualify</div>
+          </article>
+          <article class="a-kpi">
+            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-zap"/></svg></span><span class="a-kpi-label">Bonuses running</span></div>
+            <div class="a-kpi-value" id="refLive">—</div>
+            <div class="a-kpi-foot" id="refLiveFoot"></div>
+          </article>
+        </div>
+
+        <section class="a-panel">
+          <div class="a-panel-head">
+            <h2>Top referrers</h2>
+            <p class="a-sub">Grouped by device hardware, so a reinstall is not counted as a second person. A row with many claims and few qualified is what a farm looks like.</p>
+          </div>
+          <div class="a-table-scroll">
+            <table class="a-table">
+              <thead><tr><th>Device</th><th>Invited</th><th>Qualified</th><th>Waiting</th><th>Capped</th><th>Last invite</th></tr></thead>
+              <tbody id="refTopBody"><tr><td colspan="6" class="a-empty">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="a-panel">
+          <div class="a-panel-head">
+            <h2>Program settings</h2>
+            <p class="a-sub">Live values. Change them in Releases &amp; Config — they reach devices on the next ping, with no app release.</p>
+          </div>
+          <div class="a-panel-body">
+            <dl class="a-kv" id="refConfig"></dl>
+          </div>
+        </section>
+      </section>
+
       <section class="a-section" id="sec-releases">
         <div class="a-kpi-row" style="grid-template-columns:minmax(0,1fr)">
           <article class="a-kpi">
@@ -395,6 +448,41 @@
               <div class="a-switch-side">
                 <span class="a-switch-state" id="gifState">—</span>
                 <button class="a-switch" id="gifSwitch" role="switch" aria-checked="false" aria-label="GIF keyboard" data-action="toggle-gif"></button>
+              </div>
+            </div>
+
+            <div class="a-switch-row">
+              <div class="a-switch-copy">
+                <div class="a-switch-title">Referrals</div>
+                <p class="a-switch-desc">
+                  Invite codes and the bonus tokens they grant. Off by default — the app hides the
+                  invite row entirely, so turning this on is what makes the feature exist.
+                </p>
+              </div>
+              <div class="a-switch-side">
+                <span class="a-switch-state" id="referralState">—</span>
+                <button class="a-switch" id="referralSwitch" role="switch" aria-checked="false" aria-label="Referrals" data-action="toggle-referral"></button>
+              </div>
+            </div>
+
+            <!-- The one value here that changes what users get rather than
+                 whether a feature exists. It lands on EVERY live device on its
+                 next ping, old builds included — but a build older than the
+                 fix that made the app honour a LOWER server budget will keep
+                 showing 10,000 locally and fail its AI calls in between. -->
+            <div class="a-switch-row">
+              <div class="a-switch-copy">
+                <div class="a-switch-title">Free daily tokens <span class="a-chip a-chip-warn">pricing</span></div>
+                <p class="a-switch-desc">
+                  The Free tier's daily budget, applied to every device at once. Check
+                  <code>scripts/token-distribution.js</code> before moving it — the number to read is the
+                  wall cadence for engaged users, not the average.
+                </p>
+                <div class="a-actions" style="margin-top:10px">
+                  <input class="a-input" id="freeTokensInput" inputmode="numeric" style="max-width:160px" placeholder="10000" />
+                  <button class="a-btn a-btn-primary a-btn-sm" data-action="save-free-tokens">Apply</button>
+                  <span class="a-action-status" id="freeTokensStatus"></span>
+                </div>
               </div>
             </div>
 
