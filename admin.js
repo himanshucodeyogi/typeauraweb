@@ -35,6 +35,7 @@
 
   const SECTION_TITLES = {
     overview: 'Overview',
+    ask:      'Ask AI',
     devices:  'Devices',
     aitools:  'AI Tools',
     apikeys:  'API Keys',
@@ -1829,6 +1830,7 @@
 
   const LOADERS = {
     overview: (f) => loadOverview(f),
+    ask:      () => renderAsk(),
     devices:  (f) => loadDevices(page.dev, f),
     aitools:  (f) => loadAiTools(page.ai, f),
     /* Limit status is loaded on arrival so the section isn't an empty shell;
@@ -1887,6 +1889,8 @@
   function onUnauthorized() {
     token = '';
     sessionStorage.removeItem('ta_admin');
+    try { sessionStorage.removeItem(ASK_KEY); } catch { /* ignore */ }
+    askLog = [];
     cache.clear();
     loaded.clear();
     $('app').classList.remove('is-on');
@@ -1932,6 +1936,161 @@
 
     const wanted = location.hash.slice(1);
     if (wanted && wanted !== 'overview' && SECTION_TITLES[wanted]) go(wanted);
+  }
+
+  /* ═══ Ask AI ═════════════════════════════════════════════════
+     Chat with the backend's data analyst (/api/admin/ask). The server is
+     stateless: the conversation lives here, in sessionStorage next to the
+     token, and each question re-sends the last few turns. Every answer keeps
+     the queries that produced it, so a number can be checked, not just trusted. */
+
+  const ASK_KEY = 'ta_admin_ask';
+  let askLog  = [];                    // [{ role, content, queries?, error? }]
+  let askBusy = false;
+
+  function askLoad() {
+    try { askLog = JSON.parse(sessionStorage.getItem(ASK_KEY) || '[]'); } catch { askLog = []; }
+    if (!Array.isArray(askLog)) askLog = [];
+  }
+
+  function askSave() {
+    try { sessionStorage.setItem(ASK_KEY, JSON.stringify(askLog.slice(-40))); } catch { /* full or blocked — chat still works */ }
+  }
+
+  /* Small markdown subset: fenced code, tables, headings, lists, bold, inline
+     code. Input is escaped first, so the model can't inject markup. */
+  function askInline(s) {
+    return s
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  }
+
+  function askMarkdown(src) {
+    const lines = esc(src).split('\n');
+    const out = [];
+    let i = 0;
+    const isRow = (l) => /^\s*\|.*\|\s*$/.test(l);
+    const cells = (l) => l.trim().replace(/^\||\|$/g, '').split('|').map(c => askInline(c.trim()));
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      if (/^\s*```/.test(line)) {
+        const buf = [];
+        i++;
+        while (i < lines.length && !/^\s*```/.test(lines[i])) buf.push(lines[i++]);
+        i++;
+        out.push(`<pre>${buf.join('\n')}</pre>`);
+        continue;
+      }
+
+      if (isRow(line) && i + 1 < lines.length && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1])) {
+        const head = cells(line);
+        i += 2;
+        const body = [];
+        while (i < lines.length && isRow(lines[i])) body.push(cells(lines[i++]));
+        out.push(`<div class="a-ask-table"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead>` +
+          `<tbody>${body.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`);
+        continue;
+      }
+
+      const h = line.match(/^\s*#{1,4}\s+(.*)$/);
+      if (h) { out.push(`<h4>${askInline(h[1])}</h4>`); i++; continue; }
+
+      if (/^\s*([-*•]|\d+[.)])\s+/.test(line)) {
+        const ordered = /^\s*\d/.test(line);
+        const items = [];
+        while (i < lines.length && /^\s*([-*•]|\d+[.)])\s+/.test(lines[i])) {
+          items.push(`<li>${askInline(lines[i].replace(/^\s*([-*•]|\d+[.)])\s+/, ''))}</li>`);
+          i++;
+        }
+        out.push(ordered ? `<ol>${items.join('')}</ol>` : `<ul>${items.join('')}</ul>`);
+        continue;
+      }
+
+      if (!line.trim()) { i++; continue; }
+
+      const para = [];
+      while (i < lines.length && lines[i].trim() && !/^\s*(```|#{1,4}\s|[-*•]\s|\d+[.)]\s|\|)/.test(lines[i])) {
+        para.push(askInline(lines[i++]));
+      }
+      if (para.length) out.push(`<p>${para.join('<br>')}</p>`);
+      else out.push(`<p>${askInline(lines[i++])}</p>`);
+    }
+    return out.join('');
+  }
+
+  function askQueriesHtml(queries) {
+    if (!queries || !queries.length) return '';
+    const items = queries.map((q) => {
+      const args = q.args && Object.keys(q.args).length ? JSON.stringify(q.args, null, 2) : '';
+      const meta = q.error
+        ? `<span class="a-ask-q-err">${esc(q.error)}</span>`
+        : (q.rows != null ? `<span class="a-ask-q-rows">${q.rows} row${q.rows === 1 ? '' : 's'}</span>` : '');
+      return `<li><div class="a-ask-q-head"><code>${esc(q.tool)}(${esc(q.collection || '')})</code>${meta}</div>` +
+        (args ? `<pre>${esc(args)}</pre>` : '') + '</li>';
+    }).join('');
+    return `<details class="a-ask-queries"><summary>${queries.length} quer${queries.length === 1 ? 'y' : 'ies'} used</summary><ol>${items}</ol></details>`;
+  }
+
+  function renderAsk() {
+    const log = $('askLog');
+    if (!log) return;
+    $('askChips').classList.toggle('a-hidden', askLog.length > 0);
+
+    if (!askLog.length) {
+      log.innerHTML = `<div class="a-empty">${icon('sparkles')}<p>Devices, events, AI usage, tokens, crashes, payments — poochho, main query likh ke jawab dunga.</p></div>`;
+      return;
+    }
+
+    log.innerHTML = askLog.map((m) => {
+      if (m.role === 'user') return `<div class="a-ask-msg is-user"><div class="a-ask-bubble">${esc(m.content).replace(/\n/g, '<br>')}</div></div>`;
+      if (m.error) return `<div class="a-ask-msg is-bot"><div class="a-ask-bubble is-error">${esc(m.error)}</div>${askQueriesHtml(m.queries)}</div>`;
+      return `<div class="a-ask-msg is-bot"><div class="a-ask-bubble">${askMarkdown(m.content)}</div>${askQueriesHtml(m.queries)}</div>`;
+    }).join('') + (askBusy
+      ? '<div class="a-ask-msg is-bot"><div class="a-ask-bubble a-ask-typing"><span></span><span></span><span></span></div></div>'
+      : '');
+
+    log.scrollTop = log.scrollHeight;
+  }
+
+  async function sendAsk(text) {
+    const q = (text || '').trim();
+    if (!q || askBusy) return;
+
+    askLog.push({ role: 'user', content: q });
+    askBusy = true;
+    $('askInput').value = '';
+    $('askSend').disabled = true;
+    renderAsk();
+
+    /* Only successful turns go back as context — an error bubble isn't
+       something the model said. */
+    const messages = askLog
+      .filter(m => !m.error)
+      .map(m => ({ role: m.role, content: m.content }))
+      .slice(-12);
+
+    try {
+      const res = await request('/api/admin/ask', { method: 'POST', body: { messages } });
+      askLog.push({ role: 'assistant', content: res.answer || '(no answer)', queries: res.queries || [] });
+    } catch (err) {
+      askLog.push({ role: 'assistant', error: err.message || 'Request failed', queries: [] });
+    } finally {
+      askBusy = false;
+      $('askSend').disabled = false;
+      askSave();
+      renderAsk();
+      $('askInput').focus();
+    }
+  }
+
+  function newAsk() {
+    if (askBusy) return;
+    askLog = [];
+    askSave();
+    renderAsk();
+    $('askInput').focus();
   }
 
   /* ═══ Events ═════════════════════════════════════════════════ */
@@ -1987,6 +2146,8 @@
         case 'toggle-gated':  toggleGated(el.dataset.tool); break;
         case 'active-range':  setActiveRange(Number(el.dataset.range)); break;
         case 'toggle-countries': toggleCountries(); break;
+        case 'ask-new':          newAsk(); break;
+        case 'ask-chip':         sendAsk(el.textContent); break;
         case 'open-readiness':   openReadiness(); break;
         case 'close-readiness':  closeReadiness(); break;
         case 'ready-filter':     setReadyFilter(el.dataset.filter); break;
@@ -2002,6 +2163,18 @@
     });
 
     $('dialogConfirm').addEventListener('click', () => closeDialog(true));
+
+    $('askForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      sendAsk($('askInput').value);
+    });
+    /* Enter sends, Shift+Enter is a newline — the usual chat contract. */
+    $('askInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        sendAsk($('askInput').value);
+      }
+    });
 
     /* Rows are focusable, so they must also open on Enter/Space. */
     document.addEventListener('keydown', (e) => {
@@ -2041,6 +2214,7 @@
   /* ═══ Boot ═══════════════════════════════════════════════════ */
 
   async function boot() {
+    askLoad();
     wire();
 
     if (MOCK) {

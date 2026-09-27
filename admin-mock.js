@@ -365,6 +365,17 @@ export default {
       return { ok: true, saved: { ...published, updated_at: new Date().toISOString() } };
     }
 
+    if (route === '/api/admin/ask') {
+      await delay(900);
+      const q = body?.messages?.at(-1)?.content || '';
+      return {
+        answer: `Mock answer for: **${q}**\n\nAaj **${devices.length}** devices me se kuch active hain.\n\n| Country | Users | Active 7d |\n|---|---|---|\n| IN | 1,204 | 388 |\n| US | 42 | 9 |\n\n- Numbers are fixtures, not live data.`,
+        queries: [{ tool: 'aggregate', collection: 'devices', rows: 2,
+          args: { pipeline: [{ $match: { country: { $type: 'string' } } }, { $group: { _id: '$country', users: { $sum: 1 } } }] } }],
+        usage: { total_tokens: 1234 },
+      };
+    }
+
     throw new Error(`Mock has no handler for ${route}`);
   },
 };

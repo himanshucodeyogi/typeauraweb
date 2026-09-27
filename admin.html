@@ -83,6 +83,7 @@
 
     <nav class="a-nav" aria-label="Sections">
       <button class="a-nav-item is-active" data-section="overview"><svg><use href="#i-grid"/></svg><span>Overview</span></button>
+      <button class="a-nav-item" data-section="ask"><svg><use href="#i-sparkles"/></svg><span>Ask AI</span></button>
       <button class="a-nav-item" data-section="devices"><svg><use href="#i-device"/></svg><span>Devices</span><span class="a-nav-count a-hidden" id="navCountDevices"></span></button>
       <button class="a-nav-item" data-section="aitools"><svg><use href="#i-sparkles"/></svg><span>AI Tools</span></button>
       <button class="a-nav-item" data-section="apikeys"><svg><use href="#i-key"/></svg><span>API Keys</span></button>
@@ -374,6 +375,33 @@
           <div class="a-panel-body">
             <dl class="a-kv" id="refConfig"></dl>
           </div>
+        </section>
+      </section>
+
+      <!-- ─── Ask AI ─────────────────────────────────────────── -->
+      <section class="a-section" id="sec-ask">
+        <section class="a-panel a-ask">
+          <div class="a-panel-head">
+            <h2>Ask your data</h2>
+            <button class="a-btn a-btn-ghost a-btn-sm" data-action="ask-new">New chat</button>
+            <p class="a-sub">Plain-language questions, answered from live MongoDB with read-only queries. Private fields are never read.</p>
+          </div>
+          <div class="a-ask-log" id="askLog" aria-live="polite"></div>
+          <div class="a-ask-chips" id="askChips">
+            <button class="a-ask-chip" data-action="ask-chip">Aaj kitne active users hain, aur kal se compare karo</button>
+            <button class="a-ask-chip" data-action="ask-chip">Top 10 countries by active users in last 7 days</button>
+            <button class="a-ask-chip" data-action="ask-chip">Kaunsa AI tool sabse zyada use hota hai?</button>
+            <button class="a-ask-chip" data-action="ask-chip">Last 14 days ka daily token spend</button>
+            <button class="a-ask-chip" data-action="ask-chip">Sabse common crash kaunsa hai aur kis version pe?</button>
+            <button class="a-ask-chip" data-action="ask-chip">Pichle 30 din me install karne walo me se kitne abhi bhi active hain?</button>
+          </div>
+          <form class="a-ask-form" id="askForm">
+            <textarea class="a-textarea" id="askInput" rows="2" maxlength="2000"
+                      placeholder="Kuch bhi poochho… e.g. How many new installs from India this week?"></textarea>
+            <button class="a-btn a-btn-primary" type="submit" id="askSend">
+              <svg><use href="#i-sparkles"/></svg><span>Ask</span>
+            </button>
+          </form>
         </section>
       </section>
 
