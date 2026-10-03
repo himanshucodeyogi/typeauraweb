@@ -74,7 +74,7 @@
   <!-- HERO -->
   <section class="privacy-hero container">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: August 7, 2026</p>
+    <p class="updated">Last updated: October 3, 2026</p>
   </section>
 
   <!-- BODY -->
@@ -104,7 +104,7 @@
       <ul>
         <li><strong>Translate (keyboard)</strong> — the text currently in the input field.</li>
         <li><strong>Clipboard Translate</strong> — only the copied text you explicitly choose to translate.</li>
-        <li><strong>Voice input</strong> — the transcribed text alternatives produced on your device (see section 5). Your audio is never sent to us.</li>
+        <li><strong>Voice input</strong> — with standard voice, the transcribed text alternatives produced on your device; your audio is never sent to us. With <strong>AI Voice</strong> (all plans, with a daily allowance of minutes; on by default and switchable off in Settings → Voice &amp; Speech), the audio recording of what you dictate is sent for transcription. See section 5.</li>
         <li><strong>Floating Lens — Translate</strong> — the on-screen text you tap, up to 600 characters.</li>
         <li><strong>Floating Lens — Reply</strong> — the tapped text <strong>plus a small amount of surrounding chat context</strong> (up to 2 nearby messages), used to generate 3 short reply suggestions. See section 4 for exactly what this context is.</li>
         <li><strong>AI Chat</strong> — the messages you type in the chat screen, together with up to the last 10 turns of that same conversation so the AI can follow up correctly.</li>
@@ -160,12 +160,19 @@
     <p><strong>Compliance:</strong> This use of the Android Accessibility API is disclosed prominently to users during onboarding and requires explicit opt-in via Android Settings. It is used solely to deliver the on-demand text translation and reply features described above, in accordance with Google Play's Accessibility API policy, which requires that accessibility services are used only for the purpose users expect. You can disable the service anytime from Android Settings → Accessibility → TypeAura.</p>
 
     <h2>5. Microphone / Voice AI</h2>
-    <p>Voice input works in two steps:</p>
+    <p>TypeAura has two ways to turn speech into text.</p>
+    <p><strong>Standard voice</strong> (all plans) works in two steps:</p>
     <ol style="color:#C8CACC; line-height:1.8; padding-left:20px; margin-bottom:10px;">
       <li><strong>Audio → Text (on device):</strong> While you hold the mic button, Android's built-in <code>SpeechRecognizer</code> API listens and converts your speech into multiple text alternatives ranked by confidence. <strong>We never receive, record, or store your audio.</strong></li>
       <li><strong>Text → Translation (via Groq AI):</strong> The transcribed text alternatives are sent over HTTPS to our backend (<code>typeaurabackend.vercel.app/api/ai</code>), which forwards them to Groq. The AI picks the best alternative, fixes errors (homophones, filler words), and translates the result into the language you selected (Hinglish, English, Hindi, or Mixed). The translated text is returned and inserted into the text field. <strong>This transcribed text is never stored on our servers.</strong></li>
     </ol>
-    <p>The microphone is only active while you physically hold the mic button. No background audio recording occurs.</p>
+    <p><strong>AI Voice</strong> (all plans with a daily allowance of minutes, English dictation) uses a cloud speech model for better accuracy with accents, background noise and fast speech:</p>
+    <ol style="color:#C8CACC; line-height:1.8; padding-left:20px; margin-bottom:10px;">
+      <li><strong>Recording:</strong> after you tap the mic, TypeAura records your speech on your device until you stop talking or tap the mic again (at most 60 seconds).</li>
+      <li><strong>Audio → Text (via Groq):</strong> the recording is sent over HTTPS to our backend (<code>typeaurabackend.vercel.app/api/stt</code>), which forwards it to Groq for transcription with the Whisper speech model, together with up to the last 200 characters of text before your cursor so the transcript continues your sentence correctly. The text is returned and inserted into the field. <strong>The audio is never stored or logged on our servers</strong>, and the recording is deleted from your device as soon as it has been sent.</li>
+    </ol>
+    <p>You can switch AI Voice off at any time in Settings → Voice &amp; Speech; voice input then uses standard voice only.</p>
+    <p>The microphone is only active after you tap the mic button, and stops when you stop talking or tap it again. No background audio recording occurs.</p>
 
     <h2>6. Clipboard Access</h2>
     <p>TypeAura reads your clipboard to display recent clips in the Clipboard panel and to offer translation of copied text. Clipboard contents are stored locally on your device only (in app storage via SharedPreferences and in-memory) and are <strong>never automatically uploaded</strong>. They are only sent to our backend if you explicitly tap the Translate Clipboard button.</p>
@@ -194,10 +201,10 @@
     <h2>8. Third-Party Services</h2>
     <div class="privacy-card">
       <ul>
-        <li><strong>Groq (AI Provider)</strong> — receives the text you submit for AI processing (see section 2) over HTTPS and returns a result. Groq acts as a processor on our behalf; their handling and retention of that text is governed by their own terms. We do not send Groq your device ID, analytics, or any other identifier — only the text of the request itself. <a href="https://groq.com/privacy-policy/" target="_blank">Groq's Privacy Policy →</a></li>
+        <li><strong>Groq (AI Provider)</strong> — receives the text you submit for AI processing (see section 2) and, if you use AI Voice, the audio recording of what you dictate (see section 5), over HTTPS, and returns a result. Groq acts as a processor on our behalf; their handling and retention of that text is governed by their own terms. We do not send Groq your device ID, analytics, or any other identifier — only the content of the request itself. <a href="https://groq.com/privacy-policy/" target="_blank">Groq's Privacy Policy →</a></li>
         <li><strong>Giphy (GIF search)</strong> — used only by the optional GIF tab (see section 6a). Your search term reaches Giphy through our backend, and your device loads GIF images directly from Giphy's servers, which exposes your IP address to them. <a href="https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy" target="_blank">Giphy's Privacy Policy →</a></li>
         <li><strong>Vercel (Backend Hosting)</strong> — our API backend is hosted on Vercel. Vercel may log standard server-access data (IP address, timestamp) per their policy. All communication is HTTPS.</li>
-        <li><strong>Google Speech Recognition</strong> — handles voice input via Android's built-in <code>SpeechRecognizer</code> API. On most devices this is processed by Google's cloud speech service (audio is transmitted to Google for transcription) unless the user has installed an offline language pack on their device. TypeAura itself never receives, records, or stores your audio — the transcribed text is returned to us by Android's API. <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy →</a></li>
+        <li><strong>Google Speech Recognition</strong> — handles voice input via Android's built-in <code>SpeechRecognizer</code> API. On most devices this is processed by Google's cloud speech service (audio is transmitted to Google for transcription) unless the user has installed an offline language pack on their device. With standard voice, TypeAura itself never receives, records, or stores your audio — the transcribed text is returned to us by Android's API. <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy →</a></li>
       </ul>
     </div>
     <p>We do not sell, trade, or share your data with any third party for advertising or marketing purposes.</p>
@@ -217,7 +224,7 @@
     <h2>10. Permissions Explained</h2>
     <ul>
       <li><strong>INTERNET</strong> — to call the AI translation and crash reporting backend.</li>
-      <li><strong>RECORD_AUDIO</strong> — for the voice/speech-to-text feature. Active only while you hold the mic button.</li>
+      <li><strong>RECORD_AUDIO</strong> — for the voice/speech-to-text feature (standard voice and AI Voice). Active only after you tap the mic button, until you stop talking or tap it again.</li>
       <li><strong>VIBRATE</strong> — for key-press haptic feedback.</li>
       <li><strong>SYSTEM_ALERT_WINDOW</strong> — to display the Floating Lens translation bubble above other apps.</li>
       <li><strong>BIND_ACCESSIBILITY_SERVICE</strong> — used by the Floating Lens feature to (1) read on-screen text you select for translation, and (2) insert a chosen reply suggestion directly into the focused input field of the active app.</li>

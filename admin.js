@@ -1664,6 +1664,8 @@
        background config refresh. */
     const ft = $('freeTokensInput');
     if (ft && !ft.value) ft.value = String(config.free_daily_tokens ?? 10000);
+    const sf = $('sttFreeInput');
+    if (sf && !sf.value) sf.value = String((config.stt_free_seconds ?? 180) / 60);
 
     const gated = Array.isArray(config.gated_tools) ? config.gated_tools : [];
     $('gatedTools').innerHTML = GATED_TOOLS.map(name => `
@@ -1767,6 +1769,38 @@
     status.className = 'a-action-status';
     status.textContent = '';
     writeConfig({ free_daily_tokens: next }, `Free tier set to ${fmtFull(next)} tokens/day.`);
+  }
+
+  /* Free AI-voice minutes. Typed in minutes, stored in seconds. */
+  async function saveSttFree() {
+    const el = $('sttFreeInput');
+    const status = $('sttFreeStatus');
+    const raw = String(el.value).trim();
+    const minutes = Number(raw);
+    const bounds = config.stt_free_seconds_bounds || { min: 0, max: 900 };
+    const next = Math.round(minutes * 60);
+    const current = config.stt_free_seconds ?? 180;
+
+    if (!raw || !Number.isFinite(minutes) || next < bounds.min || next > bounds.max) {
+      status.className = 'a-action-status is-bad';
+      status.textContent = `Enter minutes between ${bounds.min / 60} and ${bounds.max / 60}.`;
+      return;
+    }
+    if (next === current) {
+      status.className = 'a-action-status';
+      status.textContent = 'Already set to that.';
+      return;
+    }
+    const ok = await confirmAsk(
+      next === 0 ? 'Turn AI voice off for Free?' : `Set Free AI voice to ${next / 60} min/day?`,
+      `Currently ${current / 60} min. This applies to every Free device on its next ping; Pro and Max are unaffected.`,
+      next < current ? 'Lower it' : 'Raise it',
+    );
+    if (!ok) return;
+    status.className = 'a-action-status';
+    status.textContent = '';
+    writeConfig({ stt_free_seconds: next },
+      next === 0 ? 'AI voice is off for Free.' : `Free AI voice set to ${next / 60} min/day.`);
   }
 
   async function toggleByok() {
@@ -2143,6 +2177,7 @@
         case 'toggle-gif':    toggleGif(); break;
         case 'toggle-referral': toggleReferral(); break;
         case 'save-free-tokens': saveFreeTokens(); break;
+        case 'save-stt-free':    saveSttFree(); break;
         case 'toggle-gated':  toggleGated(el.dataset.tool); break;
         case 'active-range':  setActiveRange(Number(el.dataset.range)); break;
         case 'toggle-countries': toggleCountries(); break;

@@ -142,6 +142,7 @@ let config = {
   ready_countries: ['IN', 'US', 'GB', 'CA', 'AU', 'NZ', 'IE', 'ZA'],
   referral_enabled: true,
   free_daily_tokens: 5000,
+  stt_free_seconds: 180,
   referral: {
     referrer_bonus: 5000, referee_bonus: 2000, bonus_days: 3,
     max_bonus: 25000, max_per_day: 5, max_lifetime: 20,

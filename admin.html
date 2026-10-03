@@ -514,6 +514,24 @@
               </div>
             </div>
 
+            <!-- AI voice (Whisper) for Free: seconds of audio per day. Pro (30
+                 min) and Max (120 min) are fixed in lib/tiers.js. Voice does not
+                 spend tokens, so this is its own lever — the Groq-cost one. -->
+            <div class="a-switch-row">
+              <div class="a-switch-copy">
+                <div class="a-switch-title">Free AI voice minutes <span class="a-chip a-chip-warn">pricing</span></div>
+                <p class="a-switch-desc">
+                  Daily Whisper dictation for the Free tier, in minutes (0–15). <code>0</code> turns AI voice
+                  off for Free only; Pro (30 min) and Max (120 min) are unaffected.
+                </p>
+                <div class="a-actions" style="margin-top:10px">
+                  <input class="a-input" id="sttFreeInput" inputmode="decimal" style="max-width:160px" placeholder="3" />
+                  <button class="a-btn a-btn-primary a-btn-sm" data-action="save-stt-free">Apply</button>
+                  <span class="a-action-status" id="sttFreeStatus"></span>
+                </div>
+              </div>
+            </div>
+
             <div class="a-switch-row">
               <div class="a-switch-copy">
                 <div class="a-switch-title">Bring Your Own Key <span class="a-chip a-chip-muted">legacy</span></div>
