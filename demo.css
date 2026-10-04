@@ -1,7 +1,15 @@
 /* ════════════════════════════════════════════════════════════════════
    TypeAura — Live Demo (/demo) styles
-   Page chrome reuses style.css design tokens (--bg, --accent, --text…).
+   Page chrome reuses style.css design tokens (--bg, --primary, --text…).
    The keyboard hard-codes the app's "Aura Dark" palette for authenticity.
+
+   Two layouts, switched at 1024px:
+   - Desktop: a guide panel (intro + chapter list) on the left and the
+     live phone on the right. The page scrolls normally; the phone is
+     sized off the viewport height so it fits a short laptop.
+   - Below 1024px: a locked-height kiosk. Chapter strip on top, the phone
+     fills the rest, and the guide card is laid over the bottom of the
+     phone. demo.js moves #coachCard between the two homes.
    ════════════════════════════════════════════════════════════════════ */
 
 :root {
@@ -14,129 +22,367 @@
   --wa-header:  #1f2c34;
   --wa-in:      #1f2c34;
   --wa-out:     #005c4b;
+
+  --key-h: 42px;
+  /* Desktop phone: as tall as the viewport allows (minus nav and the
+     main's padding), never shorter than the keyboard + a usable chat. */
+  --phone-h: clamp(540px, calc(100vh - var(--nav-h) - 48px), 820px);
+  --phone-w: clamp(320px, calc(var(--phone-h) * 0.47), 384px);
+}
+@supports (height: 100dvh) {
+  :root { --phone-h: clamp(540px, calc(100dvh - var(--nav-h) - 48px), 820px); }
 }
 
-/* Locked-scroll kiosk: the body IS the 100dvh column, and the navbar and
-   <main> split it. Previously .demo-main claimed the full 100dvh on its
-   own, which is why the navbar had to be hidden — leaving the page with no
-   way back to the site and no download CTA. Making the body the flex
-   column lets both coexist with no calc() magic number. */
-.demo-body {
-  overflow: hidden;
-  height: 100vh; height: 100dvh;
-  display: flex; flex-direction: column;
-}
-
-.demo-body .footer,
-.demo-head .hero-badge,
-.demo-sub { display: none !important; }
-
-/* The page's only <h1>. It was display:none — an SEO own-goal. Now it
-   occupies zero pixels but still exists for crawlers and screen readers. */
-.demo-title {
-  position: absolute !important;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0, 0, 0, 0);
-  white-space: nowrap; border: 0;
-}
-
-/* The Play CTA is display:none below 900px in style.css and demo.html has
-   no hamburger, so it must be forced back on — this page's nav is only
-   two items wide and always has room. */
+/* demo.html has no hamburger, so style.css's ≤900px rules (which hide
+   the links and the Play button behind one) are undone here. */
 .demo-body .navbar { flex-shrink: 0; }
 .demo-body .navbar .btn-nav { display: inline-flex !important; }
+.demo-body .footer { padding: 18px 0 22px; }
 
-/* ───────────── layout ───────────── */
+/* ═════════════════════════ PAGE LAYOUT (desktop first) ═════════════════════════ */
 .demo-main {
-  max-width: none; margin: 0; width: 100%;
-  height: auto; flex: 1; min-height: 0;
-  padding: 10px 10px 12px;
-  display: flex; flex-direction: column; align-items: center;
+  position: relative; overflow: hidden;
+  min-height: calc(100vh - var(--nav-h));
+  display: flex; align-items: center;
+  padding: 24px 0;
 }
-.demo-head { text-align: center; flex-shrink: 0; width: 100%; }
+@supports (height: 100dvh) {
+  .demo-main { min-height: calc(100dvh - var(--nav-h)); }
+}
+/* Hairline grid fading out around the phone (same recipe as the landing hero). */
+.demo-main::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 42% 62% at 72% 50%, #000 0%, transparent 75%);
+          mask-image: radial-gradient(ellipse 42% 62% at 72% 50%, #000 0%, transparent 75%);
+}
 
-/* progress chips */
-.demo-steps {
-  list-style: none; display: flex; flex-wrap: wrap; justify-content: center;
-  gap: 8px; margin: 0 auto; padding: 0; max-width: 720px;
+/* The stage spans every row; the two 1fr rows soak up the height the
+   phone adds, so the panel + CTA sit vertically centred beside it. */
+.demo-layout {
+  position: relative; z-index: 1;
+  width: 100%; max-width: var(--container-max);
+  margin: 0 auto; padding: 0 var(--container-x);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--phone-w);
+  grid-template-rows: 1fr auto auto 1fr;
+  grid-template-areas:
+    ".     stage"
+    "panel stage"
+    "cta   stage"
+    ".     stage";
+  column-gap: clamp(48px, 7vw, 112px);
 }
+.demo-panel { grid-area: panel; width: 100%; max-width: 560px; justify-self: end; }
+.demo-stage { grid-area: stage; align-self: start; }
+.demo-cta   { grid-area: cta; width: 100%; max-width: 560px; justify-self: end; }
+
+/* ───────────── intro ───────────── */
+.demo-intro .hero-badge { margin-bottom: 20px; }
+.demo-title {
+  font-size: clamp(36px, 3.3vw, 50px);
+  font-weight: 700; line-height: 1.06; letter-spacing: -0.035em;
+  color: var(--text);
+  margin-bottom: 14px;
+  text-wrap: balance;
+}
+.demo-sub {
+  max-width: 520px; margin-bottom: 28px;
+  font-size: 16.5px; line-height: 1.6; color: var(--text2);
+}
+
+/* ───────────── tour card ───────────── */
+.tour {
+  position: relative;
+  padding: 6px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.012)), var(--surface);
+  border: 1px solid var(--border-mid);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+}
+.tour-head { display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 14px; }
+.tour-meta { display: flex; flex-direction: column; margin-right: auto; min-width: 0; }
+.tour-label {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent-light);
+}
+.tour-count { font-size: 13px; color: var(--text3); font-variant-numeric: tabular-nums; }
+/* Letter-spacing pulls Devanagari conjuncts apart. */
+:lang(hi) .tour-label, .tour-label:lang(hi) { letter-spacing: 0; text-transform: none; }
+
+.lang-toggle {
+  display: inline-flex; gap: 2px; padding: 3px; flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.lang-opt {
+  min-height: 28px; padding: 0 10px;
+  border: 0; border-radius: 7px; background: none;
+  color: var(--text3); font: inherit; font-size: 12.5px; font-weight: 600;
+  cursor: pointer; transition: background var(--dur-fast), color var(--dur-fast);
+}
+.lang-opt:hover { color: var(--text); }
+.lang-opt[aria-pressed="true"] { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+
+.tour-restart {
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+  min-height: 36px; padding: 0 12px;
+  border: 1px solid var(--border-mid); border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text2); font: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background var(--dur), color var(--dur), border-color var(--dur);
+}
+.tour-restart:hover { color: var(--text); background: rgba(255, 255, 255, 0.07); border-color: var(--border-hi); }
+.tour-restart svg { width: 15px; height: 15px; fill: currentColor; }
+
+.tour-progress {
+  height: 3px; margin: 0 14px 8px; overflow: hidden;
+  border-radius: 3px; background: rgba(255, 255, 255, 0.06);
+}
+.tour-progress span {
+  display: block; height: 100%;
+  background: var(--accent); border-radius: inherit;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform 0.5s var(--ease);
+}
+
+/* ───────────── chapter list ───────────── */
+.demo-steps { list-style: none; display: flex; flex-direction: column; gap: 2px; }
 .demo-step-chip {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 8px 14px; border-radius: 999px; font-size: .82rem; font-weight: 600;
-  color: var(--muted, #A6A6C2);
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.08);
-  transition: all .25s ease;
+  border: 1px solid transparent; border-radius: 13px;
+  transition: background var(--dur), border-color var(--dur);
 }
-.demo-step-chip .chip-num {
-  display: grid; place-items: center; width: 19px; height: 19px; border-radius: 50%;
-  font-size: .72rem; font-weight: 800;
-  background: rgba(255,255,255,.1); color: var(--text, #EEEEFF);
+.step-btn {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; padding: 10px 12px;
+  border: 0; border-radius: 12px; background: none;
+  color: inherit; font: inherit; text-align: left;
+  cursor: pointer; transition: background var(--dur-fast);
 }
+.step-btn:hover { background: rgba(255, 255, 255, 0.035); }
+.chip-num {
+  flex-shrink: 0; display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid var(--border-mid);
+  font-size: 12.5px; font-weight: 600; color: var(--text2);
+  font-variant-numeric: tabular-nums;
+  transition: background var(--dur), color var(--dur), border-color var(--dur), box-shadow var(--dur);
+}
+.step-text  { display: flex; flex-direction: column; min-width: 0; }
+.step-name  { font-size: 15px; font-weight: 600; line-height: 1.35; color: var(--text); }
+.step-short { display: none; }
+.step-desc  { font-size: 13.5px; line-height: 1.45; color: var(--text3); }
+
 .demo-step-chip.active {
-  color: #fff; border-color: var(--accent, #7C6CF8);
-  background: color-mix(in srgb, var(--accent, #7C6CF8) 22%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #7C6CF8) 18%, transparent);
+  background: rgba(124, 108, 248, 0.07);
+  border-color: rgba(124, 108, 248, 0.32);
 }
-.demo-step-chip.active .chip-num { background: var(--accent, #7C6CF8); color: #fff; }
-.demo-step-chip.done { color: var(--cyan, #22D3EE); border-color: color-mix(in srgb, var(--cyan,#22D3EE) 40%, transparent); }
-.demo-step-chip.done .chip-num { background: var(--cyan, #22D3EE); color: #04222a; }
-.demo-step-chip.done .chip-num::after { content: "✓"; }
-.demo-step-chip.done .chip-num { font-size: 0; }
-.demo-step-chip.done .chip-num::after { font-size: .72rem; }
+.demo-step-chip.active .step-btn { cursor: default; }
+.demo-step-chip.active .step-btn:hover { background: none; }
+.demo-step-chip.active .step-desc { display: none; }
+.demo-step-chip.active .chip-num {
+  background: var(--primary); border-color: transparent; color: #fff;
+  box-shadow: 0 0 0 4px rgba(124, 108, 248, 0.18);
+}
+.demo-step-chip.done .chip-num {
+  font-size: 0; color: var(--green);
+  background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.35);
+}
+.demo-step-chip.done .chip-num::after { content: "✓"; font-size: 13px; font-weight: 700; }
+.demo-step-chip.done .step-name { color: var(--text2); }
 
-/* ───────────── stage ───────────── */
+.step-slot:empty,
+.tour-end-slot:empty { display: none; }
+
+/* ───────────── guide card (#coachCard) ─────────────
+   Base = the in-panel look. The overlay look is under .demo-stage > .coach. */
+.coach[hidden] { display: none; }
+.coach-head { display: flex; align-items: center; gap: 8px; }
+.coach-title {
+  margin-right: auto;
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 600; line-height: 1.3; color: var(--text);
+}
+.coach-body { font-size: 14.5px; line-height: 1.6; color: var(--text2); }
+.coach-foot { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+.coach-dots { display: flex; align-items: center; gap: 5px; }
+.coach-dot {
+  width: 6px; height: 6px; border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  transition: width var(--dur) var(--ease), background var(--dur);
+}
+.coach-dot.past { background: rgba(157, 144, 255, 0.55); }
+.coach-dot.on   { width: 18px; background: var(--accent-light); }
+.coach-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.coach-skip {
+  min-height: 36px; padding: 0 10px;
+  border: 0; border-radius: 8px; background: none;
+  color: var(--text3); font: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: color var(--dur-fast);
+}
+.coach-skip:hover { color: var(--text); }
+.coach-skip[hidden] { display: none; }
+.coach-next {
+  min-height: 38px; padding: 0 16px;
+  border: 0; border-radius: 10px;
+  background: var(--primary); color: #fff;
+  font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), var(--glow);
+  transition: background var(--dur), box-shadow var(--dur), transform var(--dur-fast);
+}
+.coach-next:hover { background: var(--primary-hover); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), var(--glow-hi); }
+.coach-next:active { transform: scale(0.97); }
+.coach-next.is-ghost {
+  background: rgba(255, 255, 255, 0.06); color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--border-mid);
+}
+.coach-next.is-ghost:hover { background: rgba(255, 255, 255, 0.1); }
+.coach-get {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 38px; padding: 0 16px; border-radius: 10px;
+  background: var(--primary); color: #fff;
+  font-size: 14px; font-weight: 600; white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), var(--glow);
+  transition: background var(--dur);
+}
+.coach-get:hover { background: var(--primary-hover); }
+.coach-get[hidden] { display: none; }
+.coach-get svg { width: 15px; height: 15px; fill: currentColor; }
+.coach-close {
+  display: grid; place-items: center; width: 30px; height: 30px; flex-shrink: 0;
+  border: 0; border-radius: 8px; background: rgba(255, 255, 255, 0.06);
+  color: var(--text2); font-size: 18px; line-height: 1; cursor: pointer;
+}
+.coach-close[hidden] { display: none; }
+
+/* inside the active chapter: text lines up under the chapter name */
+.step-slot .coach { padding: 0 14px 14px 54px; }
+.step-slot .coach-head { display: none; }
+
+/* below the list once the tour has ended */
+.tour-end-slot { margin-top: 6px; border-top: 1px solid var(--border); }
+.tour-end-slot .coach { padding: 16px 14px 10px; }
+.tour-end-slot .coach-head { margin-bottom: 6px; }
+.tour-end-slot .lang-toggle--coach,
+.tour-end-slot .coach-close { display: none; }
+
+/* ───────────── CTA under the panel ───────────── */
+.demo-cta { display: flex; align-items: center; gap: 14px 20px; margin-top: 24px; }
+.demo-cta .btn-primary { flex-shrink: 0; }
+.demo-foot-note { max-width: 340px; font-size: 13px; line-height: 1.55; color: var(--text3); }
+
+/* ═════════════════════════ STAGE + PHONE ═════════════════════════ */
 .demo-stage {
-  position: relative; flex: 1; min-height: 0; width: 100%;
-  display: flex; align-items: center; justify-content: center; margin-top: 10px;
+  position: relative; isolation: isolate;
+  display: flex; align-items: center; justify-content: center;
+}
+/* violet wash behind the device */
+.demo-stage::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  inset: -12% -70%;
+  background:
+    radial-gradient(closest-side, rgba(124, 108, 248, 0.22), transparent 72%),
+    radial-gradient(closest-side at 70% 80%, rgba(34, 211, 238, 0.07), transparent 70%);
 }
 
-/* ───────────── phone mockup ───────────── */
-/* fills the available height; width follows the phone aspect ratio */
 .phone-mockup {
-  position: relative; height: 100%; width: auto; max-width: 96vw;
-  aspect-ratio: 9 / 19.5;
-  background: #000; border-radius: 44px; padding: 12px;
-  box-shadow: 0 0 0 2px #2a2a33, 0 30px 80px rgba(0,0,0,.6);
+  position: relative; flex-shrink: 0;
+  width: var(--phone-w); height: var(--phone-h);
+  padding: 9px; border-radius: 50px;
+  background: #050508;
+  box-shadow:
+    0 0 0 1.5px #2a2a36,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 50px 100px -30px rgba(0, 0, 0, 0.9),
+    0 30px 90px -40px rgba(100, 85, 230, 0.55);
 }
-.phone-notch {
-  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
-  width: 120px; height: 22px; background: #000; border-radius: 0 0 16px 16px; z-index: 5;
+/* volume rocker + power key on the right edge */
+.phone-mockup::before,
+.phone-mockup::after {
+  content: ''; position: absolute; right: -3.5px; width: 3px;
+  background: #24242f; border-radius: 0 2px 2px 0;
 }
+.phone-mockup::before { top: 19%; height: 76px; }
+.phone-mockup::after  { top: 34%; height: 44px; }
+
 .phone-screen {
   position: relative; width: 100%; height: 100%;
-  background: var(--wa-bg); border-radius: 34px; overflow: hidden;
   display: flex; flex-direction: column;
+  background: var(--wa-bg); border-radius: 41px; overflow: hidden;
+  /* keys size off the screen width (cqi), not the browser's */
+  container-type: inline-size;
 }
+
+/* status bar with a punch-hole camera */
+.phone-status {
+  flex-shrink: 0;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  height: 30px; padding: 2px 24px 0;
+  background: var(--wa-header); color: #e9edef;
+  font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.ps-camera {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #000; box-shadow: 0 0 0 2px #0b0f13, inset 0 0 0 2px #15191d;
+}
+.ps-icons { justify-self: end; display: inline-flex; align-items: center; gap: 4px; }
+.ps-icons svg { width: 13px; height: 13px; fill: currentColor; }
+.ps-icons .ps-battery { width: 17px; height: 17px; }
+
+/* Android gesture pill under the keyboard */
+.phone-navbar { flex-shrink: 0; height: 16px; display: grid; place-items: center; background: var(--kb-bg); }
+.phone-navbar span { width: 34%; max-width: 110px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.5); }
 
 /* ───────────── chat ───────────── */
-.chat-app { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.chat-app { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 .chat-header {
-  display: flex; align-items: center; gap: 9px;
-  padding: 30px 12px 9px; background: var(--wa-header); color: #e9edef; flex-shrink: 0;
+  display: flex; align-items: center; gap: 9px; flex-shrink: 0;
+  padding: 6px 12px 9px 8px;
+  background: var(--wa-header); color: #e9edef;
 }
-.chat-back { background: none; border: 0; color: #e9edef; font-size: 1.5rem; line-height: 1; cursor: default; padding: 0; }
-.chat-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#7C6CF8,#22D3EE); display: grid; place-items: center; font-weight: 800; color: #fff; font-size: .95rem; }
-.chat-peer { flex: 1; }
-.chat-peer-name { font-weight: 600; font-size: .92rem; }
-.chat-peer-status { font-size: .72rem; color: #8696a0; display: flex; align-items: center; gap: 5px; }
+.chat-back { display: grid; place-items: center; color: #e9edef; }
+.chat-back svg { width: 21px; height: 21px; fill: currentColor; }
+.chat-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, #7C6CF8, #22D3EE);
+  font-weight: 700; color: #fff; font-size: 15px;
+}
+.chat-peer { flex: 1; min-width: 0; }
+.chat-peer-name { font-weight: 600; font-size: 15px; line-height: 1.25; }
+.chat-peer-status { font-size: 11.5px; color: #8696a0; display: flex; align-items: center; gap: 5px; line-height: 1.3; }
 .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #06d755; display: inline-block; }
-.chat-actions { color: #aebac1; font-size: 1.2rem; }
+.chat-actions { display: flex; align-items: center; gap: 14px; color: #aebac1; }
+.chat-actions svg { width: 19px; height: 19px; fill: currentColor; }
 
 .chat-body {
-  flex: 1; min-height: 0; overflow-y: auto; padding: 12px 10px;
-  display: flex; flex-direction: column; justify-content: flex-end; gap: 7px;
-  background-image: linear-gradient(rgba(11,20,26,.92), rgba(11,20,26,.92));
+  flex: 1; min-height: 0; overflow-y: auto; padding: 10px 10px 8px;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 6px;
+  background-color: var(--wa-bg);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1.2px);
+  background-size: 16px 16px;
+  scrollbar-width: none;
 }
 .chat-body::-webkit-scrollbar { width: 0; }
+.chat-day {
+  align-self: center; margin-bottom: 4px;
+  padding: 3px 10px; border-radius: 7px;
+  background: #182229; color: #8696a0;
+  font-size: 11px; font-weight: 500;
+}
 
 .bubble {
-  max-width: 78%; padding: 7px 10px 8px; border-radius: 9px; position: relative;
-  font-size: .86rem; line-height: 1.35; color: #e9edef; word-wrap: break-word;
+  max-width: 80%; padding: 6px 9px 7px; border-radius: 9px; position: relative;
+  font-size: 14px; line-height: 1.38; color: #e9edef; overflow-wrap: anywhere;
+  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.3);
   animation: bubbleIn .28s ease both;
 }
-.bubble .b-time { display: block; text-align: right; font-size: .62rem; color: rgba(233,237,239,.5); margin-top: 2px; }
+.bubble .b-time { display: block; text-align: right; font-size: 10.5px; color: rgba(233, 237, 239, .55); margin-top: 1px; }
 .bubble.incoming { align-self: flex-start; background: var(--wa-in); border-top-left-radius: 2px; }
 .bubble.outgoing { align-self: flex-end; background: var(--wa-out); border-top-right-radius: 2px; }
 .bubble.lens-target { cursor: pointer; }
@@ -149,37 +395,50 @@
 .bubble.typing .dot:nth-child(3) { animation-delay: .3s; }
 @keyframes typingDot { 0%, 60%, 100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
 
-.chat-inputbar { flex-shrink: 0; padding: 6px 8px; background: var(--wa-bg); }
+.chat-inputbar { flex-shrink: 0; display: flex; align-items: flex-end; gap: 6px; padding: 5px 6px 7px; background: var(--wa-bg); }
 .chat-input {
-  position: relative; min-height: 38px; background: var(--wa-header); border-radius: 20px;
-  padding: 9px 14px; color: #e9edef; font-size: .88rem; display: flex; align-items: center; gap: 1px;
+  position: relative; flex: 1; min-width: 0; min-height: 40px;
+  display: flex; align-items: center; gap: 1px;
+  padding: 9px 14px; border-radius: 20px;
+  background: var(--wa-header); color: #e9edef; font-size: 14.5px; line-height: 1.35;
 }
+.chat-input-text { overflow-wrap: anywhere; }
 .chat-input-placeholder { color: #8696a0; }
 .chat-input-text:not(:empty) + .chat-input-placeholder { display: none; }
-.chat-caret { width: 1.5px; height: 17px; background: var(--kb-accent); display: inline-block; animation: blink 1s step-end infinite; }
+.chat-caret { width: 1.5px; height: 17px; flex-shrink: 0; background: var(--kb-accent); display: inline-block; animation: blink 1s step-end infinite; }
 @keyframes blink { 50% { opacity: 0; } }
+.chat-send {
+  flex-shrink: 0; display: grid; place-items: center;
+  width: 40px; height: 40px; border: 0; border-radius: 50%;
+  background: #00a884; color: #fff; cursor: pointer;
+}
+.chat-send svg { width: 18px; height: 18px; fill: currentColor; margin-left: 2px; }
+.chat-send:active { transform: scale(.94); }
 
 /* ───────────── keyboard ───────────── */
 .kb {
-  flex-shrink: 0; background: var(--kb-bg); padding: 4px 3px 7px;
+  flex-shrink: 0; background: var(--kb-bg); padding: 4px 3px 6px;
   user-select: none; -webkit-user-select: none;
 }
-.kb-toolbar { display: flex; align-items: center; gap: 2px; height: 38px; padding: 0 4px; }
+.kb-toolbar { display: flex; align-items: center; gap: 1px; height: 38px; padding: 0 3px; }
 .kb-toolbar-spacer { flex: 1; }
 .icon-btn {
-  background: none; border: 0; color: #BDC1C6; cursor: pointer;
-  width: 40px; height: 40px; border-radius: 9px;
-  display: grid; place-items: center; transition: color .15s, background .15s;
+  flex: 0 1 38px; min-width: 0; height: 38px;
+  display: grid; place-items: center;
+  background: none; border: 0; border-radius: 9px;
+  color: #BDC1C6; cursor: pointer;
+  transition: color .15s, background .15s;
 }
-.icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
+.icon-btn svg { width: 21px; height: 21px; fill: currentColor; }
 .icon-btn:hover { background: rgba(255,255,255,.06); }
-.icon-btn.active { color: var(--kb-accent); }
+.icon-btn.active { color: var(--kb-accent); background: rgba(138,180,248,.12); }
 .kb-spinner {
-  display: inline-block;
+  display: inline-block; flex-shrink: 0;
   width: 16px; height: 16px; border-radius: 50%; margin: 0 4px;
   border: 2px solid rgba(138,180,248,.3); border-top-color: var(--kb-accent);
   animation: kbspin .7s linear infinite;
 }
+.kb-spinner--inline { margin: 0; }
 .kb-spinner[hidden] { display: none; }
 @keyframes kbspin { to { transform: rotate(360deg); } }
 
@@ -189,75 +448,90 @@
   gap: 6px; padding: 0 8px; overflow-x: auto; scrollbar-width: none;
 }
 .kb-suggestions::-webkit-scrollbar { display: none; }
-.kb-brand { color: #6b6b70; font-style: italic; font-size: .72rem; margin: 0 auto; }
+.kb-brand { color: #6b6b70; font-style: italic; font-size: 12px; margin: 0 auto; white-space: nowrap; }
 .kb-chip {
   flex-shrink: 0; background: color-mix(in srgb, var(--kb-accent) 20%, transparent);
-  color: var(--kb-accent); border: 0; border-radius: 15px; padding: 6px 13px;
-  font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+  color: var(--kb-accent); border: 0; border-radius: 15px; padding: 5px 12px;
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
 }
 .kb-chip:hover { background: color-mix(in srgb, var(--kb-accent) 32%, transparent); }
-.kb-chip-label { color: #8a8a90; font-size: .7rem; margin-right: 5px; }
+.kb-chip-label { color: #8a8a90; font-size: 11px; margin-right: 5px; }
 
 /* mic "Listening…" state */
 .kb-listening { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
 .kb-listening-text { color: var(--kb-accent); font-size: 12px; font-style: italic; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .kb-bars { display: flex; align-items: center; gap: 3px; height: 22px; }
 .kb-bar { width: 3.5px; height: 6px; border-radius: 2px; background: color-mix(in srgb, var(--kb-accent) 85%, transparent); animation: kbWave .9s ease-in-out infinite; }
+.kb-bar:nth-child(2) { animation-delay: .12s; }
+.kb-bar:nth-child(3) { animation-delay: .24s; }
+.kb-bar:nth-child(4) { animation-delay: .36s; }
+.kb-bar:nth-child(5) { animation-delay: .48s; }
 @keyframes kbWave { 0%, 100% { height: 6px; } 50% { height: 22px; } }
 
-.kb-rows { display: flex; flex-direction: column; gap: 5px; padding: 4px 3px 0; }
+.kb-rows { display: flex; flex-direction: column; gap: 5px; padding: 4px 2px 0; }
 .kb-row { display: flex; gap: 5px; justify-content: center; }
-.kb-row[data-row="1"] { padding: 0 5%; }   /* center-indented A-S-D-F row */
+.kb-row[data-row="1"] { padding: 0 5%; }   /* centre-indented A-S-D-F row */
 
 .key {
   position: relative;
-  flex: 1; min-width: 0; height: 42px; border: 0; border-radius: 8px;
+  flex: 1; min-width: 0; height: var(--key-h); border: 0; border-radius: 7px;
   background: var(--kb-key); color: var(--kb-text); cursor: pointer;
-  font-size: clamp(1rem, 4.6vw, 1.45rem); font-family: inherit; font-weight: 400;
+  font-family: inherit; font-weight: 400;
+  font-size: 19px;
+  font-size: clamp(16px, 6cqi, 22px);
   display: grid; place-items: center;
   box-shadow: 0 1px 1.5px rgba(0,0,0,.4);
   transition: transform .04s, background .1s;
 }
-.key svg { width: 24px; height: 24px; fill: currentColor; }
+.key svg { width: 22px; height: 22px; fill: currentColor; }
+.key:hover { background: color-mix(in srgb, var(--kb-key) 88%, #fff); }
 .key:active { transform: scale(.94); background: color-mix(in srgb, var(--kb-key) 80%, #000); box-shadow: none; }
-.key-num { position: absolute; top: 3px; right: 6px; font-size: 9px; color: #8a8a90; line-height: 1; font-weight: 500; }
+.key-num { position: absolute; top: 3px; right: 5px; font-size: 9px; color: #8a8a90; line-height: 1; font-weight: 500; }
 
 .key--special { background: var(--kb-special); }
+.key--special:hover { background: color-mix(in srgb, var(--kb-special) 85%, #fff); }
 .key--special:active { background: color-mix(in srgb, var(--kb-special) 80%, #000); }
-.key--shift, .key--backspace { flex: 1.8; }
-.key--shift svg, .key--backspace svg { width: 22px; height: 22px; }
+.key--shift, .key--backspace { flex: 1.6; }
+.key--shift svg, .key--backspace svg { width: 21px; height: 21px; }
 .key--shift.active { background: var(--kb-accent); color: #000; }
 
-.kb-bottom { padding: 6px 3px 0; gap: 5px; }
-.kb-bottom .key { height: 40px; border-radius: 8px; font-size: 1rem; }
+.kb-bottom { padding: 5px 2px 0; gap: 5px; }
+.kb-bottom .key { height: calc(var(--key-h) - 2px); font-size: 15px; }
 .kb-bottom .key--sym, .kb-bottom .key--enter { border-radius: 10px; }
-.kb-bottom .key--sym { flex: 1.4; font-size: .82rem; }
+.kb-bottom .key--sym { flex: 1.4; font-size: 13px; }
 .kb-bottom .key--comma, .kb-bottom .key--period, .kb-bottom .key--emoji { flex: 1.1; }
 .kb-bottom .key--space { flex: 4.5; }
 .kb-bottom .key--enter { flex: 1.8; background: var(--kb-accent); color: #000; }
-.kb-bottom .key--enter svg, .kb-bottom .key--emoji svg { width: 22px; height: 22px; }
+.kb-bottom .key--enter:hover { background: color-mix(in srgb, var(--kb-accent) 88%, #fff); }
+.kb-bottom .key--enter svg, .kb-bottom .key--emoji svg { width: 21px; height: 21px; }
 
 /* ───────────── AI Quick Actions panel ───────────── */
-.kb-panel { display: flex; flex-direction: column; padding: 2px 0 0; }
+.kb-panel {
+  display: flex; flex-direction: column; padding: 2px 0 0;
+  /* exactly the height of #kbKeys (4 rows + gaps), so opening the panel
+     doesn't push the toolbar, or a spotlight on it, up the screen */
+  height: calc(var(--key-h) * 4 + 17px);
+}
 .kb-panel[hidden] { display: none; }
-.qa-scroll { flex: 1; overflow-y: auto; max-height: 218px; padding-bottom: 2px; }
+.qa-scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 2px; scrollbar-width: none; }
 .qa-scroll::-webkit-scrollbar { width: 0; }
-.qa-header { font-size: .62rem; font-weight: 700; letter-spacing: .5px; color: rgba(189,193,198,.7); padding: 8px 12px 3px; }
+.qa-header { font-size: 10px; font-weight: 700; letter-spacing: .5px; color: rgba(189,193,198,.7); padding: 8px 10px 4px; }
 .qa-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 6px; }
 .qa-tile {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   background: var(--kb-key); border: 0; border-radius: 7px; cursor: pointer;
-  padding: 6px 4px; min-height: 40px; transition: background .1s, transform .05s;
+  padding: 6px 4px; min-height: 42px; font-family: inherit; transition: background .1s, transform .05s;
 }
+.qa-tile:hover { background: color-mix(in srgb, var(--kb-key) 88%, #fff); }
 .qa-tile:active { transform: scale(.95); background: color-mix(in srgb, var(--kb-key) 80%, #000); }
-.qa-emoji { font-size: .95rem; line-height: 1; }
-.qa-label { color: var(--kb-accent); font-size: .62rem; font-weight: 600; line-height: 1; white-space: nowrap; }
-.qa-bottom { display: flex; justify-content: space-between; gap: 5px; padding: 6px 3px 7px; }
-.qa-bottom .key { flex: 0 0 auto; height: 42px; }
-.qa-abc { width: 22%; font-size: .82rem; }
+.qa-emoji { font-size: 15px; line-height: 1; }
+.qa-label { color: var(--kb-accent); font-size: 10.5px; font-weight: 600; line-height: 1; white-space: nowrap; }
+.qa-bottom { display: flex; justify-content: space-between; gap: 5px; padding: 6px 2px 0; }
+.qa-bottom .key { flex: 0 0 auto; height: calc(var(--key-h) - 2px); }
+.qa-abc { width: 22%; font-size: 13px; }
 .qa-back { width: 18%; }
 
-/* ───────────── floating lens popup (inside phone) ───────────── */
+/* ───────────── floating lens (inside phone) ───────────── */
 .phone-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
 .phone-overlay > * { pointer-events: auto; }
 
@@ -281,130 +555,180 @@
   animation: lensPop .25s ease both;
 }
 @keyframes lensPop { from { opacity: 0; transform: translateY(10px) scale(.95); } to { opacity: 1; transform: none; } }
-.lens-popup-head { display: flex; align-items: center; gap: 7px; font-size: .76rem; color: var(--kb-accent); font-weight: 700; margin-bottom: 8px; }
-.lens-popup-orig { font-size: .76rem; color: #8696a0; margin-bottom: 4px; }
-.lens-popup-result { font-size: .95rem; line-height: 1.4; min-height: 22px; }
-.lens-popup-loading { color: #8696a0; font-size: .82rem; display: flex; align-items: center; gap: 8px; }
+.lens-popup-head { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--kb-accent); font-weight: 700; margin-bottom: 8px; }
+.lens-popup-orig { font-size: 12px; color: #8696a0; margin-bottom: 4px; }
+.lens-popup-result { font-size: 15px; line-height: 1.4; min-height: 22px; }
+.lens-popup-loading { color: #8696a0; font-size: 13px; display: flex; align-items: center; gap: 8px; }
 .lens-popup-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-.lens-btn { background: color-mix(in srgb, var(--kb-accent) 18%, transparent); color: var(--kb-accent); border: 0; border-radius: 10px; padding: 8px 13px; font-size: .8rem; font-weight: 700; cursor: pointer; font-family: inherit; }
-.lens-btn.ghost { background: rgba(255,255,255,.06); color: #aebac1; }
-.lens-reply-chip { display: block; width: 100%; text-align: left; background: rgba(255,255,255,.05); color: #e9edef; border: 1px solid rgba(255,255,255,.08); border-radius: 11px; padding: 9px 12px; margin-top: 7px; font-size: .82rem; cursor: pointer; font-family: inherit; line-height: 1.35; }
+.lens-btn { background: color-mix(in srgb, var(--kb-accent) 18%, transparent); color: var(--kb-accent); border: 0; border-radius: 10px; padding: 8px 13px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.lens-btn:hover { background: color-mix(in srgb, var(--kb-accent) 28%, transparent); }
+.lens-reply-chip { display: block; width: 100%; text-align: left; background: rgba(255,255,255,.05); color: #e9edef; border: 1px solid rgba(255,255,255,.08); border-radius: 11px; padding: 9px 12px; margin-top: 7px; font-size: 13px; cursor: pointer; font-family: inherit; line-height: 1.35; }
 .lens-reply-chip:hover { border-color: var(--kb-accent); }
-.lens-popup-close { position: absolute; top: 8px; right: 11px; background: none; border: 0; color: #8696a0; font-size: 1.1rem; cursor: pointer; }
-
-/* ───────────── tool sheet (email / live translate) ───────────── */
-.tool-sheet {
-  position: absolute; left: 0; right: 0; bottom: 0; max-height: 86%; overflow-y: auto;
-  background: #0f1419; border-top: 1px solid rgba(138,180,248,.3);
-  border-radius: 20px 20px 0 0; padding: 16px 16px 22px; color: #e9edef;
-  animation: sheetUp .3s ease both;
-}
-@keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
-.tool-sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.tool-sheet-title { font-weight: 800; font-size: 1rem; }
-.tool-sheet-close { background: none; border: 0; color: #8696a0; font-size: 1.3rem; cursor: pointer; }
-.tool-label { font-size: .76rem; color: #8696a0; margin: 10px 0 5px; font-weight: 600; }
-.tool-field { width: 100%; background: #1f2c34; border: 1px solid rgba(255,255,255,.08); border-radius: 11px; color: #e9edef; padding: 10px 12px; font-family: inherit; font-size: .86rem; resize: vertical; }
-.tool-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-.tool-pill { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); color: #aebac1; border-radius: 999px; padding: 6px 12px; font-size: .78rem; cursor: pointer; font-family: inherit; }
-.tool-pill.active { background: var(--kb-accent); color: #000; border-color: var(--kb-accent); font-weight: 700; }
-.tool-run { width: 100%; margin-top: 14px; background: var(--kb-accent); color: #000; border: 0; border-radius: 12px; padding: 12px; font-weight: 800; font-size: .9rem; cursor: pointer; font-family: inherit; }
-.tool-run:disabled { opacity: .5; cursor: default; }
-.tool-output { margin-top: 14px; background: #11171c; border: 1px solid rgba(138,180,248,.25); border-radius: 12px; padding: 12px; font-size: .85rem; line-height: 1.5; white-space: pre-wrap; min-height: 20px; }
-.tool-output .eml-subject { font-weight: 800; display: block; margin-bottom: 8px; color: var(--kb-accent); }
+.lens-popup-close { position: absolute; top: 8px; right: 11px; background: none; border: 0; color: #8696a0; font-size: 18px; cursor: pointer; }
 
 /* ───────────── toast ───────────── */
 .phone-toast {
-  position: absolute; left: 50%; bottom: 90px; transform: translateX(-50%);
-  background: rgba(0,0,0,.85); color: #fff; padding: 10px 16px; border-radius: 12px;
-  font-size: .8rem; z-index: 40; max-width: 86%; text-align: center;
+  position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%);
+  background: rgba(20,20,24,.94); color: #fff; padding: 10px 16px; border-radius: 12px;
+  font-size: 13px; line-height: 1.4; z-index: 40; width: max-content; max-width: 86%; text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
   animation: toastIn .25s ease both;
 }
+.phone-toast[hidden] { display: none; }
 @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translateX(-50%); } }
 
-/* ───────────── coachmark ───────────── */
-/* layer lets clicks pass THROUGH to the highlighted target; only the tooltip
-   (with its Next/Skip buttons) captures clicks. */
+/* ───────────── tour spotlight ─────────────
+   Lives inside .phone-screen, whose overflow:hidden clips the dimming
+   shadow to the screen. pointer-events:none lets taps reach the target. */
 .coach-layer { position: absolute; inset: 0; z-index: 60; pointer-events: none; }
-.coach-tooltip { pointer-events: auto; }
+.coach-layer[hidden] { display: none; }
 .coach-spotlight {
-  position: absolute; border-radius: 14px; pointer-events: none;
-  box-shadow: 0 0 0 9999px rgba(3,3,17,.72); transition: all .35s ease;
+  position: absolute; border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(4, 4, 12, 0.6);
+  transition: left .35s var(--ease), top .35s var(--ease), width .35s var(--ease), height .35s var(--ease);
 }
 .coach-spotlight::after {
-  content: ""; position: absolute; inset: -4px; border-radius: 16px;
-  border: 2px solid var(--accent, #7C6CF8); animation: coachPulse 1.4s ease-in-out infinite;
+  content: ""; position: absolute; inset: -3px; border-radius: 14px;
+  border: 2px solid var(--accent-light); animation: coachPulse 1.4s ease-in-out infinite;
 }
-@keyframes coachPulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent,#7C6CF8) 55%, transparent); } 50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent,#7C6CF8) 0%, transparent); } }
-.coach-tooltip {
-  position: absolute; width: 300px; max-width: 88vw; background: #15151f;
-  border: 1px solid var(--accent, #7C6CF8); border-radius: 14px; padding: 16px;
-  box-shadow: 0 18px 50px rgba(0,0,0,.6); transition: top .25s ease, left .25s ease; z-index: 61;
+@keyframes coachPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(157, 144, 255, 0.55); }
+  50%      { box-shadow: 0 0 0 7px rgba(157, 144, 255, 0); }
 }
-.coach-title { font-weight: 800; font-size: .95rem; margin-bottom: 5px; color: #fff; }
-.coach-body { font-size: .84rem; color: #c7c7d6; line-height: 1.5; }
-.coach-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 13px; gap: 10px; }
-.coach-skip { background: none; border: 0; color: #8a8a9a; font-size: .8rem; cursor: pointer; }
-.coach-next { background: var(--accent, #7C6CF8); color: #fff; border: 0; border-radius: 10px; padding: 8px 16px; font-weight: 700; font-size: .82rem; cursor: pointer; font-family: inherit; }
 
-/* ───────────── language picker ───────────── */
-.lang-modal { position: absolute; inset: 0; z-index: 80; display: grid; place-items: center; background: rgba(3,3,17,.78); backdrop-filter: blur(3px); border-radius: 20px; }
-.lang-modal[hidden] { display: none; }
-.lang-card { background: #15151f; border: 1px solid var(--accent, #7C6CF8); border-radius: 18px; padding: 22px 24px; text-align: center; box-shadow: 0 18px 50px rgba(0,0,0,.6); width: min(300px, 82%); }
-.lang-title { font-weight: 800; font-size: 1.05rem; color: #fff; }
-.lang-sub { color: #c7c7d6; font-size: .92rem; margin-top: 3px; }
-.lang-btns { display: flex; gap: 10px; margin-top: 18px; }
-.lang-btn { flex: 1; border: 0; border-radius: 12px; padding: 13px; font-weight: 700; font-size: .95rem; cursor: pointer; font-family: inherit; background: var(--accent, #7C6CF8); color: #fff; transition: transform .05s, filter .15s; }
-.lang-btn:hover { filter: brightness(1.1); }
-.lang-btn:active { transform: scale(.96); }
-.lang-btn[data-lang="hi"] { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); }
+/* ───────────── guide card laid over the phone (below 1024px) ─────────────
+   Over the TOP of the phone (the chat header): everything the tour
+   points at — toolbar, suggestion strip, Lens popup, Quick Tools —
+   lives in the bottom half. */
+.demo-stage > .coach {
+  position: absolute; z-index: 70; left: 50%; top: 10px; transform: translateX(-50%);
+  width: min(calc(100% - 28px), 380px);
+  padding: 13px 14px 11px;
+  background: rgba(18, 18, 30, 0.95);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid rgba(157, 144, 255, 0.42); border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+  animation: coachIn .3s var(--ease) both;
+}
+@keyframes coachIn { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translateX(-50%); } }
+.demo-stage > .coach .coach-head  { margin-bottom: 4px; }
+.demo-stage > .coach .coach-title { font-size: 14.5px; }
+.demo-stage > .coach .coach-body  { font-size: 13.5px; line-height: 1.5; }
+.demo-stage > .coach .coach-foot  { margin-top: 10px; }
+.demo-stage > .coach .lang-opt    { min-height: 26px; padding: 0 8px; font-size: 12px; }
 
-/* ───────────── controls ───────────── */
-/* margin-top was 34px — trimmed to 10px because these controls now cost
-   real phone height rather than being hidden. flex-shrink:0 keeps them
-   from being squeezed away when the stage competes for space. */
-.demo-controls {
-  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-  margin-top: 10px; flex-shrink: 0;
+/* ═════════════════════════ DESKTOP, SHORT VIEWPORT ═════════════════════════
+   A 1366×768 laptop leaves ~590px under the nav: drop what the tour
+   doesn't need so the panel stays beside the phone without scrolling. */
+@media (min-width: 1024px) and (max-height: 820px) {
+  :root { --key-h: 39px; }
+  .demo-cta { display: none; }
 }
-.demo-controls .btn-primary,
-.demo-controls .btn-secondary { padding: 10px 20px; font-size: 14px; }
+@media (min-width: 1024px) and (max-height: 700px) {
+  .demo-intro .hero-badge, .demo-sub { display: none; }
+  .demo-title { font-size: clamp(34px, 3vw, 42px); margin-bottom: 18px; }
+  .tour-head  { padding-top: 6px; padding-bottom: 6px; }
+  .step-btn   { padding-top: 8px; padding-bottom: 8px; }
+}
 
-/* Desktop has vertical slack for the explainer; phones don't. */
-.demo-foot-note {
-  text-align: center; color: var(--muted, #A6A6C2);
-  font-size: .82rem; max-width: 600px; margin: 12px auto 0; line-height: 1.6;
-  flex-shrink: 0;
-}
-@media (max-width: 900px) {
-  .demo-foot-note { display: none !important; }
-}
-/* style.css hides .nav-links below 900px behind a hamburger, but this page
-   has no hamburger — and "back to the site" is the exact affordance the
-   demo was missing. Keep the back link; drop the secondary ones. */
-@media (max-width: 900px) {
-  .demo-body .nav-links { display: flex !important; flex: 0 1 auto; gap: 0; }
+/* ═════════════════════════ BELOW 1024px: KIOSK ═════════════════════════ */
+@media (max-width: 1023.98px) {
+  /* The body IS the 100dvh column; navbar and <main> split it. */
+  .demo-body {
+    overflow: hidden;
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+  }
+  .demo-body .footer { display: none; }
+
+  .demo-main { flex: 1; min-height: 0; padding: 10px 0 12px; align-items: stretch; }
+  .demo-main::after { display: none; }
+  .demo-layout {
+    display: flex; flex-direction: column; gap: 10px;
+    flex: 1; min-height: 0; padding: 0 12px;
+  }
+  .demo-panel { flex-shrink: 0; max-width: none; }
+
+  /* Only the chapter strip shows; the <h1> stays for crawlers and screen readers. */
+  .demo-intro .hero-badge, .demo-sub { display: none; }
+  .demo-title {
+    position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  .tour { padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+  .tour-head, .tour-progress, .tour-end-slot { display: none; }
+
+  /* Chips size to their labels ("Translate" needs more than "Lens"). */
+  .demo-steps {
+    flex-direction: row; justify-content: center; gap: 6px;
+    width: 100%; max-width: 520px; margin: 0 auto;
+  }
+  .demo-step-chip {
+    flex: 1 1 auto; min-width: 0;
+    border-radius: 999px; border-color: var(--border-mid);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .step-btn { justify-content: center; gap: 6px; min-height: 36px; padding: 0 8px; border-radius: 999px; }
+  .chip-num { width: 20px; height: 20px; font-size: 11px; }
+  .demo-step-chip.active .chip-num { box-shadow: none; }
+  .demo-step-chip.done .chip-num::after { font-size: 11px; }
+  .step-name, .step-desc, .step-slot { display: none; }
+  .step-short {
+    display: block; min-width: 0;
+    font-size: 12.5px; font-weight: 600; color: var(--text2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .demo-step-chip.active .step-short { color: var(--text); }
+
+  .demo-stage { flex: 1; min-height: 0; align-self: stretch; }
+  .demo-stage::before { inset: 0 -20%; }
+  .phone-mockup { width: min(100%, 410px); height: 100%; }
+
+  .demo-cta { display: none; }
+
+  /* style.css hides .nav-links below 900px behind a hamburger this page
+     doesn't have. Keep "Back to site"; drop the secondary links. */
+  .demo-body .nav-links { display: flex !important; flex: 0 1 auto; gap: 0; margin-left: auto; }
   .demo-body .nav-links a:not(:first-child) { display: none; }
+  .demo-body .nav-inner { gap: 10px; }
 }
 
-@media (max-width: 600px) {
-  .demo-controls .btn-primary,
-  .demo-controls .btn-secondary { min-height: 40px; padding: 8px 16px; font-size: 13px; }
-  .demo-body .navbar .btn-nav   { padding: 7px 12px; font-size: 11.5px; }
-  .demo-body .nav-links a:first-child { font-size: 12.5px; padding: 0 6px; white-space: nowrap; }
+/* A short viewport (landscape phone) can't hold the kiosk: let it scroll. */
+@media (max-width: 1023.98px) and (max-height: 560px) {
+  .demo-body { overflow: auto; height: auto; display: block; }
+  .demo-stage { flex: none; height: 560px; }
+}
+
+@media (max-width: 1023.98px) and (max-height: 720px) {
+  :root { --key-h: 38px; }
+}
+
+/* ───────────── phones: drop the device frame ─────────────
+   On a real phone a phone-in-a-phone wastes the width; the screen gets
+   it all, and the fake status bar and gesture pill go (the device has
+   its own). */
+@media (max-width: 599.98px) {
+  .demo-main   { padding: 8px 0 8px; }
+  .demo-layout { gap: 8px; padding: 0 8px; }
+  .phone-mockup {
+    width: 100%; padding: 0; border-radius: 20px; background: none;
+    box-shadow: 0 0 0 1px var(--border-mid), 0 20px 50px -20px rgba(0, 0, 0, 0.8);
+  }
+  .phone-mockup::before, .phone-mockup::after { display: none; }
+  .phone-screen { border-radius: 20px; }
+  .phone-status, .phone-navbar { display: none; }
+  .chat-header { padding-top: 9px; }
+  .demo-stage > .coach { top: 8px; width: calc(100% - 20px); }
+
+  .demo-body .navbar .btn-nav { min-height: 34px; padding: 0 12px; font-size: 13px; }
+  .demo-body .navbar .btn-nav .icon { display: none; }
+  .demo-body .nav-links a:first-child { font-size: 13px; padding: 0 6px; white-space: nowrap; }
 }
 
 /* Logo + back link + Play button don't fit a 360px bar; the TA mark alone
    still says whose page this is. */
 @media (max-width: 380px) {
   .demo-body .nav-logo .logo-text { display: none; }
-}
-
-/* ───────────── responsive ───────────── */
-@media (max-width: 480px) {
-  .demo-main { padding: 8px 6px 10px; }
-  .phone-mockup { border-radius: 30px; padding: 7px; max-width: 100%; }
-  .phone-screen { border-radius: 24px; }
-  .demo-step-chip { font-size: .72rem; padding: 5px 9px; }
-  .demo-steps { gap: 6px; }
+  .step-btn { gap: 4px; padding: 0 4px; }
+  .step-short { font-size: 12px; }
 }

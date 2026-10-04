@@ -27,7 +27,7 @@
       return data;
     } catch (err) {
       if (err instanceof RateLimitError) throw err;
-      if (err instanceof TypeError) throw new Error('Network error — check your connection.');
+      if (err instanceof TypeError) throw new Error('Network error. Check your connection.');
       throw err;
     } finally {
       spinner(false);
@@ -84,18 +84,26 @@
      drives the keyboard themselves (i.e. the tour is not active). */
   const SCRIPT = {
     lensHindi:   'अरे! कल कॉफ़ी के लिए फ्री हो? ☕',
-    lensReplies: ["Yes, I'm totally free! ☕", 'Sure — what time works?', "Aw, I'm a bit busy tomorrow 😅"],
+    lensReplies: ["Yes, I'm totally free! ☕", 'Sure! What time works?', "Aw, I'm a bit busy tomorrow 😅"],
     translateEn: "Let's meet tomorrow morning.",
     quickFormal: 'Is our plan for tomorrow confirmed?',
   };
+
+  /* Bumped every time the tour resets the stage (new chapter, restart, end).
+     Anything the tour scheduled — auto-typing, polled clicks, the scripted
+     "thinking" pause — captures it and bails once it changes, so jumping
+     between chapters never lets the old chapter keep typing into the new one. */
+  let epoch = 0;
 
   // Returns the scripted result while the tour is playing; otherwise hits the
   // real backend. `scripted` must match the shape callDemo returns for that mode.
   async function callDemoOrScript(mode, text, params, scripted) {
     if (tour && tour.active && scripted !== undefined) {
+      const e = epoch;
       spinner(true);
       await wait(750);          // brief pause so the spinner reads as "thinking"
       spinner(false);
+      if (e !== epoch) return new Promise(() => {});   // the tour moved on: drop it
       return scripted;
     }
     return callDemo(mode, text, params);
@@ -111,6 +119,12 @@
       chatBody.appendChild(b);
       chatBody.scrollTop = chatBody.scrollHeight;
       return b;
+    },
+    addDay(label) {
+      const d = document.createElement('div');
+      d.className = 'chat-day';
+      d.textContent = label;
+      chatBody.appendChild(d);
     },
     sendOutgoing(text) { const b = this.addBubble({ side: 'outgoing', text }); scheduleRiyaReply(); return b; },
     addTyping() {
@@ -241,6 +255,11 @@
   // stop the page from scrolling / native keyboard popping on touch
   document.getElementById('keyboard').addEventListener('mousedown', e => e.preventDefault());
 
+  // WhatsApp's round send button does what Enter does
+  const sendBtn = document.getElementById('chatSend');
+  sendBtn.addEventListener('mousedown', e => e.preventDefault());
+  sendBtn.addEventListener('click', () => keyboard.handle('enter'));
+
   /* suggestions strip */
   function setSuggestions(chips) {
     suggestStrip.innerHTML = '';
@@ -270,7 +289,7 @@
       case 'lens':      return toggleLensBall();
       case 'quick':     return toggleQuickActions();
       case 'mic':       return toggleVoiceInput();
-      case 'fonts':     return toast('Fancy fonts are available in the installed app — Aᴀ 𝓪𝓫𝓬 𝕒𝕓𝕔');
+      case 'fonts':     return toast('Fancy fonts are available in the installed app: Aᴀ 𝓪𝓫𝓬 𝕒𝕓𝕔');
       case 'clipboard': return toast('Clipboard history is available in the installed app 📋');
       case 'settings':  return toast('Opens the full TypeAura app on your phone ⚙');
     }
@@ -348,7 +367,7 @@
       <button class="lens-popup-close" aria-label="Close">×</button>
       <div class="lens-popup-head">🌐 Floating Lens · → Hindi</div>
       <div class="lens-popup-orig">${escapeHtml(orig)}</div>
-      <div class="lens-popup-result"><span class="lens-popup-loading"><span class="kb-spinner" style="margin:0"></span> Translating…</span></div>
+      <div class="lens-popup-result"><span class="lens-popup-loading"><span class="kb-spinner kb-spinner--inline"></span> Translating…</span></div>
     `;
     overlay.appendChild(pop);
     positionNear(pop, anchorEl);
@@ -368,7 +387,7 @@
   }
 
   function loadLensReplies(pop, orig, actions) {
-    actions.innerHTML = '<span class="lens-popup-loading"><span class="kb-spinner" style="margin:0"></span> Generating replies…</span>';
+    actions.innerHTML = '<span class="lens-popup-loading"><span class="kb-spinner kb-spinner--inline"></span> Generating replies…</span>';
     callDemoOrScript('lens_reply', orig, { replyLang: 'English' }, { replies: SCRIPT.lensReplies })
       .then(({ replies }) => {
         actions.innerHTML = '';
@@ -508,7 +527,7 @@
       if (!listening) return;
       manualStop = true;
       listening = false;
-      if (!gotAnyResult) toast('3 sec tak kuch suna nahi — mic band. Dobara tap karke boliye 🎙');
+      if (!gotAnyResult) toast('3 sec tak kuch suna nahi, mic band. Dobara tap karke boliye 🎙');
       if (recognition) { try { recognition.stop(); } catch (_) { finishVoice(); } }
       else finishVoice();
     }, SILENCE_MS);
@@ -522,8 +541,7 @@
       wrap.innerHTML = `<span class="kb-listening-text">${escapeHtml(partial)}</span>`;
     } else {
       wrap.innerHTML = '<span class="kb-listening-text">Listening…</span><span class="kb-bars">' +
-        Array.from({ length: 5 }).map((_, i) => `<span class="kb-bar" style="animation-delay:${i * 0.12}s"></span>`).join('') +
-        '</span>';
+        '<span class="kb-bar"></span>'.repeat(5) + '</span>';
     }
     suggestStrip.appendChild(wrap);
   }
@@ -619,15 +637,16 @@
   function simulateVoice(quiet) {
     const heard = 'kal subah das baje milte hain';        // what the user "says"
     const english = "Let's meet at 10 tomorrow morning.";  // cleaned + translated
+    const e = epoch;
     listening = true;
     manualStop = false;
     setActiveTool('mic');
     showListening('');
     voiceBase = keyboard.buffer && !keyboard.buffer.endsWith(' ') ? keyboard.buffer + ' ' : keyboard.buffer;
     let i = 0;
-    if (!quiet) toast('Voice typing needs Chrome/Edge — showing a quick sample. In the app it works on any Android phone 🎙');
+    if (!quiet) toast('Voice typing needs Chrome or Edge, so here is a quick sample. In the app it works on any Android phone 🎙');
     const tick = () => {
-      if (!listening) return;                 // user tapped to cancel
+      if (!listening || e !== epoch) return;  // user tapped to cancel, or the tour moved on
       i++;
       const partial = heard.slice(0, i);
       keyboard.setBuffer(voiceBase + partial);
@@ -637,6 +656,7 @@
       } else {
         showConverting();
         setTimeout(() => {
+          if (e !== epoch) return;
           listening = false; setActiveTool(null);
           keyboard.setBuffer(english);          // clear input → show only the translated text
           clearSuggestions();
@@ -646,6 +666,19 @@
       }
     };
     setTimeout(tick, 700);
+  }
+
+  // Hard stop for a reset: drop the recognizer's handlers first so its
+  // late onend can't run finishVoice() and type into the next chapter.
+  function abortVoice() {
+    clearTimeout(silenceTimer);
+    if (recognition) {
+      recognition.onresult = recognition.onerror = recognition.onend = null;
+      try { recognition.abort(); } catch (_) {}
+      recognition = null;
+    }
+    listening = false;
+    manualStop = true;
   }
 
   function toggleVoiceInput() {
@@ -670,34 +703,57 @@
   }
 
   /* ───────────────────────── tutorial engine ───────────────────────── */
+  const stageEl     = document.getElementById('demoStage');
+  const screenEl    = $('.phone-screen');
+  const coachCard   = document.getElementById('coachCard');
   const coachLayer  = document.getElementById('coachLayer');
-  const coachTooltip = document.getElementById('coachTooltip');
   const coachTitle  = document.getElementById('coachTitle');
   const coachBody   = document.getElementById('coachBody');
-  const coachNextBtn = document.getElementById('coachNext');
-  const coachSkipBtn = document.getElementById('coachSkip');
+  const coachDots   = document.getElementById('coachDots');
+  const coachNextBtn  = document.getElementById('coachNext');
+  const coachSkipBtn  = document.getElementById('coachSkip');
+  const coachCloseBtn = document.getElementById('coachClose');
+  const coachGetLink  = document.getElementById('coachGet');
+  const tourEl      = document.getElementById('tour');
+  const tourEndSlot = $('.tour-end-slot');
+  const tourBar     = document.getElementById('tourBar');
+  const tourCount   = document.getElementById('tourCount');
   const steps       = $$('.demo-step-chip');
+  // The guide card lives in the side panel from here up, over the phone below.
+  const desktopMQ   = window.matchMedia('(min-width: 1024px)');
 
-  // Tour language (chosen at start). All coachmark text is localized below.
+  // Tour language. All guide text is localized below; the choice is a
+  // per-visitor convenience, so storage failing just means English.
+  const LANG_KEY = 'ta-demo-lang';
   let lang = 'en';
+  try { lang = localStorage.getItem(LANG_KEY) || ''; } catch (_) { lang = ''; }
+  if (lang !== 'en' && lang !== 'hi') lang = /^hi\b/i.test(navigator.language || '') ? 'hi' : 'en';
+
   const UI_TEXT = {
     en: {
-      next: 'Next →', start: 'Start ▶', finishBtn: 'Finish ✓', skip: 'Skip tour',
-      finish: '🎉 That\'s TypeAura! Loved it? Get it free on Google Play 👇',
+      next: 'Next →', start: 'Start ▶', finishBtn: 'Finish ✓', skip: 'Skip tour', replay: '↻ Replay tour',
+      guide: 'Guided tour', restart: 'Restart', complete: 'Tour complete', yourTurn: 'Try it yourself', today: 'Today', getApp: 'Get the app',
+      chapterOf: (a, b) => `Chapter ${a} of ${b}`,
+      doneTitle: "That's TypeAura! 🎉", skipTitle: 'Your turn ✨',
+      doneBody: 'The keyboard is all yours now. Type a message, tap ⇄ to translate, open ▦ Quick Tools or drag the ◎ Lens onto a chat bubble. Every result is live AI.',
     },
     hi: {
-      next: 'आगे →', start: 'शुरू करें ▶', finishBtn: 'पूरा करें ✓', skip: 'टूर छोड़ें',
-      finish: '🎉 यही है TypeAura! पसंद आया? Google Play से फ्री पाएं 👇',
+      next: 'आगे →', start: 'शुरू करें ▶', finishBtn: 'पूरा करें ✓', skip: 'टूर छोड़ें', replay: '↻ टूर दोबारा',
+      guide: 'गाइडेड टूर', restart: 'फिर से', complete: 'टूर पूरा हुआ', yourTurn: 'खुद आज़माएँ', today: 'आज', getApp: 'ऐप पाएँ',
+      chapterOf: (a, b) => `अध्याय ${a} / ${b}`,
+      doneTitle: 'यही है TypeAura! 🎉', skipTitle: 'अब आपकी बारी ✨',
+      doneBody: 'अब कीबोर्ड आपका है। कोई मैसेज टाइप करें, ⇄ से ट्रांसलेट करें, ▦ क्विक टूल्स खोलें या ◎ लेंस को किसी मैसेज पर खींचें। हर नतीजा लाइव AI से आता है।',
     },
   };
 
   /* ── auto-demo helpers (the tour plays the feature for the user) ── */
   function autoType(text) {
+    const e = epoch;
     keyboard.setBuffer('');
     keyboard.shift = false; keyboard._refreshLetters();
     let i = 0;
     const tick = () => {
-      if (!tour.active) return;
+      if (!tour.active || e !== epoch) return;
       i++;
       keyboard.setBuffer(text.slice(0, i));
       if (i < text.length) setTimeout(tick, 55 + Math.random() * 45);
@@ -711,12 +767,12 @@
   }
 
   function autoLensTranslate() {
-    const screen = $('.phone-screen');
+    const e = epoch;
     const bubble = $('.bubble.incoming');
     if (!(lensBall && lensBall.isConnected)) { setActiveTool('lens'); spawnLensBall(); }
     if (!bubble || !lensBall) return;
     lensBall.style.transition = 'left .85s ease, top .85s ease';
-    const sr = screen.getBoundingClientRect();
+    const sr = screenEl.getBoundingClientRect();
     const br = bubble.getBoundingClientRect();
     requestAnimationFrame(() => {
       lensBall.style.left = (br.left - sr.left + br.width / 2 - 24) + 'px';
@@ -724,7 +780,7 @@
       bubble.classList.add('lens-hover');
     });
     setTimeout(() => {
-      if (!tour.active) return;
+      if (!tour.active || e !== epoch) return;
       bubble.classList.remove('lens-hover');
       removeLensBall();
       setActiveTool(null);
@@ -747,9 +803,10 @@
 
   // Poll for an element to appear, then click it (used to drive async UI).
   function pollClick(getter, timeoutMs) {
+    const e = epoch;
     const start = Date.now();
     const iv = setInterval(() => {
-      if (!tour.active || Date.now() - start > timeoutMs) { clearInterval(iv); return; }
+      if (!tour.active || e !== epoch || Date.now() - start > timeoutMs) { clearInterval(iv); return; }
       const el = getter();
       if (el) { clearInterval(iv); el.click(); }
     }, 140);
@@ -760,33 +817,35 @@
     {
       chip: 0,
       title: { en: 'Chapter 1 · Floating Lens', hi: 'अध्याय 1 · फ़्लोटिंग लेंस' },
+      desc:  { en: 'Translate any message, then reply in one tap', hi: 'किसी भी मैसेज का अनुवाद, फिर एक टैप में जवाब' },
       intro: {
-        en: "The Floating Lens reads & translates text in ANY app — and even writes replies for you. Watch it on Riya's message 👇",
-        hi: 'फ़्लोटिंग लेंस किसी भी ऐप में टेक्स्ट पढ़कर अनुवाद करता है — और आपके लिए रिप्लाई भी लिखता है। रिया के मैसेज पर देखिए 👇',
+        en: "The Floating Lens reads and translates text in ANY app, and even writes replies for you. Watch it work on Riya's message.",
+        hi: 'फ़्लोटिंग लेंस किसी भी ऐप में टेक्स्ट पढ़कर अनुवाद करता है, और आपके लिए रिप्लाई भी लिखता है। रिया के मैसेज पर देखिए।',
       },
       steps: [
         { target: () => $('.icon-btn[data-action="lens"]'), run: autoLensAppear,
-          tip: { en: 'Tap the ◎ Lens — a floating orb pops out and stays on top of any app.', hi: '◎ लेंस दबाएँ — एक फ़्लोटिंग ऑर्ब निकलता है जो किसी भी ऐप के ऊपर रहता है।' } },
+          tip: { en: 'Tap the ◎ Lens: a floating orb pops out and stays on top of any app.', hi: '◎ लेंस दबाएँ: एक फ़्लोटिंग ऑर्ब निकलता है जो किसी भी ऐप के ऊपर रहता है।' } },
         { target: null, run: autoLensTranslate,
-          tip: { en: 'Drag it onto the message — it instantly translates to Hindi. 🌐', hi: 'इसे मैसेज पर खींचें — यह तुरंत हिंदी में अनुवाद कर देता है। 🌐' } },
+          tip: { en: 'Drag it onto the message and it instantly translates to Hindi. 🌐', hi: 'इसे मैसेज पर खींचें, यह तुरंत हिंदी में अनुवाद कर देता है। 🌐' } },
         { target: null, run: autoLensReplies,
-          tip: { en: 'No typing needed — tap “Suggest replies” for 3 instant AI replies.', hi: 'टाइप करने की ज़रूरत नहीं — “Suggest replies” दबाएँ, 3 इंस्टैंट AI रिप्लाई मिलेंगे।' } },
+          tip: { en: 'No typing needed: tap “Suggest replies” for 3 instant AI replies.', hi: 'टाइप करने की ज़रूरत नहीं: “Suggest replies” दबाएँ, 3 इंस्टैंट AI रिप्लाई मिलेंगे।' } },
         { target: null, run: autoLensPickReply,
-          tip: { en: 'Pick one — sent! 🎉 The Lens works in WhatsApp, Instagram, games… everywhere.', hi: 'कोई एक चुनें — भेज दिया! 🎉 लेंस WhatsApp, Instagram, गेम्स… हर जगह काम करता है।' } },
+          tip: { en: 'Pick one and it is sent! 🎉 The Lens works in WhatsApp, Instagram, games… everywhere.', hi: 'कोई एक चुनें और भेज दिया! 🎉 लेंस WhatsApp, Instagram, गेम्स… हर जगह काम करता है।' } },
       ],
     },
     {
       chip: 1,
       title: { en: 'Chapter 2 · Hinglish ↔ English', hi: 'अध्याय 2 · हिंग्लिश ↔ इंग्लिश' },
+      desc:  { en: 'Type in Hinglish, send clean English', hi: 'हिंग्लिश में लिखें, साफ़ अंग्रेज़ी भेजें' },
       intro: {
-        en: 'Type the way you talk — in Hinglish — and turn it into clean English in one tap.',
-        hi: 'जैसे आप बोलते हैं वैसे टाइप करें — हिंग्लिश में — और एक टैप में साफ़ अंग्रेज़ी बनाएँ।',
+        en: 'Type the way you talk, in Hinglish, and turn it into clean English in one tap.',
+        hi: 'जैसे आप बोलते हैं वैसे हिंग्लिश में टाइप करें, और एक टैप में साफ़ अंग्रेज़ी बनाएँ।',
       },
       steps: [
         { target: null, run: () => autoType('kal subah milte hain'),
-          tip: { en: 'Watch — we type a Hinglish line for you…', hi: 'देखिए — हम आपके लिए एक हिंग्लिश लाइन टाइप कर रहे हैं…' } },
+          tip: { en: 'Watch: we type a Hinglish line for you…', hi: 'देखिए: हम आपके लिए एक हिंग्लिश लाइन टाइप कर रहे हैं…' } },
         { target: () => $('.icon-btn[data-action="translate"]'), run: () => runTranslate(),
-          tip: { en: 'Tap ⇄ Translate — AI rewrites it in natural English.', hi: '⇄ ट्रांसलेट दबाएँ — AI इसे नैचुरल अंग्रेज़ी में बदल देता है।' } },
+          tip: { en: 'Tap ⇄ Translate and AI rewrites it in natural English.', hi: '⇄ ट्रांसलेट दबाएँ, AI इसे नैचुरल अंग्रेज़ी में बदल देता है।' } },
         { target: null, run: autoApplySuggestion,
           tip: { en: 'Tap the suggestion and it drops straight into your message. Done!', hi: 'सुझाव पर टैप करें और वह सीधे आपके मैसेज में आ जाता है। हो गया!' } },
       ],
@@ -794,9 +853,10 @@
     {
       chip: 2,
       title: { en: 'Chapter 3 · AI Quick Tools', hi: 'अध्याय 3 · एआई क्विक टूल्स' },
+      desc:  { en: '14 one-tap rewrites, from Formal to Funny', hi: '14 वन-टैप टूल्स, Formal से Funny तक' },
       intro: {
-        en: '14 one-tap AI tools — Fix Grammar, Make Formal, Funny, Polite & more — right on the keyboard.',
-        hi: '14 वन-टैप AI टूल्स — Fix Grammar, Make Formal, Funny, Polite और भी — सीधे कीबोर्ड पर।',
+        en: '14 one-tap AI tools (Fix Grammar, Make Formal, Funny, Polite and more) right on the keyboard.',
+        hi: '14 वन-टैप AI टूल्स (Fix Grammar, Make Formal, Funny, Polite और भी) सीधे कीबोर्ड पर।',
       },
       steps: [
         { target: null, run: () => autoType('bro kal ka plan pakka hai na'),
@@ -804,15 +864,16 @@
         { target: () => $('.icon-btn[data-action="quick"]'), run: () => { if (kbPanel.hidden) toggleQuickActions(); },
           tip: { en: 'Open ▦ Quick Tools to see all 14 one-tap actions.', hi: 'सभी 14 वन-टैप एक्शन देखने के लिए ▦ क्विक टूल्स खोलें।' } },
         { target: null, run: autoQuickAction,
-          tip: { en: 'Tap one — like “Make Formal” — and AI rewrites it instantly.', hi: 'कोई एक दबाएँ — जैसे “Make Formal” — और AI तुरंत उसे फिर से लिख देता है।' } },
+          tip: { en: 'Tap one, like “Make Formal”, and AI rewrites it instantly.', hi: 'कोई एक दबाएँ, जैसे “Make Formal”, और AI तुरंत उसे फिर से लिख देता है।' } },
       ],
     },
     {
       chip: 3,
       title: { en: 'Chapter 4 · Voice Typing', hi: 'अध्याय 4 · वॉइस टाइपिंग' },
+      desc:  { en: 'Speak in Hindi, get English text', hi: 'हिंदी में बोलें, अंग्रेज़ी में पाएँ' },
       intro: {
-        en: 'Just speak — even in Hindi or Hinglish — and TypeAura types it out in clean English.',
-        hi: 'बस बोलिए — हिंदी या हिंग्लिश में भी — और TypeAura उसे साफ़ अंग्रेज़ी में टाइप कर देता है।',
+        en: 'Just speak, even in Hindi or Hinglish, and TypeAura types it out in clean English.',
+        hi: 'बस बोलिए, हिंदी या हिंग्लिश में भी, और TypeAura उसे साफ़ अंग्रेज़ी में टाइप कर देता है।',
       },
       steps: [
         { target: () => $('.icon-btn[data-action="mic"]'), run: () => simulateVoice(true),
@@ -824,30 +885,34 @@
   ];
 
   const tour = {
-    ci: 0, si: 0, active: false, phase: 'intro', _curTarget: null,
+    ci: 0, si: 0, active: false,
+    phase: 'intro',            // 'intro' | 'step' | 'done'
+    endedBy: 'finish',         // how the last tour ended: 'finish' | 'skip'
+    completed: new Set(),      // chapters played to the end
+    _curTarget: null,
 
     notify() {},   // no-op (kept so feature fns can call it harmlessly)
 
     start() {
+      this.completed.clear();
+      this.goto(0);
+    },
+
+    // Jump to a chapter's intro (the chapter list is clickable).
+    goto(ci) {
       this.active = true;
-      coachSkipBtn.textContent = UI_TEXT[lang].skip;
-      this.ci = 0;
+      this.ci = ci;
       this._enterChapter();
     },
 
-    _markChips() {
-      const ch = CHAPTERS[this.ci];
-      steps.forEach((c, idx) => {
-        c.classList.toggle('active', idx === ch.chip);
-        c.classList.toggle('done', idx < ch.chip);
-      });
-    },
-
     _resetStage() {
+      epoch++;
+      abortVoice();
       overlay.innerHTML = '';
       lensBall = null;
       setActiveTool(null);
       keyboard.setBuffer('');
+      keyboard.shift = true; keyboard._refreshLetters();   // a fresh message starts capitalised
       clearSuggestions();
       clearTimeout(riyaTimer);
       const t = chatBody.querySelector('.bubble.typing'); if (t) t.remove();
@@ -856,22 +921,17 @@
 
     _enterChapter() {
       this._resetStage();
+      if (this.ci === 0) seedChat();      // the Lens chapter needs Riya's first message on top
       this.phase = 'intro';
       this.si = 0;
       this._curTarget = null;
-      this._markChips();
-      const ch = CHAPTERS[this.ci];
-      coachNextBtn.textContent = UI_TEXT[lang].start;
-      this._show(ch.title[lang], ch.intro[lang], null);
+      this.render();
     },
 
     _runStep() {
-      const ch = CHAPTERS[this.ci];
-      const step = ch.steps[this.si];
-      const lastOfTour = (this.ci === CHAPTERS.length - 1) && (this.si === ch.steps.length - 1);
-      coachNextBtn.textContent = lastOfTour ? UI_TEXT[lang].finishBtn : UI_TEXT[lang].next;
+      const step = CHAPTERS[this.ci].steps[this.si];
       this._curTarget = step.target || null;
-      this._show(ch.title[lang], step.tip[lang], this._curTarget ? this._curTarget() : null);
+      this.render();
       if (step.run) { try { step.run(); } catch (_) {} }
     },
 
@@ -883,124 +943,185 @@
         this._runStep();
         return;
       }
-      const ch = CHAPTERS[this.ci];
       this.si++;
-      if (this.si >= ch.steps.length) {
-        steps[ch.chip].classList.remove('active');
-        steps[ch.chip].classList.add('done');
+      if (this.si >= CHAPTERS[this.ci].steps.length) {
+        this.completed.add(this.ci);
+        if (this.ci + 1 >= CHAPTERS.length) return this.end('finish');
         this.ci++;
-        if (this.ci >= CHAPTERS.length) return this.finish();
         this._enterChapter();
         return;
       }
       this._runStep();
     },
 
-    _show(title, body, target) {
-      coachTitle.textContent = title;
-      coachBody.textContent = body;
-      this._place(target);
-    },
-
-    _place(targetEl) {
-      coachLayer.hidden = false;
-      const old = coachLayer.querySelector('.coach-spotlight');
-      if (old) old.remove();
-      const stageEl = document.getElementById('demoStage');
-      const stage = stageEl.getBoundingClientRect();
-
-      // spotlight ring on the target (inside the phone), if any
-      if (targetEl) {
-        const r = targetEl.getBoundingClientRect();
-        const spot = document.createElement('div');
-        spot.className = 'coach-spotlight';
-        const pad = 6;
-        spot.style.left   = (r.left - stage.left - pad) + 'px';
-        spot.style.top    = (r.top - stage.top - pad) + 'px';
-        spot.style.width  = (r.width + pad * 2) + 'px';
-        spot.style.height = (r.height + pad * 2) + 'px';
-        coachLayer.insertBefore(spot, coachTooltip);
-      }
-
-      // tooltip: beside the phone on desktop (fills the empty space), pinned to
-      // the bottom on narrow screens — always visually tied to the phone.
-      const phone = stageEl.querySelector('.phone-mockup');
-      const pr = phone.getBoundingClientRect();
-      const ttW = coachTooltip.offsetWidth || 300;
-      const ttH = coachTooltip.offsetHeight || 180;
-      coachTooltip.style.bottom = 'auto';
-
-      if (stage.width > 760) {
-        // to the right of the phone, else to the left if no room
-        let left = (pr.right - stage.left) + 28;
-        if (left + ttW > stage.width - 8) left = (pr.left - stage.left) - ttW - 28;
-        left = Math.max(8, left);
-        const top = Math.min(Math.max(8, (pr.top - stage.top) + 40), stage.height - ttH - 8);
-        coachTooltip.style.left = left + 'px';
-        coachTooltip.style.top = top + 'px';
-      } else {
-        const w = Math.min(ttW, stage.width - 16);
-        coachTooltip.style.left = Math.max(8, (stage.width - w) / 2) + 'px';
-        coachTooltip.style.top = 'auto';
-        coachTooltip.style.bottom = '12px';
-      }
-    },
-
-    finish() {
+    // Finish or skip: the tour stops driving and the keyboard calls real AI.
+    end(how) {
       this.active = false;
-      coachLayer.hidden = true;
-      const old = coachLayer.querySelector('.coach-spotlight');
-      if (old) old.remove();
-      steps.forEach(c => { c.classList.remove('active'); c.classList.add('done'); });
+      this.phase = 'done';
+      this.endedBy = how;
+      this._curTarget = null;
       this._resetStage();
-      toast(UI_TEXT[lang].finish);
+      this.render();
     },
 
-    skip() { this.finish(); },
+    // Paint everything the tour owns from its state. Safe to call any time
+    // (language switch, layout switch) — it never re-runs a step's action.
+    render() {
+      const t = UI_TEXT[lang];
+      const done = this.phase === 'done';
+      const ch = CHAPTERS[this.ci];
+      const total = CHAPTERS.length;
+
+      steps.forEach((el, i) => {
+        const isActive = !done && i === this.ci;
+        el.classList.toggle('active', isActive);
+        el.classList.toggle('done', !isActive && this.completed.has(i));
+        const btn = el.querySelector('.step-btn');
+        if (isActive) btn.setAttribute('aria-current', 'step'); else btn.removeAttribute('aria-current');
+        el.querySelector('.step-desc').textContent = CHAPTERS[i].desc[lang];
+      });
+
+      let frac = this.completed.size / total;
+      if (!done) frac = (this.ci + (this.phase === 'step' ? (this.si + 1) / (ch.steps.length + 1) : 0)) / total;
+      tourBar.style.transform = `scaleX(${Math.min(1, frac).toFixed(3)})`;
+      tourCount.textContent = !done ? t.chapterOf(this.ci + 1, total)
+        : this.endedBy === 'finish' ? t.complete : t.yourTurn;
+
+      tourEl.lang = coachCard.lang = lang;
+      $$('[data-t]').forEach(el => { el.textContent = t[el.dataset.t]; });
+      $$('.lang-opt').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+
+      coachCard.hidden = false;
+      coachCloseBtn.hidden = !done;
+      coachSkipBtn.hidden = done;
+      coachGetLink.hidden = !done;
+      coachNextBtn.classList.toggle('is-ghost', done);
+      if (done) {
+        coachTitle.textContent = this.endedBy === 'finish' ? t.doneTitle : t.skipTitle;
+        coachBody.textContent = t.doneBody;
+        coachNextBtn.textContent = t.replay;
+        coachDots.innerHTML = '';
+      } else {
+        coachTitle.textContent = ch.title[lang];
+        coachSkipBtn.textContent = t.skip;
+        if (this.phase === 'intro') {
+          coachBody.textContent = ch.intro[lang];
+          coachNextBtn.textContent = t.start;
+        } else {
+          const lastOfTour = this.ci === total - 1 && this.si === ch.steps.length - 1;
+          coachBody.textContent = ch.steps[this.si].tip[lang];
+          coachNextBtn.textContent = lastOfTour ? t.finishBtn : t.next;
+        }
+        coachDots.innerHTML = ch.steps.map((_, i) => {
+          const cls = this.phase !== 'step' ? '' : i === this.si ? ' on' : i < this.si ? ' past' : '';
+          return `<span class="coach-dot${cls}"></span>`;
+        }).join('');
+      }
+
+      mountCoach();
+      this._spot();
+    },
+
+    // Spotlight the control the current step is about (inside the phone).
+    _spot() {
+      const targetEl = this.active && this.phase === 'step' && this._curTarget ? this._curTarget() : null;
+      let spot = coachLayer.querySelector('.coach-spotlight');
+      if (!targetEl) {
+        coachLayer.hidden = true;
+        if (spot) spot.remove();
+        return;
+      }
+      coachLayer.hidden = false;
+      if (!spot) {
+        spot = document.createElement('div');
+        spot.className = 'coach-spotlight';
+        coachLayer.appendChild(spot);
+      }
+      const s = screenEl.getBoundingClientRect();
+      const r = targetEl.getBoundingClientRect();
+      const pad = 4;
+      spot.style.left   = (r.left - s.left - pad) + 'px';
+      spot.style.top    = (r.top - s.top - pad) + 'px';
+      spot.style.width  = (r.width + pad * 2) + 'px';
+      spot.style.height = (r.height + pad * 2) + 'px';
+    },
   };
 
-  coachNextBtn.addEventListener('click', () => tour.advance());
-  coachSkipBtn.addEventListener('click', () => tour.skip());
+  // Desktop: inside the active chapter (or under the list once the tour has
+  // ended). Below 1024px: laid over the bottom of the phone.
+  function mountCoach() {
+    let home;
+    if (!desktopMQ.matches) home = stageEl;
+    else if (tour.phase === 'done') home = tourEndSlot;
+    else home = steps[CHAPTERS[tour.ci].chip].querySelector('.step-slot');
+    if (coachCard.parentNode === home) return;
+    // Moving a node drops focus; keep keyboard users on the Next button.
+    const hadFocus = coachCard.contains(document.activeElement);
+    home.appendChild(coachCard);
+    if (hadFocus) coachNextBtn.focus({ preventScroll: true });
+  }
 
-  // keep the spotlight aligned with its target on resize
+  function setLang(next) {
+    if (next !== 'en' && next !== 'hi') return;
+    lang = next;
+    try { localStorage.setItem(LANG_KEY, lang); } catch (_) {}
+    tour.render();
+  }
+
+  coachNextBtn.addEventListener('click', () => {
+    if (tour.phase === 'done') restart();
+    else tour.advance();
+  });
+  coachSkipBtn.addEventListener('click', () => tour.end('skip'));
+  coachCloseBtn.addEventListener('click', () => { coachCard.hidden = true; });
+
+  document.getElementById('demoSteps').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-goto]');
+    if (!b) return;
+    const n = Number(b.dataset.goto);
+    if (tour.active && tour.ci === n) return;   // already on it
+    tour.goto(n);
+  });
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('.lang-opt');
+    if (b) setLang(b.dataset.lang);
+  });
+
+  const onLayoutChange = () => { mountCoach(); tour._spot(); };
+  if (desktopMQ.addEventListener) desktopMQ.addEventListener('change', onLayoutChange);
+  else desktopMQ.addListener(onLayoutChange);
+
+  // keep the spotlight aligned with its target: on resize, and whenever the
+  // keyboard changes height (Quick Tools panel, suggestion chips)
   let reflow;
   window.addEventListener('resize', () => {
     clearTimeout(reflow);
-    reflow = setTimeout(() => {
-      if (tour.active && tour.phase === 'step') tour._place(tour._curTarget ? tour._curTarget() : null);
-    }, 120);
+    reflow = setTimeout(() => tour._spot(), 120);
   });
+  if ('ResizeObserver' in window) new ResizeObserver(() => tour._spot()).observe(document.getElementById('keyboard'));
 
   /* ───────────────────────── boot ───────────────────────── */
   function seedChat() {
     chat.reset();
     overlay.innerHTML = '';
+    chat.addDay(UI_TEXT[lang].today);
     chat.addBubble({ side: 'incoming', text: 'Hey! Free tomorrow for coffee? ☕' });
     keyboard.setBuffer('');
   }
 
-  // Language picker — shown when the demo starts (and on restart).
-  const langModal = document.getElementById('langModal');
-  function askLanguage() {
-    coachLayer.hidden = true;
-    langModal.hidden = false;
+  // status-bar clock, Android style (12h, no AM/PM)
+  const clockEl = document.getElementById('psTime');
+  function tickClock() {
+    if (!clockEl) return;
+    const d = new Date();
+    clockEl.textContent = `${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')}`;
   }
-  langModal.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-lang]');
-    if (!b) return;
-    lang = b.dataset.lang === 'hi' ? 'hi' : 'en';
-    langModal.hidden = true;
-    tour.start();
-  });
 
   function restart() {
-    steps.forEach(s => s.classList.remove('active', 'done'));
-    tour.active = false;
-    overlay.innerHTML = '';
-    setActiveTool(null);
-    seedChat();
+    keyboard.shift = true;
     keyboard.render();
-    askLanguage();        // re-ask language on restart
+    tour.start();         // resets the stage and reseeds the chat
   }
 
   document.getElementById('restartBtn')?.addEventListener('click', restart);
@@ -1008,7 +1129,8 @@
   // init
   fillIcons();           // toolbar + bottom-row (emoji, enter) icons
   keyboard.render();
-  seedChat();
   clearSuggestions();
-  setTimeout(askLanguage, 400);   // ask language, then start the tour
+  tickClock();
+  setInterval(tickClock, 30000);
+  tour.start();
 })();

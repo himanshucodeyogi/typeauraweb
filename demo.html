@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Try TypeAura Live — Interactive AI Keyboard Demo</title>
-  <meta name="description" content="Try the TypeAura AI keyboard right in your browser — no install needed. A guided live demo of the Floating Lens, Hinglish ↔ English translation, Email Composer and Live Translate, powered by real GPT-OSS 120B." />
+  <meta name="description" content="Try the TypeAura AI keyboard right in your browser — no install needed. A guided live demo of the Floating Lens, Hinglish ↔ English translation, AI Quick Tools and voice typing, powered by real GPT-OSS 120B." />
   <meta name="robots" content="index, follow" />
-  <meta name="theme-color" content="#7C6CF8" />
+  <meta name="theme-color" content="#08080F" />
   <link rel="canonical" href="https://typeaura.indevs.in/demo" />
 
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png" />
@@ -37,9 +37,9 @@
 <body class="demo-body">
 
   <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
-  <nav class="navbar">
+  <nav class="navbar" aria-label="Main">
     <div class="nav-inner">
-      <a href="/" class="nav-logo">
+      <a href="/" class="nav-logo" aria-label="TypeAura home">
         <img class="logo-mark" src="img/logo-mark.png" width="37" height="24" alt="" />
         <span class="logo-text">TypeAura</span>
       </a>
@@ -48,147 +48,231 @@
         <a href="/#pricing">Pricing</a>
         <a href="/privacy">Privacy</a>
       </div>
-      <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-nav" target="_blank" rel="noopener">Get it on Google Play</a>
+      <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-nav" target="_blank" rel="noopener">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 20.5V3.5c0-.6.4-1.1.9-1.3l10.3 10.3L3.9 21.8c-.5-.2-.9-.7-.9-1.3zm13.8-5.4L6.1 21.9l8.6-8.6l2.1 1.8zm3.6-4.2c.4.3.6.7.6 1.1s-.2.8-.6 1.1l-2.2 1.3l-2.4-2.4l2.4-2.4l2.2 1.3zM6.1 2.1l10.7 6.8l-2.1 1.8L6.1 2.1z"/></svg>
+        Get the app
+      </a>
     </div>
   </nav>
 
-  <!-- ═══════════════════════ DEMO ═══════════════════════ -->
-  <main class="demo-main">
-    <header class="demo-head">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        Live · No install · Real GPT-OSS&nbsp;120B
-      </div>
-      <h1 class="demo-title">Try TypeAura <span class="gradient-text">right here</span></h1>
-      <p class="demo-sub">
-        A real, working TypeAura keyboard inside a sample chat. Follow the guide to try the
-        Floating Lens, Hinglish ↔ English translation, Email Composer and Live Translate —
-        every result is generated live by AI.
-      </p>
+  <!-- ═══════════════════════ DEMO ═══════════════════════
+       Desktop (≥1024px): guide panel on the left, live phone on the right.
+       Below that: a locked-height kiosk — chapter strip, phone, and the
+       guide card laid over the bottom of the phone (demo.js moves the
+       #coachCard node between the two homes). -->
+  <main class="demo-main" id="demo">
+    <div class="demo-layout">
 
-      <!-- progress chips -->
-      <ol class="demo-steps" id="demoSteps">
-        <li class="demo-step-chip" data-chip="0"><span class="chip-num">1</span> Floating Lens</li>
-        <li class="demo-step-chip" data-chip="1"><span class="chip-num">2</span> Translate</li>
-        <li class="demo-step-chip" data-chip="2"><span class="chip-num">3</span> Quick Tools</li>
-        <li class="demo-step-chip" data-chip="3"><span class="chip-num">4</span> Voice Typing</li>
-      </ol>
-    </header>
-
-    <!-- ───────────── stage: phone mockup ───────────── -->
-    <div class="demo-stage" id="demoStage">
-      <div class="phone-mockup">
-        <div class="phone-notch"></div>
-        <div class="phone-screen">
-
-          <!-- WhatsApp-style chat -->
-          <div class="chat-app">
-            <div class="chat-header">
-              <button class="chat-back" aria-hidden="true">‹</button>
-              <div class="chat-avatar">R</div>
-              <div class="chat-peer">
-                <div class="chat-peer-name">Riya</div>
-                <div class="chat-peer-status"><span class="online-dot"></span> online</div>
-              </div>
-              <div class="chat-actions" aria-hidden="true">⋮</div>
-            </div>
-
-            <div class="chat-body" id="chatBody"><!-- bubbles injected by JS --></div>
-
-            <div class="chat-inputbar">
-              <div class="chat-input" id="chatInput">
-                <span class="chat-input-text" id="chatInputText"></span>
-                <span class="chat-input-placeholder" id="chatInputPlaceholder">Message</span>
-                <span class="chat-caret"></span>
-              </div>
-            </div>
+      <section class="demo-panel" aria-labelledby="demoTitle">
+        <div class="demo-intro">
+          <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Live · No install · Real GPT-OSS&nbsp;120B
           </div>
+          <h1 class="demo-title" id="demoTitle">Try TypeAura <span class="gradient-text">right here</span></h1>
+          <p class="demo-sub">
+            A working copy of the TypeAura keyboard inside a sample chat. Take the one-minute
+            tour, then type anything yourself: every result is generated live by AI.
+          </p>
+        </div>
 
-          <!-- ───────────── TypeAura keyboard replica ───────────── -->
-          <div class="kb" id="keyboard">
-            <!-- toolbar -->
-            <div class="kb-toolbar">
-              <button type="button" class="icon-btn" data-action="quick"     data-icon="grid"      title="AI Quick Tools"></button>
-              <button type="button" class="icon-btn" data-action="translate" data-icon="translate" title="Hinglish ↔ English"></button>
-              <button type="button" class="icon-btn" data-action="lens"      data-icon="lens"      title="Floating Lens"></button>
-              <button type="button" class="icon-btn" data-action="fonts"     data-icon="text"      title="Fonts"></button>
-              <button type="button" class="icon-btn" data-action="settings"  data-icon="settings"  title="Open app"></button>
-              <button type="button" class="icon-btn" data-action="clipboard" data-icon="clipboard" title="Clipboard"></button>
-              <span class="kb-toolbar-spacer"></span>
-              <span class="kb-spinner" id="kbSpinner" hidden></span>
-              <button type="button" class="icon-btn" data-action="mic"       data-icon="mic"       title="Voice / Live Translate"></button>
+        <div class="tour" id="tour">
+          <div class="tour-head">
+            <div class="tour-meta">
+              <span class="tour-label" data-t="guide">Guided tour</span>
+              <span class="tour-count" id="tourCount">4 chapters</span>
             </div>
-
-            <!-- suggestions strip -->
-            <div class="kb-suggestions" id="suggestStrip">
-              <span class="kb-brand">TypeAura By Himanshu Kashyap</span>
+            <div class="lang-toggle" role="group" aria-label="Tour language">
+              <button type="button" class="lang-opt" data-lang="en" aria-pressed="true">English</button>
+              <button type="button" class="lang-opt" data-lang="hi" lang="hi" aria-pressed="false">हिन्दी</button>
             </div>
+            <button type="button" class="tour-restart" id="restartBtn" title="Restart the demo">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+              <span data-t="restart">Restart</span>
+            </button>
+          </div>
+          <div class="tour-progress" aria-hidden="true"><span id="tourBar"></span></div>
 
-            <!-- keys (letter rows + bottom row) -->
-            <div id="kbKeys">
-              <div class="kb-rows" id="kbRows">
-                <div class="kb-row" data-row="0"></div>
-                <div class="kb-row" data-row="1"></div>
-                <div class="kb-row kb-row-3" data-row="2"></div>
+          <ol class="demo-steps" id="demoSteps">
+            <li class="demo-step-chip" data-chip="0">
+              <button type="button" class="step-btn" data-goto="0">
+                <span class="chip-num">1</span>
+                <span class="step-text">
+                  <span class="step-name">Floating Lens</span><span class="step-short">Lens</span>
+                  <span class="step-desc">Translate any message, then reply in one tap</span>
+                </span>
+              </button>
+              <div class="step-slot"></div>
+            </li>
+            <li class="demo-step-chip" data-chip="1">
+              <button type="button" class="step-btn" data-goto="1">
+                <span class="chip-num">2</span>
+                <span class="step-text">
+                  <span class="step-name">Translate</span><span class="step-short">Translate</span>
+                  <span class="step-desc">Type in Hinglish, send clean English</span>
+                </span>
+              </button>
+              <div class="step-slot"></div>
+            </li>
+            <li class="demo-step-chip" data-chip="2">
+              <button type="button" class="step-btn" data-goto="2">
+                <span class="chip-num">3</span>
+                <span class="step-text">
+                  <span class="step-name">Quick Tools</span><span class="step-short">Tools</span>
+                  <span class="step-desc">14 one-tap rewrites, from Formal to Funny</span>
+                </span>
+              </button>
+              <div class="step-slot"></div>
+            </li>
+            <li class="demo-step-chip" data-chip="3">
+              <button type="button" class="step-btn" data-goto="3">
+                <span class="chip-num">4</span>
+                <span class="step-text">
+                  <span class="step-name">Voice Typing</span><span class="step-short">Voice</span>
+                  <span class="step-desc">Speak in Hindi, get English text</span>
+                </span>
+              </button>
+              <div class="step-slot"></div>
+            </li>
+          </ol>
+          <div class="tour-end-slot"></div>
+
+          <!-- The guide card. Mounted by demo.js: inside the active chapter
+               on desktop, over the bottom of the phone below that. -->
+          <div class="coach" id="coachCard" role="region" aria-label="Tour guide" aria-live="polite" hidden>
+            <div class="coach-head">
+              <div class="coach-title" id="coachTitle"></div>
+              <div class="lang-toggle lang-toggle--coach" role="group" aria-label="Tour language">
+                <button type="button" class="lang-opt" data-lang="en" aria-pressed="true">EN</button>
+                <button type="button" class="lang-opt" data-lang="hi" lang="hi" aria-pressed="false">हिं</button>
               </div>
-              <div class="kb-row kb-bottom">
-                <button type="button" class="key key--special key--sym" data-key="?123">?123</button>
-                <button type="button" class="key key--special key--comma" data-key=",">,</button>
-                <button type="button" class="key key--special key--emoji" data-key="emoji" data-icon="emoji"></button>
-                <button type="button" class="key key--space" data-key=" "></button>
-                <button type="button" class="key key--special key--period" data-key=".">.</button>
-                <button type="button" class="key key--special key--enter" data-key="enter" data-icon="return"></button>
+              <button type="button" class="coach-close" id="coachClose" aria-label="Close the guide" hidden>×</button>
+            </div>
+            <div class="coach-body" id="coachBody"></div>
+            <div class="coach-foot">
+              <div class="coach-dots" id="coachDots" aria-hidden="true"></div>
+              <div class="coach-actions">
+                <button type="button" class="coach-skip" id="coachSkip">Skip tour</button>
+                <button type="button" class="coach-next" id="coachNext">Start ▶</button>
+                <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="coach-get" id="coachGet" target="_blank" rel="noopener" hidden>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20.5V3.5c0-.6.4-1.1.9-1.3l10.3 10.3L3.9 21.8c-.5-.2-.9-.7-.9-1.3zm13.8-5.4L6.1 21.9l8.6-8.6l2.1 1.8zm3.6-4.2c.4.3.6.7.6 1.1s-.2.8-.6 1.1l-2.2 1.3l-2.4-2.4l2.4-2.4l2.2 1.3zM6.1 2.1l10.7 6.8l-2.1 1.8L6.1 2.1z"/></svg>
+                  <span data-t="getApp">Get the app</span>
+                </a>
               </div>
             </div>
-
-            <!-- AI Quick Actions panel (replaces the keys when open) -->
-            <div class="kb-panel" id="kbPanel" hidden></div>
-          </div><!-- /.kb -->
-
-          <!-- floating-lens popup + tool sheets mount here (inside the phone) -->
-          <div class="phone-overlay" id="phoneOverlay"></div>
-          <div class="phone-toast" id="phoneToast" hidden></div>
-        </div><!-- /.phone-screen -->
-      </div><!-- /.phone-mockup -->
-
-      <!-- coachmark layer (spotlight + tooltip) -->
-      <div class="coach-layer" id="coachLayer" hidden>
-        <div class="coach-tooltip" id="coachTooltip">
-          <div class="coach-title" id="coachTitle"></div>
-          <div class="coach-body" id="coachBody"></div>
-          <div class="coach-actions">
-            <button type="button" class="coach-skip" id="coachSkip">Skip tour</button>
-            <button type="button" class="coach-next" id="coachNext">Next →</button>
           </div>
         </div>
+      </section>
+
+      <!-- ───────────── stage: phone mockup ───────────── -->
+      <div class="demo-stage" id="demoStage">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+
+            <div class="phone-status" aria-hidden="true">
+              <span class="ps-time" id="psTime">9:41</span>
+              <span class="ps-camera"></span>
+              <span class="ps-icons">
+                <svg viewBox="0 0 24 24"><path d="M2 20h3v-4H2v4zm5 0h3v-8H7v8zm5 0h3V8h-3v12zm5 0h3V4h-3v16z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M12 21l3.6-4.8A5.96 5.96 0 0 0 12 15c-1.35 0-2.6.45-3.6 1.2L12 21zm0-18C7.95 3 4.21 4.34 1.2 6.6L3 9c2.5-1.88 5.62-3 9-3s6.5 1.12 9 3l1.8-2.4C19.79 4.34 16.05 3 12 3zm0 6c-2.7 0-5.19.89-7.2 2.4l1.8 2.4C8.1 12.67 9.97 12 12 12s3.9.67 5.4 1.8l1.8-2.4C17.19 9.89 14.7 9 12 9z"/></svg>
+                <svg viewBox="0 0 24 24" class="ps-battery"><path d="M16 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zm4 3h1.5v4H20v-4z"/></svg>
+              </span>
+            </div>
+
+            <!-- WhatsApp-style chat -->
+            <div class="chat-app">
+              <div class="chat-header">
+                <span class="chat-back" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></span>
+                <div class="chat-avatar" aria-hidden="true">R</div>
+                <div class="chat-peer">
+                  <div class="chat-peer-name">Riya</div>
+                  <div class="chat-peer-status"><span class="online-dot"></span> online</div>
+                </div>
+                <div class="chat-actions" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                  <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                  <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </div>
+              </div>
+
+              <div class="chat-body" id="chatBody"><!-- bubbles injected by JS --></div>
+
+              <div class="chat-inputbar">
+                <div class="chat-input" id="chatInput">
+                  <span class="chat-input-text" id="chatInputText"></span>
+                  <span class="chat-input-placeholder" id="chatInputPlaceholder">Message</span>
+                  <span class="chat-caret"></span>
+                </div>
+                <button type="button" class="chat-send" id="chatSend" aria-label="Send message">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- ───────────── TypeAura keyboard replica ───────────── -->
+            <div class="kb" id="keyboard">
+              <!-- toolbar -->
+              <div class="kb-toolbar">
+                <button type="button" class="icon-btn" data-action="quick"     data-icon="grid"      title="AI Quick Tools"></button>
+                <button type="button" class="icon-btn" data-action="translate" data-icon="translate" title="Hinglish ↔ English"></button>
+                <button type="button" class="icon-btn" data-action="lens"      data-icon="lens"      title="Floating Lens"></button>
+                <button type="button" class="icon-btn" data-action="fonts"     data-icon="text"      title="Fonts"></button>
+                <button type="button" class="icon-btn" data-action="settings"  data-icon="settings"  title="Open app"></button>
+                <button type="button" class="icon-btn" data-action="clipboard" data-icon="clipboard" title="Clipboard"></button>
+                <span class="kb-toolbar-spacer"></span>
+                <span class="kb-spinner" id="kbSpinner" hidden></span>
+                <button type="button" class="icon-btn" data-action="mic"       data-icon="mic"       title="Voice typing"></button>
+              </div>
+
+              <!-- suggestions strip -->
+              <div class="kb-suggestions" id="suggestStrip">
+                <span class="kb-brand">TypeAura · By Himanshu Kashyap</span>
+              </div>
+
+              <!-- keys (letter rows + bottom row) -->
+              <div id="kbKeys">
+                <div class="kb-rows" id="kbRows">
+                  <div class="kb-row" data-row="0"></div>
+                  <div class="kb-row" data-row="1"></div>
+                  <div class="kb-row kb-row-3" data-row="2"></div>
+                </div>
+                <div class="kb-row kb-bottom">
+                  <button type="button" class="key key--special key--sym" data-key="?123">?123</button>
+                  <button type="button" class="key key--special key--comma" data-key=",">,</button>
+                  <button type="button" class="key key--special key--emoji" data-key="emoji" data-icon="emoji" aria-label="Emoji"></button>
+                  <button type="button" class="key key--space" data-key=" " aria-label="Space"></button>
+                  <button type="button" class="key key--special key--period" data-key=".">.</button>
+                  <button type="button" class="key key--special key--enter" data-key="enter" data-icon="return" aria-label="Enter"></button>
+                </div>
+              </div>
+
+              <!-- AI Quick Actions panel (replaces the keys when open) -->
+              <div class="kb-panel" id="kbPanel" hidden></div>
+            </div><!-- /.kb -->
+
+            <div class="phone-navbar" aria-hidden="true"><span></span></div>
+
+            <!-- floating-lens popup + tool sheets mount here (inside the phone) -->
+            <div class="phone-overlay" id="phoneOverlay"></div>
+            <div class="phone-toast" id="phoneToast" role="status" hidden></div>
+            <!-- tour spotlight: dims the screen around the control being explained -->
+            <div class="coach-layer" id="coachLayer" hidden></div>
+          </div><!-- /.phone-screen -->
+        </div><!-- /.phone-mockup -->
+      </div><!-- /.demo-stage -->
+
+      <div class="demo-cta">
+        <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary" target="_blank" rel="noopener">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 20.5V3.5c0-.6.4-1.1.9-1.3l10.3 10.3L3.9 21.8c-.5-.2-.9-.7-.9-1.3zm13.8-5.4L6.1 21.9l8.6-8.6l2.1 1.8zm3.6-4.2c.4.3.6.7.6 1.1s-.2.8-.6 1.1l-2.2 1.3l-2.4-2.4l2.4-2.4l2.2 1.3zM6.1 2.1l10.7 6.8l-2.1 1.8L6.1 2.1z"/></svg>
+          Get it on Google Play
+        </a>
+        <p class="demo-foot-note">
+          Free on Android. The installed app adds Smart Reply, Tone Changer, emoji, clipboard
+          history and a Floating Lens that works in <em>any</em> app.
+        </p>
       </div>
 
-      <!-- language picker (shown at start) -->
-      <div class="lang-modal" id="langModal" hidden>
-        <div class="lang-card">
-          <div class="lang-title">Choose tour language</div>
-          <div class="lang-sub" lang="hi">टूर की भाषा चुनें</div>
-          <div class="lang-btns">
-            <button type="button" class="lang-btn" data-lang="en">English</button>
-            <button type="button" class="lang-btn" data-lang="hi" lang="hi">हिन्दी</button>
-          </div>
-        </div>
-      </div>
-    </div><!-- /.demo-stage -->
-
-    <div class="demo-controls">
-      <button type="button" class="btn-secondary" id="restartBtn">↻ Restart demo</button>
-      <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary" target="_blank" rel="noopener">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M3 20.5V3.5c0-.6.4-1.1.9-1.3l10.3 10.3L3.9 21.8c-.5-.2-.9-.7-.9-1.3zm13.8-5.4L6.1 21.9l8.6-8.6 2.1 1.8zm3.6-4.2c.4.3.6.7.6 1.1s-.2.8-.6 1.1l-2.2 1.3-2.4-2.4 2.4-2.4 2.2 1.3zM6.1 2.1l10.7 6.8-2.1 1.8L6.1 2.1z"/>
-        </svg>
-        Get it on Google Play
-      </a>
-    </div>
-    <p class="demo-foot-note">
-      This is a faithful web replica. The installed app also adds Smart Reply, Tone Changer,
-      voice typing, emoji &amp; clipboard, and a system-wide Floating Lens that works in <em>any</em> app.
-    </p>
+    </div><!-- /.demo-layout -->
   </main>
 
   <footer class="footer">
