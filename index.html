@@ -12,7 +12,7 @@
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="googlebot" content="index, follow" />
   <meta name="language" content="English" />
-  <meta name="theme-color" content="#7C6CF8" />
+  <meta name="theme-color" content="#08080F" />
   <link rel="canonical" href="https://typeaura.indevs.in/" />
 
   <!-- ═══════════════════════ FAVICONS ═══════════════════════ -->
@@ -40,10 +40,12 @@
   <meta name="twitter:image:alt" content="TypeAura — AI Keyboard for Hinglish, Hindi and better English" />
 
   <!-- gstatic is where the woff2 files actually live — preconnecting only to
-       googleapis warms the wrong hop. crossorigin is required on both. -->
+       googleapis warms the wrong hop. crossorigin is required on both.
+       Inter Tight is the display face for headings; pages that don't load it
+       fall back to Inter through --font-display. -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 
   <!-- ═══════════════════════ STRUCTURED DATA ═══════════════════════ -->
@@ -172,7 +174,7 @@
           "name": "Is TypeAura really free?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. Every AI feature — the Floating Lens, Live Translate, voice typing, AI Chat and all six AI tools — runs on the free plan, on a daily allowance that resets every midnight. No card, no login, no trial period. Pro and Max are optional subscriptions for people who need more headroom."
+            "text": "Yes. Every AI feature (the Floating Lens, Live Translate, voice typing, AI Chat and all six AI tools) runs on the free plan, on a daily allowance that resets every midnight. No card, no login, no trial period. Pro and Max are optional subscriptions for people who need more headroom."
           }
         },
         {
@@ -180,7 +182,7 @@
           "name": "Do you store what I type?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No. Your keystrokes, passwords and OTPs never leave your device. Text is sent to our server only when you explicitly tap an AI action — translate, rewrite, reply — and it is processed and returned immediately, never stored. Read the full detail in our Privacy Policy."
+            "text": "No. Your keystrokes, passwords and OTPs never leave your device. Text is sent to our server only when you explicitly tap an AI action, such as translate, rewrite or reply, and it is processed and returned immediately, never stored. Read the full detail in our Privacy Policy."
           }
         },
         {
@@ -188,7 +190,7 @@
           "name": "Why does the Floating Lens need Accessibility permission?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "The Lens translates text that belongs to other apps, so it needs Android's Accessibility API to read the text you tap on. It reads only at the moment you tap, and it explicitly skips password fields and editable text boxes. The permission is entirely optional — the keyboard and every AI tool work without it."
+            "text": "The Lens translates text that belongs to other apps, so it needs Android's Accessibility API to read the text you tap on. It reads only at the moment you tap, and it explicitly skips password fields and editable text boxes. The permission is entirely optional: the keyboard and every AI tool work without it."
           }
         },
         {
@@ -196,7 +198,7 @@
           "name": "Can I cancel Pro or Max?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, any time. Pro and Max are auto-renewing Google Play subscriptions, billed monthly or yearly, and you cancel them in the Play Store under Payments & subscriptions — or from the Manage subscription link inside the app. Cancelling stops the next charge; you keep everything you paid for until the end of the period you are already in, then drop back to the Free budget."
+            "text": "Yes, any time. Pro and Max are auto-renewing Google Play subscriptions, billed monthly or yearly. Cancel in the Play Store under Payments & subscriptions, or from the Manage subscription link inside the app. Cancelling stops the next charge. You keep everything you paid for until the end of the period you are already in, then drop back to the Free budget."
           }
         },
         {
@@ -204,7 +206,7 @@
           "name": "How do I buy Pro or Max?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Inside the app, not on this website. Install TypeAura, open Settings → Plans, pick Pro or Max, and pay through Google Play. You will get a TA-XXXX-XXXX recovery code — save it, as that code is how you move your plan to a new device or restore it after a reinstall."
+            "text": "Inside the app, not on this website. Install TypeAura, open Settings → Plans, pick Pro or Max, and pay through Google Play. You will get a TA-XXXX-XXXX recovery code. Save it: that code is how you move your plan to a new device or restore it after a reinstall."
           }
         },
         {
@@ -212,7 +214,7 @@
           "name": "Which languages are supported?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "129, and the keyboard picks the right ones for you: it detects the country it is installed in and leads every language list with what people there actually speak — 176 countries are tuned individually. Alongside the languages themselves it carries 21 romanizations, the way people write a language in Latin letters when its own script will not fit a phone keyboard: Hinglish in India, Arabizi across the Arab world, Banglish in Bangladesh, Roman Urdu, Greeklish, Roman Persian and more. Hinglish is still what TypeAura is really built for — type the way you actually speak and it converts to clean English, or the reverse."
+            "text": "129, and the keyboard picks the right ones for you. It detects the country it is installed in and leads every language list with what people there actually speak, with 176 countries tuned individually. Alongside the languages it carries 21 romanizations, the way people write a language in Latin letters when its own script will not fit on a phone keyboard: Hinglish in India, Arabizi across the Arab world, Banglish, Roman Urdu, Greeklish, Roman Persian and fifteen more. Hinglish is still what TypeAura is really built for: type the way you actually speak and it converts to clean English, or the reverse."
           }
         },
         {
@@ -220,7 +222,7 @@
           "name": "Does it work offline?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Typing, glide typing, suggestions, themes, emoji and clipboard history all work fully offline. The AI features — translation, the Lens, AI Chat and the tools — need an internet connection, because the model runs on a server rather than on your phone."
+            "text": "Typing, glide typing, suggestions, themes, emoji and clipboard history all work fully offline. The AI features (translation, the Lens, AI Chat and the tools) need an internet connection, because the model runs on a server rather than on your phone."
           }
         },
         {
@@ -228,7 +230,7 @@
           "name": "What happens when I run out of AI for the day?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "The keyboard keeps working normally — only the AI actions pause. Your allowance resets automatically at midnight. If you hit the limit regularly, Pro gives you much more every day, and Max gives you three times what Pro does."
+            "text": "The keyboard keeps working normally. Only the AI actions pause, and your allowance resets automatically at midnight. If you hit the limit regularly, Pro gives you much more every day, and Max gives you three times what Pro does."
           }
         },
         {
@@ -236,7 +238,7 @@
           "name": "Is the keyboard layout right for my language?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "There are seven layouts — QWERTY, AZERTY, QWERTZ, and dedicated variants for Spanish (Ñ), German (Ü Ö Ä), Danish/Norwegian (Å Æ Ø) and Swedish/Finnish (Å Ö Ä). Those letters get real keys rather than long-presses, because they are letters of the alphabet, not accents. Your country picks the starting layout and you can change it any time in Settings. Accented letters beyond the layout are a long-press away, and the currency key types the sign your country actually spends in."
+            "text": "There are seven layouts: QWERTY, AZERTY, QWERTZ, and dedicated variants for Spanish (Ñ), German (Ü Ö Ä), Danish/Norwegian (Å Æ Ø) and Swedish/Finnish (Å Ö Ä). Those letters get real keys rather than long-presses, because they are letters of the alphabet, not accents. Your country picks the starting layout and you can change it any time in Settings. Accented letters beyond the layout are a long-press away, and the currency key types the sign your country actually spends in."
           }
         },
         {
@@ -244,7 +246,7 @@
           "name": "Which Android versions work? Is there an iPhone version?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "TypeAura runs on Android 5.0 and above. There is no iOS version — iOS does not allow the kind of system-wide overlay the Floating Lens depends on. There is a Windows desktop app with the same AI tools and a global-hotkey Lens."
+            "text": "TypeAura runs on Android 5.0 and above. There is no iOS version, because iOS does not allow the kind of system-wide overlay the Floating Lens depends on. There is a Windows desktop app with the same AI tools and a global-hotkey Lens."
           }
         }
       ]
@@ -254,21 +256,19 @@
   </script>
 </head>
 <body>
-  <!-- Icon sprite: 32 lucide glyphs inlined once (~8KB) — replaces the
-       render-blocking Iconify script, its third-party DNS+TLS handshake and
-       a runtime API round-trip for every icon. -->
+  <!-- Icon sprite: lucide glyphs inlined once — no icon script, no
+       third-party handshake, no runtime API round-trip for every icon. -->
   <svg class="icon-sprite" aria-hidden="true" focusable="false"><defs>
   <symbol id="i-arrow-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7l-7 7l-7-7"/></symbol>
   <symbol id="i-arrow-right" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7l-7 7"/></symbol>
   <symbol id="i-arrow-up" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l7-7l7 7m-7 7V5"/></symbol>
   <symbol id="i-bot" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></symbol>
   <symbol id="i-bug" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 20v-9m2-4a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4zm.12-3.12L16 2"/><path d="M21 21a4 4 0 0 0-3.81-4M21 5a4 4 0 0 1-3.55 3.97M22 13h-4M3 21a4 4 0 0 1 3.81-4M3 5a4 4 0 0 0 3.55 3.97M6 13H2M8 2l1.88 1.88M9 7.13V6a3 3 0 1 1 6 0v1.13"/></g></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M20 6L9 17l-5-5"/></symbol>
   <symbol id="i-chevron-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></symbol>
-  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></symbol>
-  <symbol id="i-crown" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294zM5 21h14"/></symbol>
-  <symbol id="i-download" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 15V3m9 12v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10l5 5l5-5"/></g></symbol>
-  <symbol id="i-focus" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></g></symbol>
-  <symbol id="i-gift" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 7v14m8-10v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8m3.5-4a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5a1 1 0 0 1 0 5"/><rect width="18" height="4" x="3" y="7" rx="1"/></g></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></g></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575a1 1 0 0 1 0 .696a10.747 10.747 0 0 1-1.444 2.49m-6.41-.679a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151a1 1 0 0 1 0-.696a10.75 10.75 0 0 1 4.446-5.143M2 2l20 20"/></g></symbol>
+  <symbol id="i-gplay" viewBox="0 0 24 24"><path fill="currentColor" d="M3 20.5V3.5c0-.6.4-1.1.9-1.3l10.3 10.3L3.9 21.8c-.5-.2-.9-.7-.9-1.3zm13.8-5.4L6.1 21.9l8.6-8.6l2.1 1.8zm3.6-4.2c.4.3.6.7.6 1.1s-.2.8-.6 1.1l-2.2 1.3l-2.4-2.4l2.4-2.4l2.2 1.3zM6.1 2.1l10.7 6.8l-2.1 1.8L6.1 2.1z"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20a14.5 14.5 0 0 0 0-20M2 12h20"/></g></symbol>
   <symbol id="i-keyboard" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 8h.01M12 12h.01M14 8h.01M16 12h.01M18 8h.01M6 8h.01M7 16h10m-9-4h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></g></symbol>
   <symbol id="i-languages" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 8l6 6m-7 0l6-6l2-3M2 5h12M7 2h1m14 20l-5-10l-5 10m2-4h6"/></symbol>
@@ -276,18 +276,22 @@
   <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></g></symbol>
   <symbol id="i-mail" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m22 7l-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect width="20" height="16" x="2" y="4" rx="2"/></g></symbol>
   <symbol id="i-message-circle" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092a10 10 0 1 0-4.777-4.719"/></symbol>
-  <symbol id="i-party-popper" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M5.8 11.3L2 22l10.7-3.79M4 3h.01M22 8h.01M15 2h.01M22 20h.01M22 2l-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10m8 3l-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17M11 2l.33.82c.34.86-.2 1.82-1.11 1.98c-.7.1-1.22.72-1.22 1.43V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5s-3.07-.07-5-2s-2.83-4.17-2-5s3.07.07 5 2"/></g></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 19v3m7-12v2a7 7 0 0 1-14 0v-2"/><rect width="6" height="13" x="9" y="2" rx="3"/></g></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 22a1 1 0 0 1 0-20a10 9 0 0 1 10 9a5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></g></symbol>
   <symbol id="i-pause" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="5" height="18" x="14" y="3" rx="1"/><rect width="5" height="18" x="5" y="3" rx="1"/></g></symbol>
   <symbol id="i-pen-line" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 21h8m.174-14.188a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></symbol>
   <symbol id="i-play" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></symbol>
+  <symbol id="i-pointer" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 4.1L12 6M5.1 8l-2.9-.8M6 12l-1.9 2M7.2 2.2L8 5.1m1.037 4.59a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z"/></symbol>
   <symbol id="i-reply" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M20 18v-2a4 4 0 0 0-4-4H4"/><path d="m9 17l-5-5l5-5"/></g></symbol>
-  <symbol id="i-rocket" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"/><path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"/></g></symbol>
   <symbol id="i-scan-text" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2m4-9h8m-8 4h10M7 16h6"/></symbol>
   <symbol id="i-shield-check" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12l2 2l4-4"/></g></symbol>
   <symbol id="i-sliders-horizontal" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5H3m9 14H3M14 3v4m2 10v4m5-9h-9m9 7h-5m5-14h-7m-6 5v4m0-2H3"/></symbol>
-  <symbol id="i-smartphone" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></g></symbol>
-  <symbol id="i-sparkles" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4"/><circle cx="4" cy="20" r="2"/></g></symbol>
-  <symbol id="i-users-round" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></g></symbol>
+  <symbol id="i-smile" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2s4-2 4-2M9 9h.01M15 9h.01"/></g></symbol>
+  <symbol id="i-spell-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 16l6-12l6 12M8 12h8m0 8l2 2l4-4"/></symbol>
+  <symbol id="i-spline" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><path d="M5 17A12 12 0 0 1 17 5"/></g></symbol>
+  <symbol id="i-type" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7V4h16v3M9 20h6M12 4v16"/></symbol>
+  <symbol id="i-user-x" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 8l5 5m0-5l-5 5"/></g></symbol>
+  <symbol id="i-wifi-off" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h.01M8.5 16.429a5 5 0 0 1 7 0M5 12.859a10 10 0 0 1 5.17-2.69m8.83 2.69a10 10 0 0 0-2.007-1.523M2 8.82a15 15 0 0 1 4.177-2.643M22 8.82a15 15 0 0 0-11.288-3.764M2 2l20 20"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/></symbol>
   <symbol id="i-zap" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z"/></symbol>
   </defs></svg>
@@ -295,24 +299,24 @@
   <a href="#main" class="skip-link">Skip to content</a>
 
   <!-- ═══════════════════════════════ NAVBAR ═══════════════════════════════ -->
-  <!-- @partial:navbar v1 — canonical copy. Mirrored in privacy/delete-data/update/demo. -->
+  <!-- @partial:navbar v2 — canonical copy. Mirrored in privacy/delete-data/update/demo/info. -->
   <header>
     <nav class="navbar" aria-label="Main">
       <div class="nav-inner">
-        <a class="nav-logo" href="/">
-          <div class="logo-emoji"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-keyboard"/></svg></div>
+        <a class="nav-logo" href="/" aria-label="TypeAura home">
+          <img class="logo-mark" src="img/logo-mark.png" width="37" height="24" alt="" />
           <span class="logo-text">TypeAura</span>
         </a>
         <div class="nav-links">
-          <a href="/demo">Live Demo</a>
-          <a href="#ai-tools">AI Tools</a>
           <a href="#lens">Floating Lens</a>
+          <a href="#ai-tools">AI Tools</a>
+          <a href="#keyboard">Keyboard</a>
           <a href="#languages">Languages</a>
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
-          <a href="#install">Install</a>
         </div>
-        <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-nav" target="_blank" rel="noopener">Get it on Google Play</a>
+        <a href="/demo" class="nav-demo">Live demo</a>
+        <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-nav" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-gplay"/></svg> Get the app</a>
         <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false" aria-controls="mobileNav">
           <span></span><span></span><span></span>
         </button>
@@ -322,742 +326,599 @@
 
   <!-- Mobile nav overlay -->
   <div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile">
-    <a href="/demo"        class="mobile-nav-link"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"/></svg> Live Demo</a>
-    <a href="#ai-tools"    class="mobile-nav-link">AI Tools</a>
     <a href="#lens"        class="mobile-nav-link">Floating Lens</a>
+    <a href="#ai-tools"    class="mobile-nav-link">AI Tools</a>
+    <a href="#keyboard"    class="mobile-nav-link">Keyboard</a>
     <a href="#languages"   class="mobile-nav-link">Languages</a>
+    <a href="#privacy"     class="mobile-nav-link">Privacy</a>
     <a href="#pricing"     class="mobile-nav-link">Pricing</a>
+    <a href="#install"     class="mobile-nav-link">How to install</a>
     <a href="#faq"         class="mobile-nav-link">FAQ</a>
-    <a href="#install"     class="mobile-nav-link">How to Install</a>
-    <a href="#stats"       class="mobile-nav-link">Live Stats</a>
-    <a href="#about"       class="mobile-nav-link">About</a>
-    <a href="#feedback"    class="mobile-nav-link">Feedback</a>
-    <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="mobile-download" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"/></svg> Get it on Google Play</a>
+    <a href="#about"       class="mobile-nav-link">About &amp; feedback</a>
+    <a href="/demo"        class="mobile-nav-link"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"/></svg> Live demo</a>
+    <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="mobile-download" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-gplay"/></svg> Get it on Google Play</a>
   </div>
 
   <main id="main">
 
   <!-- ═══════════════════════════════ HERO ════════════════════════════════ -->
   <section class="hero" id="home">
-    <div class="hero-glow hero-glow-1"></div>
-    <div class="hero-glow hero-glow-2"></div>
-    <div class="hero-glow hero-glow-3"></div>
-    <div class="container">
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <div class="hero-badge">
-            <span class="badge-dot"></span>
-            AI-Powered &nbsp;·&nbsp; Android Keyboard &nbsp;·&nbsp; Free Forever
-          </div>
-          <h1 class="hero-title">
-            One Keyboard.<br />
-            <span class="gradient-text">Unlimited AI Superpowers.</span>
-          </h1>
-          <p class="hero-sub">
-            TypeAura is a smart Android keyboard with AI support for <strong>129 languages</strong>, tuned to the country you install it in.
-            Live Translate, AI Chat, Smart Reply, Email Composer, Tone Changer — <strong>6 AI tools</strong>
-            built right in — plus a <strong>Floating Lens</strong> that translates any text on your screen.
-            Powered by GPT-OSS&nbsp;120B.
-          </p>
-          <div class="hero-cta" id="download">
-            <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                <path d="M3 20.5V3.5c0-.6.4-1.1.9-1.3l10.3 10.3L3.9 21.8c-.5-.2-.9-.7-.9-1.3zm13.8-5.4L6.1 21.9l8.6-8.6 2.1 1.8zm3.6-4.2c.4.3.6.7.6 1.1s-.2.8-.6 1.1l-2.2 1.3-2.4-2.4 2.4-2.4 2.2 1.3zM6.1 2.1l10.7 6.8-2.1 1.8L6.1 2.1z"/>
-              </svg>
-              Get it on Google Play
-            </a>
-            <a href="/demo" class="btn-secondary"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"/></svg> Try the Live Demo</a>
-          </div>
-          <div class="hero-note">
-            Android 5.0+ &nbsp;·&nbsp; No login required &nbsp;·&nbsp; Free forever
-            &nbsp;·&nbsp; <a href="#install" class="hero-note-link">How to install <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-down"/></svg></a>
-          </div>
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <div class="hero-badge"><span class="badge-dot"></span> Free on Google Play</div>
+        <h1 class="hero-title">
+          Type in Hinglish.<br />
+          <span class="gradient-text">Send in perfect English.</span>
+        </h1>
+        <p class="hero-sub">
+          TypeAura is an AI keyboard for Android. It translates, rewrites and replies
+          right where you type, in 129 languages, and its Floating Lens translates
+          any text on your screen.
+        </p>
+        <div class="hero-cta" id="download">
+          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary btn-lg" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-gplay"/></svg>
+            Get it on Google Play
+          </a>
+          <a href="/demo" class="btn-secondary btn-lg">Try the live demo <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a>
         </div>
-
-        <!-- Product shot. No `autoplay` attribute on purpose: with it set,
-             browsers fetch the video regardless of preload="none", putting
-             it on the LCP critical path. app.js starts it after load. -->
-        <div class="hero-visual">
-          <div class="phone-frame">
-            <video id="heroVideo" muted loop playsinline preload="none"
-                   poster="img/translate-demo-poster.webp"
-                   width="720" height="1600"
-                   aria-label="TypeAura translating a Hinglish message into English inside a chat app">
-              <source src="img/translate-demo.mp4" type="video/mp4" />
-            </video>
-            <button type="button" class="frame-pause" id="heroPause"
-                    aria-label="Pause demo video" hidden>
-              <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pause"/></svg>
-            </button>
-          </div>
-        </div>
+        <ul class="hero-points">
+          <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Free forever</li>
+          <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> No sign-up</li>
+          <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Android 5.0+</li>
+        </ul>
       </div>
 
-      <!-- Trust strip -->
-      <div class="hero-trust">
-        <div class="trust-item">
-          <span class="trust-num">129</span>
-          <span class="trust-label">Languages</span>
-        </div>
-        <div class="trust-divider"></div>
-        <div class="trust-item">
-          <span class="trust-num">6</span>
-          <span class="trust-label">AI Tools</span>
-        </div>
-        <div class="trust-divider"></div>
-        <div class="trust-item">
-          <span class="trust-num">₹0</span>
-          <span class="trust-label">Free Forever</span>
-        </div>
-        <div class="trust-divider"></div>
-        <div class="trust-item">
-          <span class="trust-num">v3.0.6</span>
-          <span class="trust-label">Latest Version</span>
-        </div>
-        <div class="trust-divider"></div>
-        <div class="trust-item">
-          <span class="trust-num">0/61</span>
-          <span class="trust-label">VirusTotal Clean</span>
+      <!-- Product shot. No `autoplay` attribute on purpose: with it set,
+           browsers fetch the video regardless of preload="none", putting
+           it on the LCP critical path. app.js starts it after load. -->
+      <div class="hero-visual">
+        <div class="device device--hero">
+          <video id="heroVideo" muted loop playsinline preload="none"
+                 poster="img/translate-demo-poster.webp"
+                 width="720" height="1600"
+                 aria-label="TypeAura translating a Hinglish message into English inside a chat app">
+            <source src="img/translate-demo.mp4" type="video/mp4" />
+          </video>
+          <button type="button" class="frame-pause" id="heroPause"
+                  aria-label="Pause demo video" hidden>
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pause"/></svg>
+          </button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════════════ SCREENSHOTS ══════════════════════════ -->
-  <section class="section section--dark" id="screenshots">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-tag">Screenshots</div>
-        <h2>See it in <span class="gradient-text">action</span></h2>
+  <!-- ═══════════════════════════════ LIVE STATS ═══════════════════════════ -->
+  <!-- Card ids and .stat-value are what app.js fills from /api/public-stats.
+       A card whose field the backend doesn't send yet is hidden by JS. -->
+  <section class="stats-band" id="stats" aria-labelledby="statsTitle">
+    <div class="container stats-inner">
+      <p class="stats-title" id="statsTitle"><span class="live-dot" aria-hidden="true"></span> Live usage</p>
+      <div class="stats-grid">
+        <div class="stat-card" id="stat-installs">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Installs</div>
+        </div>
+        <div class="stat-card" id="stat-active">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Active users, 30 days</div>
+        </div>
+        <div class="stat-card" id="stat-sessions">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Keyboard sessions</div>
+        </div>
+        <div class="stat-card" id="stat-ai">
+          <div class="stat-value">—</div>
+          <div class="stat-label">AI actions</div>
+        </div>
+        <div class="stat-card" id="stat-countries">
+          <div class="stat-value">—</div>
+          <div class="stat-label">Countries</div>
+        </div>
       </div>
-      <div class="screenshots-row" id="screenshotsRow">
-        <div class="screenshot-slot video-slot">
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ FLOATING LENS ════════════════════════ -->
+  <!-- Copy comes first in the source so mobile reads copy → media; the
+       desktop grid puts the media on the left. -->
+  <section class="section" id="lens">
+    <div class="container feature-row feature-row--media-left">
+      <div class="feature-copy reveal">
+        <p class="eyebrow">Floating Lens</p>
+        <h2>Translate anything on your screen</h2>
+        <p class="lede">
+          A small bubble floats over every app. Tap any text, a message, a caption or a
+          notification, and the translation appears right where you are looking.
+        </p>
+        <ul class="check-list">
+          <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span><strong>Works in every app.</strong> WhatsApp, Instagram, browsers, even games.</span></li>
+          <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span><strong>No copy and paste.</strong> Tap the text, read it, then reply, comment or copy from the pop-up.</span></li>
+          <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span><strong>129 languages</strong>, each in its own script.</span></li>
+          <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span><strong>Private by design.</strong> It reads only where you tap, skips password fields and stores nothing.</span></li>
+        </ul>
+        <a href="/demo" class="text-link">See it in the live demo <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a>
+      </div>
+      <div class="feature-media reveal">
+        <div class="device">
           <video muted loop playsinline preload="none"
                  poster="img/lens-demo-poster.webp"
                  width="720" height="1600"
                  aria-label="The TypeAura Floating Lens translating on-screen text in another app">
             <source src="img/lens-demo.mp4" type="video/mp4" />
           </video>
-          <p class="screenshot-label">Floating Lens</p>
         </div>
-        <div class="screenshot-slot" role="button" tabindex="0" aria-label="Open a larger view of the TypeAura home screen">
-          <picture>
-            <source type="image/webp"
-                    srcset="img/home-v3-480.webp 480w, img/home-v3-720.webp 720w, img/home-v3-1080.webp 1080w"
-                    sizes="(max-width: 380px) 64vw, (max-width: 600px) 56vw, (max-width: 900px) 32vw, 165px" />
-            <img src="img/home-v3.jpg" width="1080" height="2400"
-                 data-full="img/home-v3-1080.webp"
-                 alt="TypeAura Home Screen" loading="lazy" decoding="async" />
-          </picture>
-          <p class="screenshot-label">Home</p>
-        </div>
-        <div class="screenshot-slot" role="button" tabindex="0" aria-label="Open a larger view of the TypeAura AI Tools screen">
-          <picture>
-            <source type="image/webp"
-                    srcset="img/aitools-v3-480.webp 480w, img/aitools-v3-720.webp 720w, img/aitools-v3-1080.webp 1080w"
-                    sizes="(max-width: 380px) 64vw, (max-width: 600px) 56vw, (max-width: 900px) 32vw, 165px" />
-            <img src="img/aitools-v3.jpg" width="1080" height="2400"
-                 data-full="img/aitools-v3-1080.webp"
-                 alt="TypeAura AI Tools — Live Translate, Text Tools, AI Chat, Smart Reply, Email Composer, Tone Changer" loading="lazy" decoding="async" />
-          </picture>
-          <p class="screenshot-label">AI Tools</p>
-        </div>
-        <div class="screenshot-slot video-slot">
-          <video muted loop playsinline preload="none"
-                 poster="img/translate-demo-poster.webp"
-                 width="720" height="1600"
-                 aria-label="Hinglish text being converted to English as the user types">
-            <source src="img/translate-demo.mp4" type="video/mp4" />
-          </video>
-          <p class="screenshot-label">Hinglish → English</p>
-        </div>
-        <div class="screenshot-slot" role="button" tabindex="0" aria-label="Open a larger view of the TypeAura themes gallery">
-          <picture>
-            <source type="image/webp"
-                    srcset="img/themes-v3-480.webp 480w, img/themes-v3-720.webp 720w, img/themes-v3-1080.webp 1080w"
-                    sizes="(max-width: 380px) 64vw, (max-width: 600px) 56vw, (max-width: 900px) 32vw, 165px" />
-            <img src="img/themes-v3.jpg" width="1080" height="2400"
-                 data-full="img/themes-v3-1080.webp"
-                 alt="TypeAura Themes — 25 keyboard theme presets" loading="lazy" decoding="async" />
-          </picture>
-          <p class="screenshot-label">Themes</p>
-        </div>
-        <div class="screenshot-slot" role="button" tabindex="0" aria-label="Open a larger view of the TypeAura settings screen">
-          <picture>
-            <source type="image/webp"
-                    srcset="img/settings-v3-480.webp 480w, img/settings-v3-720.webp 720w, img/settings-v3-1080.webp 1080w"
-                    sizes="(max-width: 380px) 64vw, (max-width: 600px) 56vw, (max-width: 900px) 32vw, 165px" />
-            <img src="img/settings-v3.jpg" width="1080" height="2400"
-                 data-full="img/settings-v3-1080.webp"
-                 alt="TypeAura Settings" loading="lazy" decoding="async" />
-          </picture>
-          <p class="screenshot-label">Settings</p>
-        </div>
-      </div>
-      <div class="section-cta">
-        <a href="/demo" class="btn-secondary">See the full walkthrough <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════ STATS ════════════════════════════════ -->
-  <section class="section" id="stats">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-tag">Live Stats</div>
-        <h2>Real usage, <span class="gradient-text">real numbers</span></h2>
-        <p class="section-desc">Stats update automatically as TypeAura grows.</p>
-      </div>
-      <div class="stats-grid">
-        <div class="stat-card" id="stat-installs">
-          <div class="stat-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-download"/></svg></div>
-          <div class="stat-value" data-endpoint="total_installs">—</div>
-          <div class="stat-label">Total Installs</div>
-        </div>
-        <div class="stat-card" id="stat-active">
-          <div class="stat-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-users-round"/></svg></div>
-          <div class="stat-value" data-endpoint="active_users">—</div>
-          <div class="stat-label">Active Users (30d)</div>
-        </div>
-        <div class="stat-card" id="stat-sessions">
-          <div class="stat-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-keyboard"/></svg></div>
-          <div class="stat-value" data-endpoint="keyboard_sessions">—</div>
-          <div class="stat-label">Keyboard Sessions</div>
-        </div>
-        <div class="stat-card" id="stat-ai">
-          <div class="stat-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-sparkles"/></svg></div>
-          <div class="stat-value" data-endpoint="ai_actions">—</div>
-          <div class="stat-label">AI Actions Used</div>
-        </div>
-        <div class="stat-card" id="stat-countries">
-          <div class="stat-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-globe"/></svg></div>
-          <div class="stat-value" data-endpoint="countries">—</div>
-          <div class="stat-label">Countries Installed In</div>
-        </div>
-      </div>
-    </div>
-  </section>
-  
-  <!-- ═══════════════════════════════ LANGUAGES ═══════════════════════════ -->
-  <section class="section section--dark" id="languages">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-tag">Worldwide</div>
-        <h2>Built for how <span class="gradient-text">your country</span> types</h2>
-        <p class="section-desc">TypeAura started in India, with Hinglish. It turns out the rest of the world has the same problem — so the keyboard now adapts to wherever it is installed.</p>
-      </div>
-
-      <div class="what-is-card">
-        <div class="what-left">
-          <div class="section-tag">Country-aware</div>
-          <h2>It already knows <span class="gradient-text">what you speak</span></h2>
-          <p>
-            On first launch TypeAura works out which country it is in and leads every language
-            list — onboarding, the Lens, Live Translate, the mic — with the languages people
-            there actually speak, most common first. No hunting through an alphabetical list of
-            129 to find your own.
-          </p>
-          <p>
-            The layout, the currency key and even the spelling follow. A French install starts on
-            AZERTY, a German one gets real <strong>Ü Ö Ä</strong> keys, the currency key types
-            <strong>₹</strong> in India and <strong>₦</strong> in Nigeria, and "Fix Grammar" stops
-            turning <em>colour</em> into <em>color</em> outside America.
-          </p>
-        </div>
-        <div class="what-right">
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-languages"/></svg> 129 languages, endonyms and all</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-globe"/></svg> 176 countries tuned individually</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-keyboard"/></svg> 7 layouts — QWERTY, AZERTY, QWERTZ, Nordic</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pen-line"/></svg> 21 romanizations for unreachable scripts</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-sliders-horizontal"/></svg> Local spelling — British, Indian, American</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-zap"/></svg> Every bit of it still a setting you control</div>
-        </div>
-      </div>
-
-      <div class="section-header lang-subhead">
-        <h2>Hinglish is an <span class="gradient-text">Indian name</span> for a worldwide habit</h2>
-        <p class="section-desc">Wherever a script will not fit on a phone keyboard, people write their language in Latin letters instead. Every one of these types in Latin and comes back in the real script.</p>
-      </div>
-      <div class="lang-chips">
-        <span class="ai-tag">Hinglish <small>· India</small></span>
-        <span class="ai-tag">Arabizi <small>· 21 Arab countries</small></span>
-        <span class="ai-tag">Banglish <small>· Bangladesh</small></span>
-        <span class="ai-tag">Roman Urdu <small>· Pakistan</small></span>
-        <span class="ai-tag">Roman Nepali <small>· Nepal</small></span>
-        <span class="ai-tag">Roman Sinhala <small>· Sri Lanka</small></span>
-        <span class="ai-tag">Greeklish <small>· Greece, Cyprus</small></span>
-        <span class="ai-tag">Roman Persian <small>· Iran</small></span>
-        <span class="ai-tag">Roman Russian <small>· Russia, Central Asia</small></span>
-        <span class="ai-tag">Roman Ukrainian <small>· Ukraine</small></span>
-        <span class="ai-tag">Roman Bulgarian <small>· Bulgaria</small></span>
-        <span class="ai-tag">Roman Macedonian <small>· North Macedonia</small></span>
-        <span class="ai-tag">Roman Belarusian <small>· Belarus</small></span>
-        <span class="ai-tag">Roman Kazakh <small>· Kazakhstan</small></span>
-        <span class="ai-tag">Roman Mongolian <small>· Mongolia</small></span>
-        <span class="ai-tag">Roman Georgian <small>· Georgia</small></span>
-        <span class="ai-tag">Roman Armenian <small>· Armenia</small></span>
-        <span class="ai-tag">Roman Pashto <small>· Afghanistan</small></span>
-        <span class="ai-tag">Roman Amharic <small>· Ethiopia</small></span>
-        <span class="ai-tag">Roman Tigrinya <small>· Eritrea</small></span>
-        <span class="ai-tag">Serbian (Latin) <small>· Serbia, Montenegro</small></span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════ FLOATING LENS ════════════════════════ -->
-  <section class="section" id="lens">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-tag">Floating Lens</div>
-        <h2>Translate <span class="gradient-text">anything on your screen</span></h2>
-        <p class="section-desc">A floating bubble that lives over every app. Tap any text — a message, a caption, a notification, a button — and TypeAura instantly reads and translates it. No copy-paste, no switching apps.</p>
-      </div>
-      <div class="what-is-card">
-        <div class="what-left">
-          <div class="section-tag">How it works</div>
-          <h2>Tap. Read. <span class="gradient-text">Translate.</span></h2>
-          <p>
-            Turn on the Floating Lens and a small bubble floats above whatever you're using.
-            Tap the text you want to understand and the Lens reads it on the spot, then shows the
-            translation in a clean pop-up — right where you're looking.
-          </p>
-          <p>
-            It works in WhatsApp, Instagram, browsers, games — literally any app. And it's
-            privacy-safe: the Lens automatically skips password and editable fields, and never stores what it reads.
-          </p>
-        </div>
-        <div class="what-right">
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-scan-text"/></svg> Reads on-screen text on tap</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-globe"/></svg> Translates into 129 languages</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-smartphone"/></svg> Works in every app, system-wide</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-focus"/></svg> Floating bubble — always one tap away</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg> Skips passwords &amp; private fields</div>
-          <div class="stat-pill"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-zap"/></svg> No copy-paste, no app switching</div>
-        </div>
-      </div>
-      <div class="section-cta">
-        <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary" target="_blank" rel="noopener">Try the Lens free — Install TypeAura</a>
-        <a href="/demo" class="btn-secondary">See it in the live demo <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════ AI TOOLS ════════════════════════════ -->
-  <section class="section section--dark" id="ai-tools">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-tag">AI Tools</div>
-        <h2>Six powerful tools, <span class="gradient-text">one app</span></h2>
-        <p class="section-desc">Tap the AI Tools tab inside TypeAura to access all six — Live Translate, Text Tools, AI Chat, Smart Reply, Email Composer, and Tone Changer.</p>
+  <section class="section section--alt" id="ai-tools">
+    <div class="container feature-row">
+      <div class="feature-copy reveal">
+        <p class="eyebrow">AI Tools</p>
+        <h2>Six AI tools, built into the app</h2>
+        <p class="lede">
+          The keyboard handles quick fixes. For bigger jobs, open the AI Tools tab: an
+          interpreter, an assistant that remembers the conversation, and one-tap writing help.
+        </p>
+        <div class="tools-grid">
+          <div class="tool">
+            <span class="tile tile--blue"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-languages"/></svg></span>
+            <div><h3>Live Translate</h3><p>A two-way interpreter. Speak, and the other person hears the translation aloud.</p></div>
+          </div>
+          <div class="tool">
+            <span class="tile tile--indigo"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pen-line"/></svg></span>
+            <div><h3>Text Tools</h3><p>16+ tools to fix grammar, rewrite, summarize and translate any text.</p></div>
+          </div>
+          <div class="tool">
+            <span class="tile tile--purple"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-bot"/></svg></span>
+            <div><h3>AI Chat</h3><p>Ask anything in English, Hindi or Hinglish. It remembers the whole conversation.</p></div>
+          </div>
+          <div class="tool">
+            <span class="tile tile--green"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-reply"/></svg></span>
+            <div><h3>Smart Reply</h3><p>Paste a message and get three replies: casual, friendly or professional.</p></div>
+          </div>
+          <div class="tool">
+            <span class="tile tile--orange"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-mail"/></svg></span>
+            <div><h3>Email Composer</h3><p>Rough notes in, a polished email with a subject line out.</p></div>
+          </div>
+          <div class="tool">
+            <span class="tile tile--cyan"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-sliders-horizontal"/></svg></span>
+            <div><h3>Tone Changer</h3><p>Rewrite a message in six tones, from formal to humorous.</p></div>
+          </div>
+        </div>
       </div>
-      <div class="ai-tools-grid">
-
-        <div class="ai-tool-card">
-          <div class="ai-tool-top">
-            <div class="ai-tool-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-languages"/></svg></div>
-            <div class="ai-tool-meta">
-              <div class="ai-tool-header"><h3>Live Translate</h3></div>
-              <p class="ai-tool-sub">Face-to-face real-time conversation</p>
-            </div>
-          </div>
-          <p class="ai-tool-desc">Place your phone between two people — speak in your language, the other person hears the translation spoken aloud automatically.</p>
-          <div class="ai-tool-tags">
-            <span class="ai-tag">Auto-speak translation</span>
-            <span class="ai-tag">129 languages</span>
-            <span class="ai-tag">Tap to replay</span>
-            <span class="ai-tag">Swap in one tap</span>
-          </div>
-        </div>
-
-        <div class="ai-tool-card">
-          <div class="ai-tool-top">
-            <div class="ai-tool-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pen-line"/></svg></div>
-            <div class="ai-tool-meta">
-              <div class="ai-tool-header"><h3>Text Tools</h3></div>
-              <p class="ai-tool-sub">Write, fix, translate &amp; transform</p>
-            </div>
-          </div>
-          <p class="ai-tool-desc">Paste any text and run it through 16+ AI tools — organized into Writing, Translate &amp; Utility tabs.</p>
-          <div class="ai-tool-tags">
-            <span class="ai-tag">Grammar fix &amp; rewrite</span>
-            <span class="ai-tag">129-language translate</span>
-            <span class="ai-tag">Summarize &amp; continue</span>
-            <span class="ai-tag">Quick templates</span>
-          </div>
-        </div>
-
-        <div class="ai-tool-card">
-          <div class="ai-tool-top">
-            <div class="ai-tool-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-bot"/></svg></div>
-            <div class="ai-tool-meta">
-              <div class="ai-tool-header"><h3>AI Chat</h3></div>
-              <p class="ai-tool-sub">Smart multi-turn assistant</p>
-            </div>
-          </div>
-          <p class="ai-tool-desc">Ask anything in English, Hindi, or Hinglish. Remembers the full conversation, adapts to your chosen mode.</p>
-          <div class="ai-tool-tags">
-            <span class="ai-tag">6 smart modes</span>
-            <span class="ai-tag">129 reply languages</span>
-            <span class="ai-tag">Multi-turn memory</span>
-            <span class="ai-tag">Long-press to copy</span>
-          </div>
-        </div>
-
-        <div class="ai-tool-card">
-          <div class="ai-tool-top">
-            <div class="ai-tool-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-reply"/></svg></div>
-            <div class="ai-tool-meta">
-              <div class="ai-tool-header"><h3>Smart Reply</h3><span class="tool-new-badge">New</span></div>
-              <p class="ai-tool-sub">3 instant replies from any message</p>
-            </div>
-          </div>
-          <p class="ai-tool-desc">Paste any received message and get three ready-to-send replies in seconds — Casual, Friendly, or Professional.</p>
-          <div class="ai-tool-tags">
-            <span class="ai-tag">Casual · Friendly · Pro</span>
-            <span class="ai-tag">One-tap copy</span>
-            <span class="ai-tag">Any language</span>
-            <span class="ai-tag">No typing needed</span>
-          </div>
-        </div>
-
-        <div class="ai-tool-card">
-          <div class="ai-tool-top">
-            <div class="ai-tool-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-mail"/></svg></div>
-            <div class="ai-tool-meta">
-              <div class="ai-tool-header"><h3>Email Composer</h3><span class="tool-new-badge">New</span></div>
-              <p class="ai-tool-sub">Bullet points in, polished email out</p>
-            </div>
-          </div>
-          <p class="ai-tool-desc">Jot rough notes, choose your recipient type, and get a complete professional email with subject line in seconds.</p>
-          <div class="ai-tool-tags">
-            <span class="ai-tag">Boss · Colleague · Client</span>
-            <span class="ai-tag">Subject auto-generated</span>
-            <span class="ai-tag">Greeting &amp; sign-off</span>
-            <span class="ai-tag">One-tap copy</span>
-          </div>
-        </div>
-
-        <div class="ai-tool-card">
-          <div class="ai-tool-top">
-            <div class="ai-tool-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-sliders-horizontal"/></svg></div>
-            <div class="ai-tool-meta">
-              <div class="ai-tool-header"><h3>Tone Changer</h3><span class="tool-new-badge">New</span></div>
-              <p class="ai-tool-sub">Switch tone with one tap</p>
-            </div>
-          </div>
-          <p class="ai-tool-desc">Type your message, pick a tone, and instantly transform it. Six tones, chainable — use any result as new input.</p>
-          <div class="ai-tool-tags">
-            <span class="ai-tag">Casual · Formal · Friendly</span>
-            <span class="ai-tag">Professional · Humorous</span>
-            <span class="ai-tag">Chain transforms</span>
-            <span class="ai-tag">One-tap copy</span>
-          </div>
-        </div>
-
-      </div>
-      <div class="section-cta">
-        <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary" target="_blank" rel="noopener">Get all 6 AI tools — free</a>
-        <a href="/demo" class="btn-secondary">Try them in your browser <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a>
+      <div class="feature-media reveal">
+        <button type="button" class="device device--zoom" data-label="AI Tools" aria-label="Enlarge the AI Tools screen">
+          <picture>
+            <source type="image/webp"
+                    srcset="img/aitools-v3-480.webp 480w, img/aitools-v3-720.webp 720w, img/aitools-v3-1080.webp 1080w"
+                    sizes="(max-width: 600px) 64vw, 300px" />
+            <img src="img/aitools-v3.jpg" width="1080" height="2400"
+                 data-full="img/aitools-v3-1080.webp"
+                 alt="TypeAura AI Tools: Live Translate, Text Tools, AI Chat, Smart Reply, Email Composer, Tone Changer" loading="lazy" decoding="async" />
+          </picture>
+        </button>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════════════ PRICING ══════════════════════════════ -->
-  <section class="section section--dark" id="pricing">
+  <!-- ═══════════════════════════════ KEYBOARD ════════════════════════════ -->
+  <section class="section" id="keyboard">
+    <div class="container feature-row feature-row--media-left">
+      <div class="feature-copy reveal">
+        <p class="eyebrow">The keyboard</p>
+        <h2>A complete keyboard, before any AI</h2>
+        <p class="lede">Everything you expect from a modern keyboard, fast and free. The everyday typing works without internet.</p>
+        <div class="kb-grid">
+          <div class="kb-item">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-spline"/></svg>
+            <h3>Glide typing</h3>
+            <p>Swipe across the letters instead of tapping each one.</p>
+          </div>
+          <div class="kb-item">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-mic"/></svg>
+            <h3>Voice typing</h3>
+            <p>Dictate in your language, then let AI tidy it up.</p>
+          </div>
+          <div class="kb-item">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-spell-check"/></svg>
+            <h3>Grammar and rewrite</h3>
+            <p>Fix grammar or rewrite a message from the toolbar, in any app.</p>
+          </div>
+          <div class="kb-item">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg>
+            <h3>Clipboard history</h3>
+            <p>Everything you copied, one tap away.</p>
+          </div>
+          <div class="kb-item">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-palette"/></svg>
+            <h3>25 themes</h3>
+            <p>Light, dark, neon, glass and photo themes, or build your own.</p>
+          </div>
+          <div class="kb-item">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-type"/></svg>
+            <h3>Fancy fonts</h3>
+            <p>Stylish Unicode fonts that paste into any app.</p>
+          </div>
+          <div class="kb-item">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-smile"/></svg>
+            <h3>Emoji and GIFs</h3>
+            <p>Emoji search and a built-in GIF panel.</p>
+          </div>
+          <div class="kb-item">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-wifi-off"/></svg>
+            <h3>Works offline</h3>
+            <p>Typing, glide, suggestions and clipboard need no internet.</p>
+          </div>
+        </div>
+      </div>
+      <div class="feature-media reveal">
+        <button type="button" class="device device--zoom" data-label="Themes" aria-label="Enlarge the Themes screen">
+          <picture>
+            <source type="image/webp"
+                    srcset="img/themes-v3-480.webp 480w, img/themes-v3-720.webp 720w, img/themes-v3-1080.webp 1080w"
+                    sizes="(max-width: 600px) 64vw, 300px" />
+            <img src="img/themes-v3.jpg" width="1080" height="2400"
+                 data-full="img/themes-v3-1080.webp"
+                 alt="TypeAura Themes: 25 keyboard theme presets" loading="lazy" decoding="async" />
+          </picture>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ LANGUAGES ═══════════════════════════ -->
+  <section class="section section--alt" id="languages">
     <div class="container">
-      <div class="section-header">
-        <div class="section-tag">Pricing</div>
-        <h2>Free to start, <span class="gradient-text">yours to scale</span></h2>
-        <p class="section-desc">Every AI feature is on the free plan — only the daily amount changes. Start free, then move up to Pro or Max for more headroom. Paid plans are <strong>subscriptions you can cancel any time</strong>, and your daily allowance resets every midnight.</p>
+      <div class="lang-grid">
+        <div class="lang-copy reveal">
+          <p class="eyebrow">Worldwide</p>
+          <h2>Built for how your country types</h2>
+          <p class="lede">
+            On first launch TypeAura works out which country it is in, and every language
+            list leads with what people there actually speak. The layout, the currency key
+            and even the spelling follow.
+          </p>
+          <ul class="check-list check-list--compact">
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>A French install starts on AZERTY, a German one gets real <strong>Ü Ö Ä</strong> keys.</span></li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>The currency key types <strong>₹</strong> in India and <strong>₦</strong> in Nigeria.</span></li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>"Fix Grammar" keeps <em>colour</em> as <em>colour</em> outside America.</span></li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>Every one of these is a setting you can change.</span></li>
+          </ul>
+          <dl class="figures">
+            <div><dt>Languages</dt><dd>129</dd></div>
+            <div><dt>Countries tuned</dt><dd>176</dd></div>
+            <div><dt>Romanizations</dt><dd>21</dd></div>
+            <div><dt>Keyboard layouts</dt><dd>7</dd></div>
+          </dl>
+        </div>
+
+        <div class="lang-panel reveal">
+          <h3>Type in Latin letters, get the real script back</h3>
+          <p>Wherever a script won't fit on a phone keyboard, people write their language in Latin letters. Hinglish is India's name for a worldwide habit.</p>
+          <ul class="translit">
+            <li><span class="tl-name">Hinglish</span><span class="tl-in">aap kaise ho</span><svg class="icon tl-arrow" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg><span class="tl-out" lang="hi">आप कैसे हो</span></li>
+            <li><span class="tl-name">Arabizi</span><span class="tl-in">kifak</span><svg class="icon tl-arrow" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg><span class="tl-out" lang="ar" dir="rtl">كيفك</span></li>
+            <li><span class="tl-name">Banglish</span><span class="tl-in">kemon acho</span><svg class="icon tl-arrow" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg><span class="tl-out" lang="bn">কেমন আছো</span></li>
+            <li><span class="tl-name">Greeklish</span><span class="tl-in">kalimera</span><svg class="icon tl-arrow" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg><span class="tl-out" lang="el">καλημέρα</span></li>
+          </ul>
+          <p class="chips-title">All 21 romanizations</p>
+          <ul class="chips">
+            <li>Hinglish <small>India</small></li>
+            <li>Arabizi <small>21 Arab countries</small></li>
+            <li>Banglish <small>Bangladesh</small></li>
+            <li>Roman Urdu <small>Pakistan</small></li>
+            <li>Roman Nepali <small>Nepal</small></li>
+            <li>Roman Sinhala <small>Sri Lanka</small></li>
+            <li>Greeklish <small>Greece, Cyprus</small></li>
+            <li>Roman Persian <small>Iran</small></li>
+            <li>Roman Russian <small>Russia, Central Asia</small></li>
+            <li>Roman Ukrainian <small>Ukraine</small></li>
+            <li>Roman Bulgarian <small>Bulgaria</small></li>
+            <li>Roman Macedonian <small>North Macedonia</small></li>
+            <li>Roman Belarusian <small>Belarus</small></li>
+            <li>Roman Kazakh <small>Kazakhstan</small></li>
+            <li>Roman Mongolian <small>Mongolia</small></li>
+            <li>Roman Georgian <small>Georgia</small></li>
+            <li>Roman Armenian <small>Armenia</small></li>
+            <li>Roman Pashto <small>Afghanistan</small></li>
+            <li>Roman Amharic <small>Ethiopia</small></li>
+            <li>Roman Tigrinya <small>Eritrea</small></li>
+            <li>Serbian (Latin) <small>Serbia, Montenegro</small></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ PRIVACY ═════════════════════════════ -->
+  <section class="section" id="privacy">
+    <div class="container">
+      <div class="section-head section-head--center reveal">
+        <p class="eyebrow">Privacy</p>
+        <h2>A keyboard sees everything you type. Ours keeps it on your phone.</h2>
+        <p class="lede">A keyboard is the most trusted app on your phone, so TypeAura is built to need as little of that trust as possible.</p>
+      </div>
+      <div class="privacy-grid">
+        <div class="privacy-item reveal">
+          <span class="tile"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg></span>
+          <h3>Keystrokes stay on your phone</h3>
+          <p>Typing, suggestions and glide run on the device. Passwords and OTPs never leave it.</p>
+        </div>
+        <div class="privacy-item reveal">
+          <span class="tile"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pointer"/></svg></span>
+          <h3>AI only when you ask</h3>
+          <p>Text reaches our server only when you tap an AI action. It is processed, returned and never stored.</p>
+        </div>
+        <div class="privacy-item reveal">
+          <span class="tile"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-eye-off"/></svg></span>
+          <h3>The Lens skips private fields</h3>
+          <p>It reads only where you tap, and skips password fields and text boxes entirely.</p>
+        </div>
+        <div class="privacy-item reveal">
+          <span class="tile"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-user-x"/></svg></span>
+          <h3>No account needed</h3>
+          <p>No login, no email, no phone number. Install it and start typing.</p>
+        </div>
+      </div>
+      <p class="section-foot">
+        <a href="/privacy" class="text-link">Read the privacy policy <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a>
+        <a href="/delete-data" class="text-link text-link--muted">Delete your data</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ PRICING ══════════════════════════════ -->
+  <section class="section section--alt" id="pricing">
+    <div class="container">
+      <div class="section-head section-head--center reveal">
+        <p class="eyebrow">Pricing</p>
+        <h2>Every feature is free. Pay only for more.</h2>
+        <p class="lede">The free plan has everything TypeAura does, on a daily AI allowance that resets every midnight. Pro and Max raise that allowance and are <strong>subscriptions you can cancel any time</strong>.</p>
       </div>
       <div class="pricing-grid">
 
-        <div class="pricing-card pricing-card--free">
-          <div class="pricing-header">
-            <div class="pricing-icon" style="background:linear-gradient(135deg,#6366F1,#818CF8);"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-gift"/></svg></div>
-            <div class="pricing-name"><h3>Free</h3></div>
+        <div class="pricing-card reveal">
+          <div class="pricing-head">
+            <h3>Free</h3>
+            <p class="pricing-for">For trying everything</p>
           </div>
           <div class="pricing-price">
             <span class="pricing-amount">₹0</span>
-            <span class="pricing-period">/ forever</span>
+            <span class="pricing-period">forever</span>
           </div>
-          <p class="pricing-alt">No card, no login — just install and type.</p>
-          <div class="pricing-divider"></div>
-          <p class="pricing-desc">Not a trial and not a cut-down version — every feature TypeAura has, on a daily allowance that resets each midnight.</p>
+          <p class="pricing-alt">No card, no login.</p>
+          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-secondary pricing-cta" target="_blank" rel="noopener">Start free</a>
           <ul class="pricing-list">
-            <li>Type Hinglish, get any of <strong>120+ languages</strong></li>
-            <li>Floating Lens — translate any screen</li>
-            <li>Voice typing with AI cleanup</li>
-            <li>AI Chat, Smart Reply, Email and Text tools</li>
-            <li>Glide typing, themes, fonts and GIFs</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Type Hinglish, get any of 129 languages</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Floating Lens on any screen</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Voice typing with AI cleanup</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>AI Chat, Smart Reply, Email and Text tools</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Glide typing, themes, fonts and GIFs</li>
           </ul>
-          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-secondary pricing-cta" target="_blank" rel="noopener">Start free — no card needed</a>
-          <p class="pricing-note">No purchase &nbsp;·&nbsp; No account &nbsp;·&nbsp; Install and start typing</p>
         </div>
 
-        <div class="pricing-card pricing-card--pro">
-          <div class="pricing-header">
-            <div class="pricing-icon" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-crown"/></svg></div>
-            <div class="pricing-name">
-              <h3>Pro <span class="pricing-badge">Most Popular</span></h3>
-            </div>
+        <div class="pricing-card pricing-card--featured reveal">
+          <div class="pricing-head">
+            <h3>Pro <span class="pricing-badge">Most popular</span></h3>
+            <p class="pricing-for">For everyday use</p>
           </div>
           <div class="pricing-price">
             <span class="pricing-amount">₹300</span>
             <span class="pricing-period">/ month</span>
           </div>
-          <p class="pricing-alt">or <strong>₹2,250</strong> / year <span class="pricing-save">save 37%</span></p>
-          <div class="pricing-divider"></div>
-          <p class="pricing-desc">For daily drivers — far more AI every day, with zero setup. Billed monthly or yearly through Google Play, cancel whenever you like.</p>
+          <p class="pricing-alt">or ₹2,250 / year <span class="pricing-save">Save 37%</span></p>
+          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary pricing-cta" target="_blank" rel="noopener">Get Pro</a>
           <ul class="pricing-list">
-            <li><strong>Much more AI</strong> every day</li>
-            <li><strong>Twice</strong> as much text per Lens translation</li>
-            <li><strong>Twice</strong> as much text in every AI tool</li>
-            <li>Cancel anytime in Google Play</li>
-            <li>No setup — just subscribe and use</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span><strong>Much more AI</strong> every day</span></li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span><strong>Twice</strong> the text per Lens translation</span></li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span><strong>Twice</strong> the text in every AI tool</span></li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>No setup, subscribe and use</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Cancel anytime in Google Play</li>
           </ul>
-          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary pricing-cta" target="_blank" rel="noopener">Get Pro — ₹300</a>
-          <p class="pricing-note">Subscribe inside the app &nbsp;·&nbsp; Google Play Billing &nbsp;·&nbsp; Cancel anytime</p>
         </div>
 
-        <div class="pricing-card pricing-card--max">
-          <div class="pricing-header">
-            <div class="pricing-icon" style="background:linear-gradient(135deg,#F97316,#FBBF24);"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-rocket"/></svg></div>
-            <div class="pricing-name">
-              <h3>Max <span class="pricing-badge pricing-badge--max">Best Value</span></h3>
-            </div>
+        <div class="pricing-card reveal">
+          <div class="pricing-head">
+            <h3>Max</h3>
+            <p class="pricing-for">For heavy, all-day use</p>
           </div>
           <div class="pricing-price">
             <span class="pricing-amount">₹500</span>
             <span class="pricing-period">/ month</span>
           </div>
-          <p class="pricing-alt">or <strong>₹3,750</strong> / year <span class="pricing-save pricing-save--max">save 37%</span></p>
-          <div class="pricing-divider"></div>
-          <p class="pricing-desc">The most we offer — for all-day translating, full-page Lens captures and back-to-back AI tool runs.</p>
+          <p class="pricing-alt">or ₹3,750 / year <span class="pricing-save">Save 37%</span></p>
+          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-secondary pricing-cta" target="_blank" rel="noopener">Get Max</a>
           <ul class="pricing-list">
-            <li>Everything in Pro, plus:</li>
-            <li><strong>3×</strong> the daily AI of Pro</li>
-            <li>Translate a <strong>full page</strong> in one Lens read</li>
-            <li>The longest inputs in every AI tool</li>
-            <li>Priority email support</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Everything in Pro, plus:</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span><strong>3×</strong> the daily AI of Pro</span></li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>A <strong>full page</strong> in one Lens read</span></li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>The longest inputs in every AI tool</li>
+            <li><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Priority email support</li>
           </ul>
-          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary pricing-cta" target="_blank" rel="noopener">Get Max — ₹500</a>
-          <p class="pricing-note">Subscribe inside the app &nbsp;·&nbsp; Google Play Billing &nbsp;·&nbsp; Cancel anytime</p>
         </div>
 
       </div>
 
-      <!-- How to buy — the purchase happens in-app via Play Billing, not on the web -->
-      <div class="pricing-howto">
-        <div class="howto-step"><span class="howto-num">1</span> Install TypeAura</div>
-        <div class="howto-sep"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-right"/></svg></div>
-        <div class="howto-step"><span class="howto-num">2</span> Open <strong>Settings → Plans</strong></div>
-        <div class="howto-sep"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-right"/></svg></div>
-        <div class="howto-step"><span class="howto-num">3</span> Pick Pro or Max, pay with Google Play</div>
-      </div>
+      <!-- The purchase happens in-app via Play Billing, not on the web. -->
+      <p class="pricing-howto">
+        <strong>How to upgrade:</strong> install TypeAura, open <strong>Settings → Plans</strong>, and pay with Google Play.
+        You get a recovery code that moves your plan to a new phone.
+      </p>
     </div>
   </section>
-  
+
   <!-- ═══════════════════════════════ INSTALL ══════════════════════════════ -->
   <section class="section" id="install">
     <div class="container">
-      <div class="section-header">
-        <div class="section-tag">How to Install</div>
-        <h2>Up and running in <span class="gradient-text">3 steps</span></h2>
+      <div class="section-head section-head--center reveal">
+        <p class="eyebrow">Get started</p>
+        <h2>Set up in under a minute</h2>
       </div>
-      <div class="install-steps">
-        <div class="step-card">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <h3>Get it on Google Play</h3>
-            <p>Tap the button below to open the TypeAura listing on the Play Store, then tap <strong>Install</strong>.</p>
-            <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary btn-sm" target="_blank" rel="noopener">Get it on Google Play</a>
-          </div>
-        </div>
-        <div class="step-arrow"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></div>
-        <div class="step-card">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <h3>Enable TypeAura</h3>
-            <p>Go to <strong>Settings → System → Languages &amp; Input → On-screen keyboard</strong> and enable TypeAura.</p>
-          </div>
-        </div>
-        <div class="step-arrow"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></div>
-        <div class="step-card">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <h3>Set as Default</h3>
-            <p>Select TypeAura as your default keyboard when you tap any text field, and enjoy!</p>
-          </div>
-        </div>
-      </div>
+      <ol class="steps">
+        <li class="step reveal">
+          <span class="step-num">1</span>
+          <h3>Install from Google Play</h3>
+          <p>Open the TypeAura listing on the Play Store and tap <strong>Install</strong>.</p>
+          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="text-link" target="_blank" rel="noopener">Open Google Play <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a>
+        </li>
+        <li class="step reveal">
+          <span class="step-num">2</span>
+          <h3>Enable the keyboard</h3>
+          <p>Open the app and follow the prompt, or go to <strong>Settings → System → Languages &amp; input → On-screen keyboard</strong>.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step-num">3</span>
+          <h3>Make it your default</h3>
+          <p>Pick TypeAura as your default keyboard, then tap any text field and start typing.</p>
+        </li>
+      </ol>
 
-      <!-- Hindi guide -->
-      <div class="hindi-guide" id="hindi-guide" lang="hi">
-        <div class="section-tag" style="margin-bottom: 12px;">हिंदी गाइड</div>
-        <h3 style="color: var(--accent-light); margin-bottom: 16px;">हिंदी में install कैसे करें?</h3>
-        <ol class="hindi-steps">
+      <details class="hindi-guide reveal" id="hindi-guide">
+        <summary><span lang="hi">हिंदी में install कैसे करें?</span><span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
+        <ol class="hindi-steps" lang="hi">
           <li>ऊपर दिए <strong>Get it on Google Play</strong> button पर tap करें।</li>
           <li>Play Store पर <strong>Install</strong> दबाएं और app install होने का इंतज़ार करें।</li>
           <li>App install होने के बाद खोलें। अंदर <strong>"Keyboard Enable"</strong> पर tap करें।</li>
           <li>Phone के settings में जाकर TypeAura को <strong>Default Keyboard</strong> बनाएं।</li>
-          <li>अब किसी भी text field पर type करें — TypeAura खुल जायेगा! <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-party-popper"/></svg></li>
+          <li>अब किसी भी text field पर type करें, TypeAura खुल जाएगा!</li>
         </ol>
-      </div>
+      </details>
     </div>
   </section>
 
   <!-- ═══════════════════════════════ FAQ ══════════════════════════════════ -->
   <!-- Native <details>/<summary>: keyboard-operable and screen-reader
        announced with zero JS, and the answers stay in the DOM for crawlers
-       and answer engines (a JS accordion would hide them). -->
-  <section class="section section--dark" id="faq">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-tag">FAQ</div>
-        <h2>Questions, <span class="gradient-text">answered</span></h2>
-        <p class="section-desc">Everything people ask before installing — privacy, permissions, pricing and limits.</p>
+       and answer engines (a JS accordion would hide them). Keep the text in
+       sync with the FAQPage JSON-LD in <head>. -->
+  <section class="section section--alt" id="faq">
+    <div class="container faq-layout">
+      <div class="faq-intro reveal">
+        <p class="eyebrow">FAQ</p>
+        <h2>Questions, answered</h2>
+        <p class="lede">Privacy, permissions, pricing and limits: everything people ask before installing.</p>
+        <p class="faq-contact">Still have a question? <a href="mailto:himanshuapps.dev@gmail.com?subject=TypeAura%20Question">Email us</a></p>
       </div>
 
       <div class="faq-list">
         <details class="faq-item">
           <summary>Is TypeAura really free?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p>Yes. Every AI feature — the Floating Lens, Live Translate, voice typing, AI Chat and all six AI tools — runs on the free plan, on a <strong>daily allowance</strong> that resets every midnight. No card, no login, no trial period. Pro and Max are optional subscriptions for people who need more headroom.</p>
+            <p>Yes. Every AI feature (the Floating Lens, Live Translate, voice typing, AI Chat and all six AI tools) runs on the free plan, on a <strong>daily allowance</strong> that resets every midnight. No card, no login, no trial period. Pro and Max are optional subscriptions for people who need more headroom.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary>Do you store what I type?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p>No. Your keystrokes, passwords and OTPs never leave your device. Text is sent to our server <strong>only when you explicitly tap an AI action</strong> — translate, rewrite, reply — and it is processed and returned immediately, never stored. Read the full detail in our <a href="/privacy">Privacy Policy</a>.</p>
+            <p>No. Your keystrokes, passwords and OTPs never leave your device. Text is sent to our server <strong>only when you explicitly tap an AI action</strong>, such as translate, rewrite or reply, and it is processed and returned immediately, never stored. Read the full detail in our <a href="/privacy">Privacy Policy</a>.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary>Why does the Floating Lens need Accessibility permission?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p>The Lens translates text that belongs to <em>other</em> apps, so it needs Android's Accessibility API to read the text you tap on. It reads only at the moment you tap, and it <strong>explicitly skips password fields and editable text boxes</strong>. The permission is entirely optional — the keyboard and every AI tool work without it.</p>
+            <p>The Lens translates text that belongs to <em>other</em> apps, so it needs Android's Accessibility API to read the text you tap on. It reads only at the moment you tap, and it <strong>explicitly skips password fields and editable text boxes</strong>. The permission is entirely optional: the keyboard and every AI tool work without it.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary>Can I cancel Pro or Max?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p>Yes, any time. Pro and Max are <strong>auto-renewing Google Play subscriptions</strong>, billed monthly or yearly. Cancel in the Play Store under Payments &amp; subscriptions, or from the <strong>Manage subscription</strong> link inside the app. Cancelling stops the next charge — you keep everything you paid for until the end of the period you are already in, then drop back to the Free budget.</p>
+            <p>Yes, any time. Pro and Max are <strong>auto-renewing Google Play subscriptions</strong>, billed monthly or yearly. Cancel in the Play Store under Payments &amp; subscriptions, or from the <strong>Manage subscription</strong> link inside the app. Cancelling stops the next charge. You keep everything you paid for until the end of the period you are already in, then drop back to the Free budget.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary>How do I buy Pro or Max?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p>Inside the app, not on this website. Install TypeAura, open <strong>Settings → Plans</strong>, pick Pro or Max, and pay through Google Play. You will get a <strong>TA-XXXX-XXXX recovery code</strong> — save it, as that code is how you move your plan to a new device or restore it after a reinstall.</p>
+            <p>Inside the app, not on this website. Install TypeAura, open <strong>Settings → Plans</strong>, pick Pro or Max, and pay through Google Play. You will get a <strong>TA-XXXX-XXXX recovery code</strong>. Save it: that code is how you move your plan to a new device or restore it after a reinstall.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary>Which languages are supported?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p><strong>129</strong> — and the keyboard picks the right ones for you. It detects the country it is installed in and leads every language list with what people there actually speak, with <strong>176 countries</strong> tuned individually.</p>
-            <p>Alongside the languages it carries <strong>21 romanizations</strong> — the way people write a language in Latin letters when its own script will not fit on a phone keyboard. <strong>Hinglish</strong> in India, <strong>Arabizi</strong> across the Arab world, <strong>Banglish</strong>, <strong>Roman Urdu</strong>, <strong>Greeklish</strong>, <strong>Roman Persian</strong> and fifteen more. Type in Latin letters, get the native script back.</p>
-            <p>Hinglish is still what TypeAura is really built for — type the way you actually speak and it converts to clean English, or the reverse.</p>
+            <p><strong>129</strong>, and the keyboard picks the right ones for you. It detects the country it is installed in and leads every language list with what people there actually speak, with <strong>176 countries</strong> tuned individually.</p>
+            <p>Alongside the languages it carries <strong>21 romanizations</strong>, the way people write a language in Latin letters when its own script will not fit on a phone keyboard: <strong>Hinglish</strong> in India, <strong>Arabizi</strong> across the Arab world, <strong>Banglish</strong>, <strong>Roman Urdu</strong>, <strong>Greeklish</strong>, <strong>Roman Persian</strong> and fifteen more.</p>
+            <p>Hinglish is still what TypeAura is really built for: type the way you actually speak and it converts to clean English, or the reverse.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary>Does it work offline?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p>Typing, glide typing, suggestions, themes, emoji and clipboard history all work fully offline. The AI features — translation, the Lens, AI Chat and the tools — need an internet connection, because the model runs on a server rather than on your phone.</p>
+            <p>Typing, glide typing, suggestions, themes, emoji and clipboard history all work fully offline. The AI features (translation, the Lens, AI Chat and the tools) need an internet connection, because the model runs on a server rather than on your phone.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary>What happens when I run out of AI for the day?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p>The keyboard keeps working normally — only the AI actions pause. Your allowance resets automatically at midnight. If you hit the limit regularly, Pro gives you much more every day, and Max gives you three times what Pro does.</p>
+            <p>The keyboard keeps working normally. Only the AI actions pause, and your allowance resets automatically at midnight. If you hit the limit regularly, Pro gives you much more every day, and Max gives you three times what Pro does.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary>Is the keyboard layout right for my language?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p>There are <strong>seven layouts</strong> — QWERTY, AZERTY, QWERTZ, and dedicated variants for Spanish (<strong>Ñ</strong>), German (<strong>Ü Ö Ä</strong>), Danish/Norwegian (<strong>Å Æ Ø</strong>) and Swedish/Finnish (<strong>Å Ö Ä</strong>). Those letters get real keys, not long-presses, because they are letters of the alphabet rather than accents.</p>
-            <p>Your country picks the starting layout, but it is only a starting point — it is a setting, so switch it any time. Accented letters beyond the layout are a long-press away, and the currency key types the sign your country actually spends in.</p>
+            <p>There are <strong>seven layouts</strong>: QWERTY, AZERTY, QWERTZ, and dedicated variants for Spanish (<strong>Ñ</strong>), German (<strong>Ü Ö Ä</strong>), Danish/Norwegian (<strong>Å Æ Ø</strong>) and Swedish/Finnish (<strong>Å Ö Ä</strong>). Those letters get real keys rather than long-presses, because they are letters of the alphabet, not accents.</p>
+            <p>Your country picks the starting layout and you can change it any time in Settings. Accented letters beyond the layout are a long-press away, and the currency key types the sign your country actually spends in.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary>Which Android versions work? Is there an iPhone version?<span class="faq-chev" aria-hidden="true"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></span></summary>
           <div class="faq-answer">
-            <p>TypeAura runs on <strong>Android 5.0 and above</strong>. There is no iOS version — iOS does not allow the kind of system-wide overlay the Floating Lens depends on. There is a <strong>Windows desktop app</strong> with the same AI tools and a global-hotkey Lens.</p>
+            <p>TypeAura runs on <strong>Android 5.0 and above</strong>. There is no iOS version, because iOS does not allow the kind of system-wide overlay the Floating Lens depends on. There is a <strong>Windows desktop app</strong> with the same AI tools and a global-hotkey Lens.</p>
           </div>
         </details>
       </div>
-
-      <div class="cta-band">
-        <h2>Ready to type smarter?</h2>
-        <div class="section-cta">
-          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary" target="_blank" rel="noopener">Install TypeAura — Free</a>
-          <a href="/demo" class="btn-secondary">Try the live demo</a>
-        </div>
-        <p class="cta-band-note">Android 5.0+ &nbsp;·&nbsp; No login &nbsp;·&nbsp; Every AI feature, free every day</p>
-      </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════════════ FOUNDER ══════════════════════════════ -->
-  <!-- Plain .section (not --dark): FAQ above is dark, so this restores the
-       alternating rhythm that the new section would otherwise break. -->
+  <!-- ═══════════════════════════════ ABOUT + FEEDBACK ═════════════════════ -->
   <section class="section" id="about">
     <div class="container">
-      <div class="founder-card">
-        <div class="founder-avatar">HK</div>
-        <div class="founder-text">
-          <div class="section-tag">Builder Story</div>
-          <h2>Why I built <span class="gradient-text">TypeAura</span></h2>
+      <div class="about-card reveal">
+        <div class="about-person">
+          <div class="founder-avatar" aria-hidden="true">HK</div>
+          <div>
+            <p class="about-name">Himanshu Kashyap</p>
+            <p class="about-role">Founder, TypeAura</p>
+          </div>
+        </div>
+        <div class="about-text">
+          <h2>Why I built TypeAura</h2>
           <p>
-            I'm <strong>Himanshu Kashyap</strong>, a developer who's been frustrated with keyboards that don't
-            understand how Indians actually type. We all mix Hindi and English constantly, but every keyboard
-            out there treats it like a problem instead of a superpower.
+            Most of us mix Hindi and English in every message, yet every keyboard treated
+            that as a mistake to correct. I wanted one that takes the way you actually type
+            and helps you send it the way you mean it.
           </p>
           <p>
-            So I built TypeAura — a keyboard that doesn't judge your Hinglish, but makes it shine.
-            With AI translation built right into the keyboard, you can type the way you think
-            and sound the way you want.
+            TypeAura gets better every week, and what gets built next comes from the people
+            using it. Tell me what to fix.
           </p>
-          <p>
-            TypeAura is in beta and improving every week. Your usage and feedback directly shapes
-            what gets built next.
-          </p>
+          <div class="about-actions" id="feedback">
+            <a href="mailto:himanshuapps.dev@gmail.com?subject=TypeAura%20Feedback" class="btn-secondary btn-sm"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-message-circle"/></svg> Give feedback</a>
+            <a href="mailto:himanshuapps.dev@gmail.com?subject=TypeAura%20Bug%20Report" class="btn-secondary btn-sm"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-bug"/></svg> Report a bug</a>
+            <a href="mailto:himanshuapps.dev@gmail.com?subject=TypeAura%20Feature%20Request" class="btn-secondary btn-sm"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-lightbulb"/></svg> Request a feature</a>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ═══════════════════════════════ FEEDBACK ═════════════════════════════ -->
-  <section class="section" id="feedback">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-tag">Feedback</div>
-        <h2>Help us <span class="gradient-text">improve</span></h2>
-        <p class="section-desc">TypeAura is in active development. Your feedback directly shapes what gets built next.</p>
-      </div>
-      <div class="feedback-row">
-        <a href="mailto:himanshuapps.dev@gmail.com?subject=TypeAura Feedback" class="feedback-card">
-          <div class="feedback-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-message-circle"/></svg></div>
-          <h3>Give Feedback</h3>
-          <p>Tell us what you love, what you hate, or what you wish was different.</p>
-        </a>
-        <a href="mailto:himanshuapps.dev@gmail.com?subject=TypeAura Bug Report" class="feedback-card">
-          <div class="feedback-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-bug"/></svg></div>
-          <h3>Report a Bug</h3>
-          <p>Found something broken? Let us know and we'll fix it ASAP.</p>
-        </a>
-        <a href="mailto:himanshuapps.dev@gmail.com?subject=TypeAura Feature Request" class="feedback-card">
-          <div class="feedback-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-lightbulb"/></svg></div>
-          <h3>Request a Feature</h3>
-          <p>Have an idea for something new? We're listening.</p>
-        </a>
+      <!-- Closing CTA -->
+      <div class="cta-band reveal">
+        <h2>Type the way you talk. Send it the way you mean it.</h2>
+        <p>Free on Google Play. No sign-up, no card.</p>
+        <div class="cta-actions">
+          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-primary btn-lg" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-gplay"/></svg> Get it on Google Play</a>
+          <a href="/demo" class="btn-secondary btn-lg">Try the live demo</a>
+        </div>
       </div>
     </div>
   </section>
@@ -1065,32 +926,45 @@
   </main>
 
   <!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
-  <!-- @partial:footer v1 — canonical copy. Mirrored in privacy/delete-data. -->
+  <!-- @partial:footer v2 — canonical copy. Mirrored in privacy/delete-data. -->
   <footer class="footer">
     <div class="container">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <div class="logo-emoji"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-keyboard"/></svg></div>
-          <span class="logo-text" style="font-weight:800; font-size:16px;">TypeAura</span>
-          <span class="footer-badge">v3.0.6</span>
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a class="nav-logo" href="/" aria-label="TypeAura home">
+            <img class="logo-mark" src="img/logo-mark.png" width="37" height="24" alt="" loading="lazy" />
+            <span class="logo-text">TypeAura</span>
+          </a>
+          <p>The AI keyboard for Android that translates, rewrites and replies as you type.</p>
+          <a href="https://play.google.com/store/apps/details?id=com.typeaura.app" class="btn-secondary btn-sm" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-gplay"/></svg> Get it on Google Play</a>
         </div>
-        <div class="footer-links">
-          <a href="#ai-tools">AI Tools</a>
-          <a href="#lens">Floating Lens</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#faq">FAQ</a>
-          <a href="#install">Install</a>
-          <a href="#about">About</a>
-          <a href="/privacy">Privacy Policy</a>
-          <a href="/delete-data">Delete Data</a>
-        </div>
+        <nav class="footer-col" aria-label="Product">
+          <p class="footer-h">Product</p>
+          <a href="/#lens">Floating Lens</a>
+          <a href="/#ai-tools">AI Tools</a>
+          <a href="/#keyboard">Keyboard</a>
+          <a href="/#languages">Languages</a>
+          <a href="/#pricing">Pricing</a>
+          <a href="/demo">Live demo</a>
+        </nav>
+        <nav class="footer-col" aria-label="Support">
+          <p class="footer-h">Support</p>
+          <a href="/#install">How to install</a>
+          <a href="/#faq">FAQ</a>
+          <a href="mailto:himanshuapps.dev@gmail.com?subject=TypeAura%20Feedback">Contact</a>
+          <a href="mailto:himanshuapps.dev@gmail.com?subject=TypeAura%20Bug%20Report">Report a bug</a>
+        </nav>
+        <nav class="footer-col" aria-label="Legal">
+          <p class="footer-h">Legal</p>
+          <a href="/privacy">Privacy policy</a>
+          <a href="/delete-data">Delete your data</a>
+        </nav>
       </div>
-      <div class="footer-divider"></div>
       <div class="footer-bottom">
-        <p>Built by <strong>Himanshu Kashyap</strong> &nbsp;·&nbsp; Android &amp; Windows &nbsp;·&nbsp; Version 3.0.6</p>
+        <p>© 2026 TypeAura · Built by Himanshu Kashyap · v3.0.6</p>
         <p class="footer-privacy">
-          <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-shield-check"/></svg> TypeAura does not store your typed text, passwords, OTPs, or personal messages.
-          Only anonymous usage stats are collected to improve the product.
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-shield-check"/></svg>
+          TypeAura does not store your typed text, passwords, OTPs or personal messages.
         </p>
       </div>
     </div>
