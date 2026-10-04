@@ -5,23 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TypeAura Admin Console</title>
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="theme-color" content="#7C6CF8" />
+  <meta name="theme-color" content="#050516" />
   <link rel="icon" type="image/png" href="img/icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
 
 <!-- ═══ Icon sprite ═══════════════════════════════════════════════
-     Stroke icons replace the emoji the old console used as iconography.
-     Referenced everywhere as <svg><use href="#i-name"/></svg>. -->
+     Stroke icons, referenced everywhere as <svg><use href="#i-name"/></svg>. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <g id="i-base" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></g>
-  </defs>
   <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
   <symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M9 13h6"/></symbol>
   <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h6v8H3zM3 3h6v6H3zM15 3h6v8h-6zM15 15h6v6h-6z"/></symbol>
@@ -50,21 +46,35 @@
   <symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a6 6 0 0 1 8 0 6 6 0 0 0 8 0v9a6 6 0 0 1-8 0 6 6 0 0 0-8 0"/></symbol>
   <symbol id="i-gif" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M11 10a2 2 0 1 0 0 4h1v-2M15 9v6M18 9h3M18 12h2.5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
 </svg>
 
 <!-- ═══ Login ══════════════════════════════════════════════════ -->
 <div class="a-login" id="loginScreen">
   <div class="a-login-card">
-    <div class="a-login-mark"><svg><use href="#i-lock"/></svg></div>
-    <h1>Admin Console</h1>
-    <p>TypeAura operations — private access</p>
+    <div class="a-login-brand">
+      <span class="a-brand-mark"><svg><use href="#i-keyboard"/></svg></span>
+      <span class="a-login-word">TypeAura</span>
+      <span class="a-login-tag">Admin</span>
+    </div>
+    <h1>Sign in to the console</h1>
+    <p>Private operator access. The session lives in this browser tab only.</p>
     <form class="a-login-form" id="loginForm" autocomplete="off">
-      <input type="password" class="a-input" id="adminPassword" placeholder="Admin password"
-             aria-label="Admin password" autocomplete="current-password" />
+      <label class="a-field">
+        <span class="a-field-label">Admin password</span>
+        <input type="password" class="a-input" id="adminPassword" placeholder="Enter password"
+               autocomplete="current-password" />
+      </label>
       <p class="a-error-text a-hidden" id="loginError" role="alert"></p>
-      <button type="submit" class="a-btn a-btn-primary" id="loginBtn" style="width:100%">Sign in</button>
+      <button type="submit" class="a-btn a-btn-primary a-btn-block" id="loginBtn">Sign in</button>
     </form>
   </div>
+  <p class="a-login-foot"><svg><use href="#i-shield"/></svg>Failed attempts are rate limited per IP.</p>
 </div>
 
 <!-- ═══ App shell ══════════════════════════════════════════════ -->
@@ -74,30 +84,36 @@
 
   <aside class="a-sidebar" id="sidebar">
     <div class="a-brand">
-      <div class="a-brand-mark"><svg><use href="#i-keyboard"/></svg></div>
+      <span class="a-brand-mark"><svg><use href="#i-keyboard"/></svg></span>
       <div class="a-brand-text">
         <div class="a-brand-name">TypeAura</div>
-        <div class="a-brand-sub">Admin</div>
+        <div class="a-brand-sub">Admin console</div>
       </div>
     </div>
 
     <nav class="a-nav" aria-label="Sections">
-      <button class="a-nav-item is-active" data-section="overview"><svg><use href="#i-grid"/></svg><span>Overview</span></button>
-      <button class="a-nav-item" data-section="ask"><svg><use href="#i-sparkles"/></svg><span>Ask AI</span></button>
-      <button class="a-nav-item" data-section="devices"><svg><use href="#i-device"/></svg><span>Devices</span><span class="a-nav-count a-hidden" id="navCountDevices"></span></button>
-      <button class="a-nav-item" data-section="aitools"><svg><use href="#i-sparkles"/></svg><span>AI Tools</span></button>
-      <button class="a-nav-item" data-section="apikeys"><svg><use href="#i-key"/></svg><span>API Keys</span></button>
-      <button class="a-nav-item" data-section="crashes"><svg><use href="#i-bug"/></svg><span>Crashes</span><span class="a-nav-count a-hidden" id="navCountCrashes"></span></button>
-      <button class="a-nav-item" data-section="referrals"><svg><use href="#i-gift"/></svg><span>Referrals</span></button>
-      <button class="a-nav-item" data-section="releases"><svg><use href="#i-rocket"/></svg><span>Releases</span></button>
+      <div class="a-nav-group">
+        <span class="a-nav-label">Insights</span>
+        <button class="a-nav-item is-active" data-section="overview"><svg><use href="#i-grid"/></svg><span>Overview</span></button>
+        <button class="a-nav-item" data-section="ask"><svg><use href="#i-sparkles"/></svg><span>Ask AI</span></button>
+        <button class="a-nav-item" data-section="devices"><svg><use href="#i-device"/></svg><span>Devices</span><span class="a-nav-count a-hidden" id="navCountDevices"></span></button>
+        <button class="a-nav-item" data-section="aitools"><svg><use href="#i-zap"/></svg><span>AI usage</span></button>
+        <button class="a-nav-item" data-section="referrals"><svg><use href="#i-gift"/></svg><span>Referrals</span></button>
+      </div>
+      <div class="a-nav-group">
+        <span class="a-nav-label">Operations</span>
+        <button class="a-nav-item" data-section="crashes"><svg><use href="#i-bug"/></svg><span>Crashes</span><span class="a-nav-count is-alert a-hidden" id="navCountCrashes"></span></button>
+        <button class="a-nav-item" data-section="apikeys"><svg><use href="#i-key"/></svg><span>API keys</span></button>
+        <button class="a-nav-item" data-section="releases"><svg><use href="#i-rocket"/></svg><span>Releases &amp; config</span></button>
+      </div>
     </nav>
 
     <div class="a-sidebar-foot">
-      <div class="a-health" id="health" data-state="ok">
+      <div class="a-health" id="health" data-state="ok" title="Backend status">
         <span class="a-health-dot"></span>
         <span id="healthText">Backend healthy</span>
       </div>
-      <button class="a-btn a-btn-ghost" data-action="logout" style="width:100%">
+      <button class="a-btn a-btn-ghost a-btn-sm a-btn-block" data-action="logout" title="Sign out">
         <svg><use href="#i-logout"/></svg><span>Sign out</span>
       </button>
     </div>
@@ -108,10 +124,13 @@
       <button class="a-icon-btn a-burger" data-action="toggle-nav" aria-label="Open navigation">
         <svg><use href="#i-menu"/></svg>
       </button>
-      <h1 id="pageTitle">Overview</h1>
+      <div class="a-topbar-titles">
+        <h1 id="pageTitle">Overview</h1>
+        <p class="a-topbar-sub" id="pageDesc"></p>
+      </div>
       <span class="a-stamp" id="stamp"></span>
-      <button class="a-icon-btn" data-action="refresh" id="refreshBtn" aria-label="Refresh this section" title="Refresh this section">
-        <svg><use href="#i-refresh"/></svg>
+      <button class="a-btn a-btn-ghost a-btn-sm" data-action="refresh" id="refreshBtn" title="Refresh this section">
+        <svg><use href="#i-refresh"/></svg><span>Refresh</span>
       </button>
     </header>
 
@@ -121,116 +140,133 @@
       <section class="a-section is-active" id="sec-overview">
         <div class="a-kpi-row">
           <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-users"/></svg></span><span class="a-kpi-label">Total Installs</span></div>
+            <div class="a-kpi-top"><span class="a-kpi-label">Total installs</span><svg class="a-kpi-icon"><use href="#i-users"/></svg></div>
             <div class="a-kpi-value" id="k-total">—</div>
             <div class="a-kpi-foot" id="k-total-foot"></div>
           </article>
           <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-activity"/></svg></span><span class="a-kpi-label">Daily Active</span></div>
+            <div class="a-kpi-top"><span class="a-kpi-label">Daily active</span><svg class="a-kpi-icon"><use href="#i-activity"/></svg></div>
             <div class="a-kpi-value" id="k-dau">—</div>
+            <div class="a-kpi-foot" id="k-dau-foot"></div>
             <div class="a-kpi-spark" id="k-dau-spark"></div>
           </article>
           <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-clock"/></svg></span><span class="a-kpi-label">Monthly Active</span></div>
+            <div class="a-kpi-top"><span class="a-kpi-label">Monthly active</span><svg class="a-kpi-icon"><use href="#i-clock"/></svg></div>
             <div class="a-kpi-value" id="k-mau">—</div>
             <div class="a-kpi-foot" id="k-mau-foot"></div>
           </article>
           <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-zap"/></svg></span><span class="a-kpi-label">AI Tokens · 30d</span></div>
+            <div class="a-kpi-top"><span class="a-kpi-label">AI tokens · 30 days</span><svg class="a-kpi-icon"><use href="#i-zap"/></svg></div>
             <div class="a-kpi-value" id="k-tokens">—</div>
+            <div class="a-kpi-foot" id="k-tokens-foot"></div>
             <div class="a-kpi-spark" id="k-tokens-spark"></div>
           </article>
         </div>
 
-        <div class="a-stat-strip">
-          <div class="a-stat"><span class="a-stat-label">Weekly Active</span><span class="a-stat-value" id="k-wau">—</span></div>
-          <div class="a-stat"><span class="a-stat-label">Total AI Uses</span><span class="a-stat-value" id="k-ai">—</span></div>
-          <div class="a-stat"><span class="a-stat-label">Voice AI</span><span class="a-stat-value" id="k-voice">—</span></div>
-          <div class="a-stat"><span class="a-stat-label">Lens Uses</span><span class="a-stat-value" id="k-lens">—</span></div>
-          <div class="a-stat"><span class="a-stat-label">Keyboard Opens</span><span class="a-stat-value" id="k-kb">—</span></div>
-          <div class="a-stat"><span class="a-stat-label">App Opens</span><span class="a-stat-value" id="k-app">—</span></div>
-        </div>
-
-        <div class="a-chart-grid">
+        <div class="a-grid-main">
           <section class="a-panel">
             <div class="a-panel-head">
-              <h2>Daily active devices</h2>
+              <div class="a-panel-titles">
+                <h2>Daily active devices</h2>
+                <p class="a-sub">Distinct devices seen each day</p>
+              </div>
               <div class="a-seg" role="group" aria-label="Chart range" id="activeRange">
-                <button type="button" class="a-seg-btn" data-action="active-range" data-range="7" aria-pressed="false">7d</button>
-                <button type="button" class="a-seg-btn is-active" data-action="active-range" data-range="30" aria-pressed="true">30d</button>
+                <button type="button" class="a-seg-btn" data-action="active-range" data-range="7" aria-pressed="false">7 days</button>
+                <button type="button" class="a-seg-btn is-active" data-action="active-range" data-range="30" aria-pressed="true">30 days</button>
               </div>
             </div>
             <div class="a-panel-body"><div class="a-chart-wrap" id="chartActive"></div></div>
           </section>
           <section class="a-panel">
-            <div class="a-panel-head"><h2>Plan mix</h2></div>
+            <div class="a-panel-head">
+              <div class="a-panel-titles">
+                <h2>Plans</h2>
+                <p class="a-sub">Effective tier across all installs</p>
+              </div>
+            </div>
             <div class="a-panel-body"><div id="chartPlans"></div></div>
           </section>
         </div>
 
-        <div class="a-chart-grid">
+        <div class="a-grid-main">
           <section class="a-panel">
-            <div class="a-panel-head"><h2>AI tokens per day</h2><span class="a-chip a-chip-muted">Last 30 days</span></div>
+            <div class="a-panel-head">
+              <div class="a-panel-titles">
+                <h2>AI tokens per day</h2>
+                <p class="a-sub">Spend through the AI proxy, last 30 days</p>
+              </div>
+            </div>
             <div class="a-panel-body"><div class="a-chart-wrap" id="chartTokens"></div></div>
           </section>
           <section class="a-panel">
             <div class="a-panel-head">
-              <h2>Devices by country</h2>
-              <span class="a-chip a-chip-muted">Total · active 7d</span>
-              <button type="button" class="a-btn a-btn-ghost a-btn-sm" data-action="open-readiness">
-                <svg><use href="#i-expand"/></svg>All countries
-              </button>
+              <div class="a-panel-titles">
+                <h2>Engagement</h2>
+                <p class="a-sub">All-time totals across every device</p>
+              </div>
             </div>
-            <div class="a-panel-body"><div id="countryPanel"></div></div>
+            <div class="a-panel-body"><div id="engagePanel"></div></div>
           </section>
         </div>
+
+        <section class="a-panel">
+          <div class="a-panel-head">
+            <div class="a-panel-titles">
+              <h2>Markets</h2>
+              <p class="a-sub">Devices by country, split by activity in the last 7 days. Click a row to see its devices.</p>
+            </div>
+            <div class="a-controls">
+              <button type="button" class="a-btn a-btn-ghost a-btn-sm" data-action="open-readiness">
+                <svg><use href="#i-flag"/></svg>Country readiness
+              </button>
+            </div>
+          </div>
+          <div id="countryPanel"></div>
+        </section>
       </section>
 
       <!-- ─── Devices ────────────────────────────────────────── -->
       <section class="a-section" id="sec-devices">
         <div class="a-panel">
-          <div class="a-panel-head">
-            <h2>All devices</h2>
-            <div class="a-controls">
-              <label class="a-search">
-                <svg><use href="#i-search"/></svg>
-                <input class="a-input" id="devSearch" placeholder="Search device name or ID…" aria-label="Search devices" />
-              </label>
-              <!-- Options past "All countries" are filled in from stats.countries
-                   once Overview has loaded, so the list only ever offers codes
-                   that actually exist in the data. -->
-              <select class="a-select" id="devCountry" aria-label="Filter devices by country">
-                <option value="">All countries</option>
-              </select>
-              <select class="a-select" id="devFilter" aria-label="Filter devices">
-                <option value="">All users</option>
-                <option value="active7d">Active 7d</option>
-                <option value="active30d">Active 30d</option>
-                <option value="enabled">Keyboard enabled</option>
-                <option value="selected">Keyboard selected</option>
-                <option value="plan_free">Plan: Free</option>
-                <option value="plan_pro">Plan: Pro</option>
-                <option value="plan_max">Plan: Max</option>
-                <option value="plan_paid">Plan: Paid (active)</option>
-                <option value="plan_byok">Plan: BYOK (legacy)</option>
-                <option value="override_set">Has admin override</option>
-              </select>
-              <select class="a-select" id="devSort" aria-label="Sort devices">
-                <option value="last_use_date">Sort: Last active</option>
-                <option value="install_date">Sort: Install date</option>
-                <option value="total_keyboard_opens">Sort: KB opens</option>
-                <option value="total_app_opens">Sort: App opens</option>
-              </select>
-            </div>
+          <div class="a-toolbar">
+            <label class="a-search">
+              <svg><use href="#i-search"/></svg>
+              <input class="a-input" id="devSearch" placeholder="Search device name or ID" aria-label="Search devices" />
+            </label>
+            <!-- Options past "All countries" are filled in from stats.countries
+                 once Overview has loaded, so the list only ever offers codes
+                 that actually exist in the data. -->
+            <select class="a-select" id="devCountry" aria-label="Filter devices by country">
+              <option value="">All countries</option>
+            </select>
+            <select class="a-select" id="devFilter" aria-label="Filter devices">
+              <option value="">All users</option>
+              <option value="active7d">Active 7d</option>
+              <option value="active30d">Active 30d</option>
+              <option value="enabled">Keyboard enabled</option>
+              <option value="selected">Keyboard selected</option>
+              <option value="plan_free">Plan: Free</option>
+              <option value="plan_pro">Plan: Pro</option>
+              <option value="plan_max">Plan: Max</option>
+              <option value="plan_paid">Plan: Paid (active)</option>
+              <option value="plan_byok">Plan: BYOK (legacy)</option>
+              <option value="override_set">Has admin override</option>
+            </select>
+            <select class="a-select" id="devSort" aria-label="Sort devices">
+              <option value="last_use_date">Sort: Last active</option>
+              <option value="install_date">Sort: Install date</option>
+              <option value="total_keyboard_opens">Sort: Keyboard opens</option>
+              <option value="total_app_opens">Sort: App opens</option>
+            </select>
           </div>
-          <div class="a-table-scroll">
+          <div class="a-table-scroll is-tall">
             <table class="a-table">
               <thead>
                 <tr>
                   <th>Device</th><th>Plan</th><th>Country</th><th>Android</th>
                   <th>Installed</th><th>Last active</th>
-                  <th class="a-right">App</th><th class="a-right">Keyboard</th><th class="a-right">Tokens</th>
-                  <th>Enabled</th><th>Default</th><th>Theme</th>
+                  <th class="a-right">App opens</th><th class="a-right">KB opens</th><th class="a-right">Tokens</th>
+                  <th>Keyboard</th><th>Theme</th>
                 </tr>
               </thead>
               <tbody id="devBody"></tbody>
@@ -240,31 +276,28 @@
         </div>
       </section>
 
-      <!-- ─── AI Tools ───────────────────────────────────────── -->
+      <!-- ─── AI usage ───────────────────────────────────────── -->
       <section class="a-section" id="sec-aitools">
         <div class="a-panel">
-          <div class="a-panel-head">
-            <h2>AI tool usage per device</h2>
-            <div class="a-controls">
-              <label class="a-search">
-                <svg><use href="#i-search"/></svg>
-                <input class="a-input" id="aiSearch" placeholder="Search device…" aria-label="Search devices" />
-              </label>
-              <select class="a-select" id="aiSort" aria-label="Sort by tool">
-                <option value="total_ai_uses">Sort: Keyboard AI</option>
-                <option value="total_voice_ai_uses">Sort: Voice AI</option>
-                <option value="total_lens_translate">Sort: Lens translate</option>
-                <option value="total_lens_reply">Sort: Lens reply</option>
-              </select>
-            </div>
+          <div class="a-toolbar">
+            <label class="a-search">
+              <svg><use href="#i-search"/></svg>
+              <input class="a-input" id="aiSearch" placeholder="Search device" aria-label="Search devices" />
+            </label>
+            <select class="a-select" id="aiSort" aria-label="Sort by tool">
+              <option value="total_ai_uses">Sort: Keyboard AI</option>
+              <option value="total_voice_ai_uses">Sort: Voice AI</option>
+              <option value="total_lens_translate">Sort: Lens translate</option>
+              <option value="total_lens_reply">Sort: Lens reply</option>
+            </select>
+            <div class="a-legend" id="aiLegend"></div>
           </div>
-          <div class="a-legend" id="aiLegend"></div>
-          <div class="a-table-scroll">
+          <div class="a-table-scroll is-tall">
             <table class="a-table">
               <thead>
                 <tr>
                   <th>Device</th><th>Keyboard AI</th><th>Voice AI</th>
-                  <th>Lens translate</th><th>Lens reply</th><th>Top tool</th><th class="a-right">Total</th>
+                  <th>Lens translate</th><th>Lens reply</th><th>Top feature</th><th class="a-right">Total</th>
                 </tr>
               </thead>
               <tbody id="aiBody"></tbody>
@@ -274,47 +307,54 @@
         </div>
       </section>
 
-      <!-- ─── API Keys ───────────────────────────────────────── -->
+      <!-- ─── API keys ───────────────────────────────────────── -->
       <section class="a-section" id="sec-apikeys">
+        <div class="a-metrics" id="keySummary" style="--n:4"></div>
         <div class="a-panel">
           <div class="a-panel-head">
-            <h2>Groq key health</h2>
-            <p class="a-sub">Each check live-tests every key against Groq from the server — the browser can't call Groq directly.</p>
+            <div class="a-panel-titles">
+              <h2>Groq keys</h2>
+              <p class="a-sub">Checks run from the server against Groq. The browser cannot call Groq directly.</p>
+            </div>
             <div class="a-controls">
-              <button class="a-btn a-btn-ghost a-btn-sm" data-action="check-keys" id="checkKeysBtn"><svg><use href="#i-zap"/></svg>Run health check</button>
-              <button class="a-btn a-btn-ghost a-btn-sm" data-action="check-limits" id="checkLimitsBtn"><svg><use href="#i-shield"/></svg>Refresh limit status</button>
+              <button class="a-btn a-btn-ghost a-btn-sm" data-action="check-limits" id="checkLimitsBtn"><svg><use href="#i-shield"/></svg>Refresh limits</button>
+              <button class="a-btn a-btn-primary a-btn-sm" data-action="check-keys" id="checkKeysBtn"><svg><use href="#i-zap"/></svg>Run health check</button>
             </div>
           </div>
-          <div class="a-panel-body">
-            <div class="a-key-chips" id="keySummary" style="margin-bottom:14px"></div>
-            <div class="a-key-grid" id="keyGrid"></div>
+          <div class="a-table-scroll">
+            <table class="a-table">
+              <thead>
+                <tr>
+                  <th class="a-col-idx">#</th><th>Key</th><th>Health</th><th>Rate limit</th>
+                  <th class="a-right">Latency</th><th>Model</th><th>Checked</th><th class="a-right"><span class="a-sr">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody id="keyBody"></tbody>
+            </table>
           </div>
         </div>
       </section>
 
       <!-- ─── Crashes ────────────────────────────────────────── -->
       <section class="a-section" id="sec-crashes">
-        <div class="a-stat-strip" id="crashStats" style="grid-template-columns:repeat(3,minmax(0,1fr))">
-          <div class="a-stat"><span class="a-stat-label">Crash groups</span><span class="a-stat-value" id="c-groups">—</span></div>
-          <div class="a-stat"><span class="a-stat-label">Occurrences (page)</span><span class="a-stat-value" id="c-occ">—</span></div>
-          <div class="a-stat"><span class="a-stat-label">Devices affected (page)</span><span class="a-stat-value" id="c-dev">—</span></div>
+        <div class="a-metrics" style="--n:3">
+          <div class="a-metric"><span class="a-metric-label">Crash groups</span><span class="a-metric-value" id="c-groups">—</span></div>
+          <div class="a-metric"><span class="a-metric-label">Occurrences on this page</span><span class="a-metric-value" id="c-occ">—</span></div>
+          <div class="a-metric"><span class="a-metric-label">Devices affected on this page</span><span class="a-metric-value" id="c-dev">—</span></div>
         </div>
         <div class="a-panel">
-          <div class="a-panel-head">
-            <h2>Crash groups</h2>
-            <div class="a-controls">
-              <label class="a-search">
-                <svg><use href="#i-search"/></svg>
-                <input class="a-input" id="crashSearch" placeholder="Search error message…" aria-label="Search crashes" />
-              </label>
-              <select class="a-select" id="crashSort" aria-label="Sort crashes">
-                <option value="last_seen">Sort: Last seen</option>
-                <option value="occurrences">Sort: Occurrences</option>
-                <option value="first_seen">Sort: First seen</option>
-              </select>
-            </div>
+          <div class="a-toolbar">
+            <label class="a-search">
+              <svg><use href="#i-search"/></svg>
+              <input class="a-input" id="crashSearch" placeholder="Search error message" aria-label="Search crashes" />
+            </label>
+            <select class="a-select" id="crashSort" aria-label="Sort crashes">
+              <option value="last_seen">Sort: Last seen</option>
+              <option value="occurrences">Sort: Occurrences</option>
+              <option value="first_seen">Sort: First seen</option>
+            </select>
           </div>
-          <div class="a-table-scroll">
+          <div class="a-table-scroll is-tall">
             <table class="a-table">
               <thead>
                 <tr><th>Error</th><th>Type</th><th class="a-right">Count</th><th class="a-right">Devices</th><th>Last seen</th><th>First seen</th></tr>
@@ -326,65 +366,75 @@
         </div>
       </section>
 
-      <!-- ─── Releases & config ──────────────────────────────── -->
+      <!-- ─── Referrals ──────────────────────────────────────── -->
       <section class="a-section" id="sec-referrals">
         <!-- Qualification rate is the number that matters: the share of invited
              installs that ever set the keyboard up. If it collapses, either the
              bar is wrong or the invites are not real people. -->
         <div class="a-kpi-row">
           <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-gift"/></svg></span><span class="a-kpi-label">Codes redeemed</span></div>
+            <div class="a-kpi-top"><span class="a-kpi-label">Codes redeemed</span><svg class="a-kpi-icon"><use href="#i-gift"/></svg></div>
             <div class="a-kpi-value" id="refClaims">—</div>
             <div class="a-kpi-foot" id="refClaimsFoot"></div>
           </article>
           <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-check"/></svg></span><span class="a-kpi-label">Qualified</span></div>
+            <div class="a-kpi-top"><span class="a-kpi-label">Qualified</span><svg class="a-kpi-icon"><use href="#i-check"/></svg></div>
             <div class="a-kpi-value" id="refQualified">—</div>
             <div class="a-kpi-foot" id="refQualifiedFoot"></div>
           </article>
           <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-clock"/></svg></span><span class="a-kpi-label">Waiting on setup</span></div>
+            <div class="a-kpi-top"><span class="a-kpi-label">Waiting on setup</span><svg class="a-kpi-icon"><use href="#i-clock"/></svg></div>
             <div class="a-kpi-value" id="refPending">—</div>
             <div class="a-kpi-foot">Referrer is not paid until these qualify</div>
           </article>
           <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-zap"/></svg></span><span class="a-kpi-label">Bonuses running</span></div>
+            <div class="a-kpi-top"><span class="a-kpi-label">Bonuses running</span><svg class="a-kpi-icon"><use href="#i-zap"/></svg></div>
             <div class="a-kpi-value" id="refLive">—</div>
             <div class="a-kpi-foot" id="refLiveFoot"></div>
           </article>
         </div>
 
-        <section class="a-panel">
-          <div class="a-panel-head">
-            <h2>Top referrers</h2>
-            <p class="a-sub">Grouped by device hardware, so a reinstall is not counted as a second person. A row with many claims and few qualified is what a farm looks like.</p>
-          </div>
-          <div class="a-table-scroll">
-            <table class="a-table">
-              <thead><tr><th>Device</th><th>Invited</th><th>Qualified</th><th>Waiting</th><th>Capped</th><th>Last invite</th></tr></thead>
-              <tbody id="refTopBody"><tr><td colspan="6" class="a-empty">Loading…</td></tr></tbody>
-            </table>
-          </div>
-        </section>
+        <div class="a-grid-main">
+          <section class="a-panel">
+            <div class="a-panel-head">
+              <div class="a-panel-titles">
+                <h2>Top referrers</h2>
+                <p class="a-sub">Grouped by device hardware, so a reinstall is not a second person. Many invites with few qualified is what a farm looks like.</p>
+              </div>
+            </div>
+            <div class="a-table-scroll">
+              <table class="a-table">
+                <thead><tr><th>Device</th><th class="a-right">Invited</th><th class="a-right">Qualified</th><th class="a-right">Waiting</th><th>Capped</th><th>Last invite</th></tr></thead>
+                <tbody id="refTopBody"><tr class="a-state-row"><td colspan="6">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </section>
 
-        <section class="a-panel">
-          <div class="a-panel-head">
-            <h2>Program settings</h2>
-            <p class="a-sub">Live values. Change them in Releases &amp; Config — they reach devices on the next ping, with no app release.</p>
-          </div>
-          <div class="a-panel-body">
-            <dl class="a-kv" id="refConfig"></dl>
-          </div>
-        </section>
+          <section class="a-panel">
+            <div class="a-panel-head">
+              <div class="a-panel-titles">
+                <h2>Program settings</h2>
+                <p class="a-sub">Live values. They reach devices on the next ping, with no app release.</p>
+              </div>
+            </div>
+            <div class="a-panel-body">
+              <dl class="a-kv" id="refConfig"></dl>
+            </div>
+          </section>
+        </div>
       </section>
 
       <!-- ─── Ask AI ─────────────────────────────────────────── -->
       <section class="a-section" id="sec-ask">
         <section class="a-panel a-ask">
           <div class="a-panel-head">
-            <h2>Ask your data</h2>
-            <button class="a-btn a-btn-ghost a-btn-sm" data-action="ask-new">New chat</button>
-            <p class="a-sub">Plain-language questions, answered from live MongoDB with read-only queries. Private fields are never read.</p>
+            <div class="a-panel-titles">
+              <h2>Data analyst</h2>
+              <p class="a-sub">Answers come from live MongoDB through read-only queries. Private fields are never read.</p>
+            </div>
+            <div class="a-controls">
+              <button class="a-btn a-btn-ghost a-btn-sm" data-action="ask-new"><svg><use href="#i-plus"/></svg>New chat</button>
+            </div>
           </div>
           <div class="a-ask-log" id="askLog" aria-live="polite"></div>
           <div class="a-ask-chips" id="askChips">
@@ -396,67 +446,90 @@
             <button class="a-ask-chip" data-action="ask-chip">Pichle 30 din me install karne walo me se kitne abhi bhi active hain?</button>
           </div>
           <form class="a-ask-form" id="askForm">
-            <textarea class="a-textarea" id="askInput" rows="2" maxlength="2000"
-                      placeholder="Kuch bhi poochho… e.g. How many new installs from India this week?"></textarea>
-            <button class="a-btn a-btn-primary" type="submit" id="askSend">
-              <svg><use href="#i-sparkles"/></svg><span>Ask</span>
-            </button>
+            <div class="a-ask-box">
+              <textarea class="a-ask-input" id="askInput" rows="1" maxlength="2000" aria-label="Question"
+                        placeholder="Kuch bhi poochho… e.g. How many new installs from India this week?"></textarea>
+              <button class="a-btn a-btn-primary a-ask-send" type="submit" id="askSend" aria-label="Send question">
+                <svg><use href="#i-arrow-up"/></svg>
+              </button>
+            </div>
+            <p class="a-ask-hint">Enter to send, Shift+Enter for a new line. Every answer lists the queries it ran.</p>
           </form>
         </section>
       </section>
 
+      <!-- ─── Releases & config ──────────────────────────────── -->
       <section class="a-section" id="sec-releases">
-        <div class="a-kpi-row" style="grid-template-columns:minmax(0,1fr)">
-          <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-icon"><svg><use href="#i-rocket"/></svg></span><span class="a-kpi-label">Current live version</span></div>
-            <div class="a-kpi-value" id="liveVersion">—</div>
-            <div class="a-kpi-foot" id="liveMeta"></div>
-          </article>
+        <div class="a-grid-release">
+          <section class="a-panel">
+            <div class="a-panel-head">
+              <div class="a-panel-titles">
+                <h2>Publish an update</h2>
+                <p class="a-sub">Every installed device is told about it on its next update check.</p>
+              </div>
+            </div>
+            <div class="a-panel-body">
+              <div class="a-form-grid">
+                <div class="a-form-row">
+                  <label class="a-field">
+                    <span class="a-field-label">Version <span class="a-req">*</span></span>
+                    <input class="a-input" id="uvVersion" placeholder="e.g. 3.0.1" inputmode="decimal" />
+                  </label>
+                  <label class="a-field">
+                    <span class="a-field-label">Title <span class="a-req">*</span></span>
+                    <input class="a-input" id="uvTitle" placeholder="e.g. Speed &amp; stability" />
+                  </label>
+                </div>
+                <label class="a-field">
+                  <span class="a-field-label">Highlights</span>
+                  <textarea class="a-textarea" id="uvHighlights" rows="5" placeholder="New AI shortcut&#10;Faster keyboard&#10;Bug fixes"></textarea>
+                  <span class="a-field-hint">One per line. Blank lines are dropped.</span>
+                </label>
+              </div>
+            </div>
+            <div class="a-panel-foot">
+              <span class="a-action-status" id="uvStatus"></span>
+              <button class="a-btn a-btn-primary" data-action="publish"><svg><use href="#i-rocket"/></svg>Publish update</button>
+            </div>
+          </section>
+
+          <section class="a-panel a-live">
+            <div class="a-panel-head">
+              <div class="a-panel-titles">
+                <h2>Live version</h2>
+                <p class="a-sub">What the in-app update checker reports right now</p>
+              </div>
+              <span class="a-chip a-chip-ok"><svg><use href="#i-check"/></svg>Published</span>
+            </div>
+            <div class="a-panel-body">
+              <div class="a-live-version" id="liveVersion">—</div>
+              <div class="a-live-meta" id="liveMeta"></div>
+              <ul class="a-live-list" id="liveHighlights"></ul>
+            </div>
+          </section>
+        </div>
+
+        <div class="a-section-head">
+          <div>
+            <h2>Remote config</h2>
+            <p>Applied on each device's next ping. No app release needed.</p>
+          </div>
+          <p class="a-action-status" id="configStatus"></p>
         </div>
 
         <section class="a-panel">
           <div class="a-panel-head">
-            <h2>Publish an update</h2>
-            <p class="a-sub">Notifies every installed device on its next check.</p>
+            <div class="a-panel-titles"><h2>Feature flags</h2></div>
           </div>
-          <div class="a-panel-body">
-            <div class="a-form-grid">
-              <label class="a-field">
-                <span class="a-field-label">Version <span class="a-req">*</span></span>
-                <input class="a-input" id="uvVersion" placeholder="e.g. 3.0.1" inputmode="decimal" />
-              </label>
-              <label class="a-field">
-                <span class="a-field-label">Title <span class="a-req">*</span></span>
-                <input class="a-input" id="uvTitle" placeholder="e.g. Speed &amp; stability" />
-              </label>
-              <label class="a-field">
-                <span class="a-field-label">Highlights</span>
-                <textarea class="a-textarea" id="uvHighlights" rows="5" placeholder="New AI shortcut&#10;Faster keyboard&#10;Bug fixes"></textarea>
-                <span class="a-field-hint">One per line. Blank lines are dropped.</span>
-              </label>
-              <div class="a-form-foot">
-                <button class="a-btn a-btn-primary" data-action="publish"><svg><use href="#i-rocket"/></svg>Publish update</button>
-                <span class="a-action-status" id="uvStatus"></span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="a-panel">
-          <div class="a-panel-head">
-            <h2>Remote config</h2>
-            <p class="a-sub">Feature switches applied on each device's next ping — no app release needed.</p>
-          </div>
-          <div class="a-panel-body">
+          <div class="a-panel-body a-rows">
 
             <div class="a-switch-row">
               <div class="a-switch-copy">
                 <div class="a-switch-title">Paid plans <span class="a-chip a-chip-info">Pro &amp; Max</span></div>
                 <p class="a-switch-desc">
-                  One switch covers both paid tiers. When off, both cards show “Coming Soon” with a
-                  Notify-me button. When on, Pro (₹299 / ₹2,249) and Max (₹499 / ₹3,749) become
-                  purchasable — the Google Play service-account creds must already be set in
-                  Vercel or checkout fails.
+                  One switch covers both paid tiers. Off: both cards show “Coming Soon” with a Notify-me
+                  button. On: Pro (₹299 / ₹2,249) and Max (₹499 / ₹3,749) become purchasable. The Google
+                  Play service-account creds must already be set in Vercel or checkout fails.
                 </p>
               </div>
               <div class="a-switch-side">
@@ -469,8 +542,8 @@
               <div class="a-switch-copy">
                 <div class="a-switch-title">GIF keyboard</div>
                 <p class="a-switch-desc">
-                  Global kill-switch for the GIF tab in the emoji panel. When off, <code>/api/gif</code>
-                  stops serving and the tab shows “GIFs unavailable”. Needs a Giphy key in Vercel to work at all.
+                  Global kill-switch for the GIF tab in the emoji panel. Off: <code>/api/gif</code> stops
+                  serving and the tab shows “GIFs unavailable”. Needs a Giphy key in Vercel to work at all.
                 </p>
               </div>
               <div class="a-switch-side">
@@ -483,8 +556,8 @@
               <div class="a-switch-copy">
                 <div class="a-switch-title">Referrals</div>
                 <p class="a-switch-desc">
-                  Invite codes and the bonus tokens they grant. Off by default — the app hides the
-                  invite row entirely, so turning this on is what makes the feature exist.
+                  Invite codes and the bonus tokens they grant. Off by default: the app hides the invite
+                  row entirely, so turning this on is what makes the feature exist.
                 </p>
               </div>
               <div class="a-switch-side">
@@ -493,6 +566,32 @@
               </div>
             </div>
 
+            <div class="a-switch-row">
+              <div class="a-switch-copy">
+                <div class="a-switch-title">Bring Your Own Key <span class="a-chip a-chip-muted">legacy</span></div>
+                <p class="a-switch-desc">
+                  BYOK was removed from the app. This only reaches old builds still in the wild (≤ v2.0.x).
+                  Off: those users fall back to the Free quota. Stored keys are kept.
+                </p>
+              </div>
+              <div class="a-switch-side">
+                <span class="a-switch-state" id="byokState">—</span>
+                <button class="a-switch" id="byokSwitch" role="switch" aria-checked="false" aria-label="Bring your own key" data-action="toggle-byok"></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="a-panel">
+          <div class="a-panel-head">
+            <div class="a-panel-titles">
+              <h2>Free tier limits</h2>
+              <p class="a-sub">These change what existing users get, on every device at once.</p>
+            </div>
+            <span class="a-chip a-chip-warn"><svg><use href="#i-alert"/></svg>Pricing</span>
+          </div>
+          <div class="a-panel-body a-rows">
+
             <!-- The one value here that changes what users get rather than
                  whether a feature exists. It lands on EVERY live device on its
                  next ping, old builds included — but a build older than the
@@ -500,17 +599,20 @@
                  showing 10,000 locally and fail its AI calls in between. -->
             <div class="a-switch-row">
               <div class="a-switch-copy">
-                <div class="a-switch-title">Free daily tokens <span class="a-chip a-chip-warn">pricing</span></div>
+                <div class="a-switch-title">Daily AI tokens</div>
                 <p class="a-switch-desc">
-                  The Free tier's daily budget, applied to every device at once. Check
-                  <code>scripts/token-distribution.js</code> before moving it — the number to read is the
-                  wall cadence for engaged users, not the average.
+                  The Free tier's daily budget. Check <code>scripts/token-distribution.js</code> before
+                  moving it: the number to read is the wall cadence for engaged users, not the average.
                 </p>
-                <div class="a-actions" style="margin-top:10px">
-                  <input class="a-input" id="freeTokensInput" inputmode="numeric" style="max-width:160px" placeholder="10000" />
-                  <button class="a-btn a-btn-primary a-btn-sm" data-action="save-free-tokens">Apply</button>
-                  <span class="a-action-status" id="freeTokensStatus"></span>
+              </div>
+              <div class="a-limit">
+                <div class="a-input-group">
+                  <input class="a-input" id="freeTokensInput" inputmode="numeric" placeholder="10000" aria-label="Free daily tokens" />
+                  <span class="a-input-suffix">tokens / day</span>
                 </div>
+                <button class="a-btn a-btn-ghost" data-action="save-free-tokens">Apply</button>
+                <span class="a-field-hint" id="freeTokensHint"></span>
+                <span class="a-action-status" id="freeTokensStatus"></span>
               </div>
             </div>
 
@@ -519,45 +621,34 @@
                  spend tokens, so this is its own lever — the Groq-cost one. -->
             <div class="a-switch-row">
               <div class="a-switch-copy">
-                <div class="a-switch-title">Free AI voice minutes <span class="a-chip a-chip-warn">pricing</span></div>
+                <div class="a-switch-title">AI voice minutes</div>
                 <p class="a-switch-desc">
-                  Daily Whisper dictation for the Free tier, in minutes (0–15). <code>0</code> turns AI voice
-                  off for Free only; Pro (30 min) and Max (120 min) are unaffected.
+                  Daily Whisper dictation for Free. <code>0</code> turns AI voice off for Free only;
+                  Pro (30 min) and Max (120 min) are unaffected.
                 </p>
-                <div class="a-actions" style="margin-top:10px">
-                  <input class="a-input" id="sttFreeInput" inputmode="decimal" style="max-width:160px" placeholder="3" />
-                  <button class="a-btn a-btn-primary a-btn-sm" data-action="save-stt-free">Apply</button>
-                  <span class="a-action-status" id="sttFreeStatus"></span>
+              </div>
+              <div class="a-limit">
+                <div class="a-input-group">
+                  <input class="a-input" id="sttFreeInput" inputmode="decimal" placeholder="3" aria-label="Free AI voice minutes" />
+                  <span class="a-input-suffix">min / day</span>
                 </div>
+                <button class="a-btn a-btn-ghost" data-action="save-stt-free">Apply</button>
+                <span class="a-field-hint" id="sttFreeHint"></span>
+                <span class="a-action-status" id="sttFreeStatus"></span>
               </div>
             </div>
+          </div>
+        </section>
 
-            <div class="a-switch-row">
-              <div class="a-switch-copy">
-                <div class="a-switch-title">Bring Your Own Key <span class="a-chip a-chip-muted">legacy</span></div>
-                <p class="a-switch-desc">
-                  BYOK was removed from the app — this only reaches old builds still in the wild (≤ v2.0.x).
-                  When off, those users fall back to the Free quota. Stored keys are kept.
-                </p>
-              </div>
-              <div class="a-switch-side">
-                <span class="a-switch-state" id="byokState">—</span>
-                <button class="a-switch" id="byokSwitch" role="switch" aria-checked="false" aria-label="Bring your own key" data-action="toggle-byok"></button>
-              </div>
+        <section class="a-panel">
+          <div class="a-panel-head">
+            <div class="a-panel-titles">
+              <h2>Gated AI tools</h2>
+              <p class="a-sub">Selected tools are locked behind a paid plan for every device. Leave all off to keep the whole AI suite on Free.</p>
             </div>
-
-            <div class="a-switch-row">
-              <div class="a-switch-copy">
-                <div class="a-switch-title">Gated AI tools</div>
-                <p class="a-switch-desc">
-                  Tools selected here are locked behind a paid plan for every device. Leave all off to keep
-                  the whole AI suite available on the Free tier.
-                </p>
-                <div class="a-pill-set" id="gatedTools"></div>
-              </div>
-            </div>
-
-            <p class="a-action-status" id="configStatus" style="margin-top:14px"></p>
+          </div>
+          <div class="a-panel-body">
+            <div class="a-pill-set" id="gatedTools"></div>
           </div>
         </section>
       </section>
@@ -570,7 +661,10 @@
 <div class="a-scrim" id="scrim" data-action="close-drawer"></div>
 <aside class="a-drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true">
   <div class="a-drawer-head">
-    <h2 id="drawerTitle">Details</h2>
+    <div class="a-drawer-titles">
+      <h2 id="drawerTitle">Details</h2>
+      <div class="a-drawer-meta" id="drawerMeta"></div>
+    </div>
     <button class="a-icon-btn" data-action="close-drawer" aria-label="Close details"><svg><use href="#i-close"/></svg></button>
   </div>
   <div class="a-drawer-body" id="drawerBody"></div>
@@ -583,7 +677,7 @@
 <div class="a-full" id="readiness" role="dialog" aria-modal="true" aria-labelledby="readyTitle" aria-hidden="true">
   <header class="a-full-head">
     <div class="a-full-title">
-      <svg class="a-full-icon"><use href="#i-flag"/></svg>
+      <span class="a-full-icon"><svg><use href="#i-flag"/></svg></span>
       <div>
         <h2 id="readyTitle">Country readiness</h2>
         <p class="a-full-sub" id="readySub">Tick a country once the app and the keyboard are ready for it.</p>
@@ -596,7 +690,7 @@
   <div class="a-full-tools">
     <label class="a-search">
       <svg><use href="#i-search"/></svg>
-      <input type="search" class="a-input" id="readySearch" placeholder="Search country or code…" autocomplete="off">
+      <input type="search" class="a-input" id="readySearch" placeholder="Search country or code" autocomplete="off">
     </label>
     <div class="a-seg" role="group" aria-label="Filter countries" id="readyFilter">
       <button type="button" class="a-seg-btn is-active" data-action="ready-filter" data-filter="all" aria-pressed="true">All</button>
@@ -613,8 +707,11 @@
 <!-- ═══ Confirm dialog ═════════════════════════════════════════ -->
 <div class="a-dialog" id="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dialogTitle" aria-hidden="true">
   <div class="a-dialog-box">
-    <h2 id="dialogTitle">Are you sure?</h2>
-    <p id="dialogText"></p>
+    <span class="a-dialog-icon"><svg><use href="#i-alert"/></svg></span>
+    <div class="a-dialog-copy">
+      <h2 id="dialogTitle">Are you sure?</h2>
+      <p id="dialogText"></p>
+    </div>
     <div class="a-dialog-actions">
       <button class="a-btn a-btn-ghost" data-action="dialog-cancel">Cancel</button>
       <button class="a-btn a-btn-primary" id="dialogConfirm">Confirm</button>

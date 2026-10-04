@@ -37,11 +37,23 @@
     overview: 'Overview',
     ask:      'Ask AI',
     devices:  'Devices',
-    aitools:  'AI Tools',
-    apikeys:  'API Keys',
+    aitools:  'AI usage',
+    apikeys:  'API keys',
     crashes:  'Crashes',
     referrals: 'Referrals',
-    releases: 'Releases & Config',
+    releases: 'Releases & config',
+  };
+
+  /* One line under the topbar title, so each view says what it is for. */
+  const SECTION_DESCS = {
+    overview: 'Installs, activity and AI spend across every device',
+    ask:      'Plain-language questions, answered with read-only queries on live data',
+    devices:  'Every install, its plan and how it is used. Click a row for details.',
+    aitools:  'Which AI features each device leans on',
+    apikeys:  'Groq key health and rate-limit status',
+    crashes:  'Crash reports from the app and the keyboard, grouped by cause',
+    referrals: 'Invite funnel, top referrers and program settings',
+    releases: 'Publish app updates and change remote config',
   };
 
   /* ═══ State ══════════════════════════════════════════════════ */
@@ -108,6 +120,23 @@
     const d = new Date(iso);
     return Number.isNaN(+d) ? '—' : d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
   }
+
+  /* '3 h ago' for anything inside a week, a date after that. */
+  function fmtAgo(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (Number.isNaN(+d)) return '—';
+    const s = (Date.now() - d.getTime()) / 1000;
+    if (s < 0)      return fmtDate(iso);
+    if (s < 60)     return 'just now';
+    if (s < 3600)   return `${Math.floor(s / 60)} min ago`;
+    if (s < 86400)  return `${Math.floor(s / 3600)} h ago`;
+    if (s < 604800) return `${Math.floor(s / 86400)} d ago`;
+    return fmtDate(iso);
+  }
+
+  const pct = (part, whole, digits = 1) =>
+    (whole ? `${((part / whole) * 100).toFixed(digits)}%` : '—');
 
   /* 'YYYY-MM-DD' → '19 Jul'. Parsed as UTC noon so the label can't slip a day
      on a browser west of the date line. */
@@ -176,7 +205,7 @@
     if (d.admin_plan_override) {
       flags.push(`<span class="a-flag-override" title="Admin override: ${esc(d.admin_plan_override)}">${icon('shield')}</span>`);
     }
-    if (legacyByok) flags.push(`<span class="a-plan a-plan-byok" title="Legacy BYOK key stored">BYOK</span>`);
+    if (legacyByok) flags.push('<span class="a-plan a-plan-byok" title="Legacy BYOK key stored">BYOK</span>');
 
     if (flags.length) html += `<span class="a-plan-flags">${flags.join('')}</span>`;
     return html;
@@ -208,6 +237,7 @@
     const btn = $('dialogConfirm');
     btn.textContent = confirmLabel;
     btn.className = `a-btn ${danger ? 'a-btn-danger' : 'a-btn-primary'}`;
+    $('dialog').classList.toggle('is-danger', danger);
     $('dialog').classList.add('is-open');
     $('dialog').setAttribute('aria-hidden', 'false');
     btn.focus();
@@ -252,7 +282,7 @@
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
 
-      if (res.status === 401) { onUnauthorized(); throw new ApiError('Session rejected — sign in again.', 401); }
+      if (res.status === 401) { onUnauthorized(); throw new ApiError('Session rejected. Sign in again.', 401); }
       if (res.status === 429) {
         const wait = Number(res.headers.get('Retry-After')) || 0;
         setHealth('warn', 'Rate limited');
@@ -282,106 +312,160 @@
 
   /* ═══ Charts ═════════════════════════════════════════════════
      Hand-rolled inline SVG — the site ships no charting library and a strict
-     no-CDN page shouldn't start. Every chart draws into a fixed viewBox and
-     scales to its container, so hover maps cleanly through percentages. */
+     no-CDN page shouldn't start.
 
-  const VW = 640;                      // viewBox width for all full-size charts
+     Every chart is drawn at its container's real pixel width, so axis text is
+     always 11px and lines are always 2px. (A fixed viewBox scaled to the card
+     made the type grow and shrink with the window.) mountChart() remembers
+     how to redraw each host, and one ResizeObserver redraws it whenever its
+     width changes, including the first time a hidden section is shown. The
+     data is already in hand, so a redraw never costs a request. */
 
-  /* Round up to a readable axis top. The step list is deliberately fine-grained:
-     a coarse [1,2,5,10] ladder rounds 285k up to 500k and throws away half the
-     plot height. Every step is divisible by 2 so the mid gridline stays round. */
-  function niceMax(v) {
-    if (!v || v <= 0) return 1;
-    const mag  = 10 ** Math.floor(Math.log10(v));
-    const step = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(s => v <= s * mag) || 10;
-    return step * mag;
+  const chartDraws = new Map();        // host element → draw()
+  let chartRO = null;
+
+  function mountChart(host, draw) {
+    if (!host) return;
+    for (const h of chartDraws.keys()) {
+      if (!h.isConnected) { chartDraws.delete(h); if (chartRO) chartRO.unobserve(h); }
+    }
+    chartDraws.set(host, draw);
+    if (!chartRO && 'ResizeObserver' in window) {
+      chartRO = new ResizeObserver((entries) => {
+        for (const e of entries) {
+          const w = Math.round(e.contentRect.width);
+          if (!w || String(w) === e.target.dataset.drawnW) continue;
+          const fn = chartDraws.get(e.target);
+          if (fn) fn();
+        }
+      });
+    }
+    if (chartRO) chartRO.observe(host);
+    draw();
+  }
+
+  /* The width to draw at. A hidden host reports 0: draw at a fallback and
+     leave drawnW blank, so the observer redraws once it is shown. */
+  function chartWidth(host) {
+    const w = Math.round(host.clientWidth);
+    host.dataset.drawnW = w ? String(w) : '';
+    return w || 640;
+  }
+
+  /* Round axis steps (1, 2, 2.5, 5 × 10ⁿ) aiming for about four intervals.
+     Integer series never get a fractional step: "2.5 devices" is not a tick. */
+  function niceScale(maxVal, { target = 4, integer = false } = {}) {
+    if (!maxVal || maxVal <= 0) return { top: target, step: 1 };
+    const raw  = maxVal / target;
+    const mag  = 10 ** Math.floor(Math.log10(raw));
+    const norm = raw / mag;
+    let step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
+    if (integer) step = Math.max(1, Math.ceil(step));
+    return { top: Math.ceil(maxVal / step - 1e-9) * step, step };
+  }
+
+  function yAxis(top, step, y, padL, right) {
+    let grid = '', labels = '';
+    for (let v = 0; v <= top + step / 1000; v += step) {
+      const yy = Math.round(y(v)) + 0.5;
+      grid   += `<line class="a-grid-line" x1="${padL}" y1="${yy}" x2="${right}" y2="${yy}"/>`;
+      labels += `<text class="a-axis-text" x="${padL - 10}" y="${yy}" text-anchor="end" dominant-baseline="middle">${esc(fmt(v))}</text>`;
+    }
+    return { grid, labels };
+  }
+
+  /* Date labels spaced by the room actually available, counted back from the
+     newest day so today is always labelled. */
+  function xAxis(data, toX, plotW, W, padL, padR, baseY) {
+    const n = data.length;
+    const maxLabels = Math.max(2, Math.floor(plotW / 78));
+    const every = Math.max(1, Math.ceil((n - 1) / (maxLabels - 1)));
+    let out = '';
+    for (let i = n - 1; i >= 0; i -= every) {
+      const x = toX(i);
+      const anchor = x - 22 < padL ? 'start' : x + 22 > W - padR ? 'end' : 'middle';
+      out += `<text class="a-axis-text" x="${x.toFixed(1)}" y="${baseY}" text-anchor="${anchor}">${esc(fmtDayLabel(data[i].date))}</text>`;
+    }
+    return out;
   }
 
   function emptyChart(host, message) {
+    host.dataset.drawnW = '';
     host.innerHTML = `<div class="a-chart-empty">${esc(message)}</div>`;
   }
 
   /**
    * Line + area chart over a dated series.
-   * @param {HTMLElement} host  a .a-chart-wrap
+   * @param {HTMLElement} host  a .a-chart-wrap (or a KPI spark strip)
    * @param {Array<{date:string, value:number}>} data oldest → newest
    */
   function lineChart(host, data, opts = {}) {
-    const { color = C1, compact = false, label = 'value' } = opts;
+    mountChart(host, () => drawLine(host, data, opts));
+  }
+
+  function drawLine(host, data, { color = C1, compact = false, label = 'value' } = {}) {
     if (!data || !data.length) {
-      if (compact) { host.innerHTML = ''; return; }
+      if (compact) { host.dataset.drawnW = ''; host.innerHTML = ''; return; }
       return emptyChart(host, 'No data for this period yet.');
     }
 
-    const H    = compact ? 44 : 210;
-    const padL = compact ? 2  : 44;
-    const padR = compact ? 2  : 10;
-    const padT = compact ? 8  : 14;
-    const padB = compact ? 6  : 26;
-    const plotW = VW - padL - padR;
+    const W = chartWidth(host);
+    const H = compact ? (host.clientHeight || 46) - 12 : 232;
+    const padL = compact ? 2 : 44;
+    const padR = compact ? 4 : 8;
+    const padT = compact ? 5 : 10;
+    const padB = compact ? 3 : 28;
+    const plotW = W - padL - padR;
     const plotH = H - padT - padB;
 
-    const max = niceMax(Math.max(...data.map(d => d.value), 0));
+    const maxV = Math.max(...data.map(d => d.value), 0);
+    const { top, step } = compact
+      ? { top: maxV || 1, step: maxV || 1 }
+      : niceScale(maxV, { integer: maxV >= 4 });
     const x = (i) => padL + (data.length === 1 ? plotW / 2 : (i / (data.length - 1)) * plotW);
-    const y = (v) => padT + plotH - (v / max) * plotH;
+    const y = (v) => padT + plotH - (v / top) * plotH;
 
     const line = data.map((d, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(d.value).toFixed(1)}`).join(' ');
     const area = `${line} L${x(data.length - 1).toFixed(1)} ${padT + plotH} L${x(0).toFixed(1)} ${padT + plotH} Z`;
     const gid  = `g${Math.random().toString(36).slice(2, 8)}`;
 
-    let grid = '';
-    let yAxis = '';
-    if (!compact) {
-      for (let t = 0; t <= 2; t++) {
-        const v  = (max / 2) * t;
-        const yy = y(v).toFixed(1);
-        grid  += `<line class="a-grid-line" x1="${padL}" y1="${yy}" x2="${VW - padR}" y2="${yy}"/>`;
-        yAxis += `<text class="a-axis-text" x="${padL - 8}" y="${yy}" text-anchor="end" dominant-baseline="middle">${esc(fmt(v))}</text>`;
-      }
-    }
+    const axes = compact ? { grid: '', labels: '' } : yAxis(top, step, y, padL, W - padR);
+    const xLabels = compact ? '' : xAxis(data, x, plotW, W, padL, padR, H - 8);
 
-    /* Three x labels only — first, middle, last. A label per day would collide
-       long before 30 of them fit. */
-    let xAxis = '';
-    if (!compact) {
-      [0, Math.floor((data.length - 1) / 2), data.length - 1].forEach((i, n) => {
-        if (i < 0 || !data[i]) return;
-        xAxis += `<text class="a-axis-text" x="${x(i).toFixed(1)}" y="${H - 6}" text-anchor="${n === 0 ? 'start' : n === 2 ? 'end' : 'middle'}">${esc(fmtDayLabel(data[i].date))}</text>`;
-      });
-    }
-
-    /* The compact form is a sparkline inside a KPI tile: decoration that gives
-       the headline number a shape. It carries no hover layer on purpose — the
-       tile clips its own overflow, and the very same series is fully
+    const last = data[data.length - 1];
+    /* The compact form is a sparkline inside a KPI tile: it gives the headline
+       number a shape and carries no hover layer. The same series is fully
        explorable, with crosshair and tooltip, in the panel below. */
     const interactive = !compact;
 
     host.innerHTML = `
-      <svg viewBox="0 0 ${VW} ${H}" preserveAspectRatio="none" role="img"
-           aria-label="${esc(label)} over the last ${data.length} days, from ${esc(fmtDayLabel(data[0].date))} to ${esc(fmtDayLabel(data[data.length - 1].date))}">
+      <svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img"
+           aria-label="${esc(label)} over the last ${data.length} days, from ${esc(fmtDayLabel(data[0].date))} to ${esc(fmtDayLabel(last.date))}">
         <defs>
           <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="${color}" stop-opacity="0.34"/>
+            <stop offset="0%"   stop-color="${color}" stop-opacity="${compact ? 0.22 : 0.2}"/>
             <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
           </linearGradient>
         </defs>
-        ${grid}
+        ${axes.grid}
         <path d="${area}" fill="url(#${gid})"/>
-        <path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-        ${yAxis}${xAxis}
+        <path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        ${axes.labels}${xLabels}
+        <circle cx="${x(data.length - 1).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="${compact ? 3 : 4}"
+                fill="${color}" stroke="var(--a-surface)" stroke-width="2"/>
         ${interactive ? `
           <line class="a-crosshair" id="${gid}-cross" x1="0" y1="${padT}" x2="0" y2="${padT + plotH}"/>
-          <circle id="${gid}-dot" r="4" fill="${color}" stroke="var(--card-solid)" stroke-width="2" opacity="0"/>
-          <rect class="a-hot" x="${padL}" y="${padT}" width="${plotW}" height="${plotH}"/>` : ''}
+          <circle id="${gid}-dot" r="4.5" fill="${color}" stroke="var(--a-surface)" stroke-width="2" opacity="0"/>
+          <rect class="a-hot" x="${padL}" y="0" width="${plotW}" height="${padT + plotH}"/>` : ''}
       </svg>
-      ${interactive ? '<div class="a-tooltip"><span class="a-tooltip-date"></span><br><span class="a-tooltip-val"></span></div>' : ''}`;
+      ${interactive ? '<div class="a-tooltip"><span class="a-tooltip-date"></span><span class="a-tooltip-val"></span></div>' : ''}`;
 
     if (!interactive) return;
 
     attachHover(host, data, {
       count: data.length,
       toX: x, toY: (d) => y(d.value),
-      viewW: VW, viewH: H,
+      viewW: W,
       cross: $(`${gid}-cross`), dot: $(`${gid}-dot`),
       label,
     });
@@ -389,59 +473,61 @@
 
   /** Vertical bar chart over a dated series. */
   function barChart(host, data, opts = {}) {
-    const { color = C2, label = 'value' } = opts;
-    if (!data || !data.length) return emptyChart(host, 'No data for this period yet.');
-    if (!data.some(d => d.value > 0)) return emptyChart(host, 'No AI tokens recorded in this period.');
+    mountChart(host, () => drawBars(host, data, opts));
+  }
 
-    const H = 210, padL = 44, padR = 10, padT = 14, padB = 26;
-    const plotW = VW - padL - padR;
+  function drawBars(host, data, { color = C2, label = 'value' } = {}) {
+    if (!data || !data.length) return emptyChart(host, 'No data for this period yet.');
+    if (!data.some(d => d.value > 0)) return emptyChart(host, 'Nothing recorded in this period.');
+
+    const W = chartWidth(host);
+    const H = 232, padL = 44, padR = 8, padT = 10, padB = 28;
+    const plotW = W - padL - padR;
     const plotH = H - padT - padB;
 
-    const max  = niceMax(Math.max(...data.map(d => d.value), 0));
+    const maxV = Math.max(...data.map(d => d.value), 0);
+    const { top, step } = niceScale(maxV, { integer: true });
     const slot = plotW / data.length;
-    const bw   = Math.max(2, slot - 2);     // the 2px gap keeps bars from fusing
+    /* Thin marks: capped at 24px and never the whole slot, so the band's
+       leftover reads as air rather than a wall of colour. */
+    const bw   = Math.max(2, Math.min(24, slot * 0.66, slot - 2));
     const x    = (i) => padL + i * slot + (slot - bw) / 2;
-    const y    = (v) => padT + plotH - (v / max) * plotH;
+    const y    = (v) => padT + plotH - (v / top) * plotH;
+    const base = padT + plotH;
 
-    let grid = '', yAxis = '';
-    for (let t = 0; t <= 2; t++) {
-      const v  = (max / 2) * t;
-      const yy = y(v).toFixed(1);
-      grid  += `<line class="a-grid-line" x1="${padL}" y1="${yy}" x2="${VW - padR}" y2="${yy}"/>`;
-      yAxis += `<text class="a-axis-text" x="${padL - 8}" y="${yy}" text-anchor="end" dominant-baseline="middle">${esc(fmt(v))}</text>`;
-    }
+    const axes = yAxis(top, step, y, padL, W - padR);
+    const xLabels = xAxis(data, (i) => x(i) + bw / 2, plotW, W, padL, padR, H - 8);
 
-    let xAxis = '';
-    [0, Math.floor((data.length - 1) / 2), data.length - 1].forEach((i, n) => {
-      if (i < 0 || !data[i]) return;
-      xAxis += `<text class="a-axis-text" x="${(x(i) + bw / 2).toFixed(1)}" y="${H - 6}" text-anchor="${n === 0 ? 'start' : n === 2 ? 'end' : 'middle'}">${esc(fmtDayLabel(data[i].date))}</text>`;
-    });
-
+    /* 4px rounded data end, square at the baseline. */
     const bars = data.map((d, i) => {
-      const h = Math.max(d.value > 0 ? 2 : 0, padT + plotH - y(d.value));
-      return `<rect x="${x(i).toFixed(1)}" y="${(padT + plotH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2).toFixed(1)}" fill="${color}"/>`;
+      const h = d.value > 0 ? Math.max(2, base - y(d.value)) : 0;
+      if (!h) return '';
+      const x0 = x(i), y0 = base - h, r = Math.min(4, bw / 2, h);
+      return `<path class="a-bar" data-i="${i}" fill="${color}" d="M${x0.toFixed(1)} ${base} V${(y0 + r).toFixed(1)} `
+        + `Q${x0.toFixed(1)} ${y0.toFixed(1)} ${(x0 + r).toFixed(1)} ${y0.toFixed(1)} H${(x0 + bw - r).toFixed(1)} `
+        + `Q${(x0 + bw).toFixed(1)} ${y0.toFixed(1)} ${(x0 + bw).toFixed(1)} ${(y0 + r).toFixed(1)} V${base} Z"/>`;
     }).join('');
 
-    const gid = `b${Math.random().toString(36).slice(2, 8)}`;
     host.innerHTML = `
-      <svg viewBox="0 0 ${VW} ${H}" preserveAspectRatio="none" role="img" aria-label="${esc(label)} over time">
-        ${grid}${bars}${yAxis}${xAxis}
-        <line class="a-crosshair" id="${gid}-cross" x1="0" y1="${padT}" x2="0" y2="${padT + plotH}"/>
-        <rect class="a-hot" x="${padL}" y="${padT}" width="${plotW}" height="${plotH}"/>
+      <svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${esc(label)} per day">
+        ${axes.grid}<g class="a-bars">${bars}</g>${axes.labels}${xLabels}
+        <rect class="a-hot" x="${padL}" y="0" width="${plotW}" height="${base}"/>
       </svg>
-      <div class="a-tooltip"><span class="a-tooltip-date"></span><br><span class="a-tooltip-val"></span></div>`;
+      <div class="a-tooltip"><span class="a-tooltip-date"></span><span class="a-tooltip-val"></span></div>`;
 
     attachHover(host, data, {
       count: data.length,
       toX: (i) => x(i) + bw / 2,
       toY: (d) => y(d.value),
-      viewW: VW, viewH: H,
-      cross: $(`${gid}-cross`), dot: null,
+      viewW: W,
+      cross: null, dot: null,
+      bars: host.querySelector('.a-bars'),
       label,
     });
   }
 
-  /* Shared crosshair + tooltip behaviour for the dated charts. */
+  /* Shared hover behaviour for the dated charts: nearest point by x, a
+     crosshair or a highlighted bar, and a tooltip kept inside the card. */
   function attachHover(host, data, cfg) {
     const svg = host.querySelector('svg');
     const hot = host.querySelector('.a-hot');
@@ -461,17 +547,30 @@
 
       if (cfg.cross) { cfg.cross.setAttribute('x1', px); cfg.cross.setAttribute('x2', px); cfg.cross.classList.add('is-on'); }
       if (cfg.dot)   { cfg.dot.setAttribute('cx', px); cfg.dot.setAttribute('cy', py); cfg.dot.setAttribute('opacity', '1'); }
+      if (cfg.bars) {
+        cfg.bars.classList.add('is-hover');
+        cfg.bars.querySelectorAll('.a-bar').forEach(b => b.classList.toggle('is-on', Number(b.dataset.i) === best));
+      }
 
       tip.querySelector('.a-tooltip-date').textContent = fmtDayLabel(point.date);
       tip.querySelector('.a-tooltip-val').textContent  = `${fmtFull(point.value)} ${cfg.label}`;
-      tip.style.left = `${(px / cfg.viewW) * 100}%`;
-      tip.style.top  = `${(py / cfg.viewH) * 100}%`;
       tip.classList.add('is-on');
+      /* The card clips its overflow, so a tooltip for a point near the top
+         drops below the point instead of disappearing under the header. */
+      tip.classList.toggle('is-below', py < tip.offsetHeight + 16);
+      const half = tip.offsetWidth / 2 + 4;
+      const left = Math.min(Math.max(px * (box.width / cfg.viewW), half), box.width - half);
+      tip.style.left = `${left}px`;
+      tip.style.top  = `${py}px`;
     };
 
     const hide = () => {
       if (cfg.cross) cfg.cross.classList.remove('is-on');
       if (cfg.dot)   cfg.dot.setAttribute('opacity', '0');
+      if (cfg.bars) {
+        cfg.bars.classList.remove('is-hover');
+        cfg.bars.querySelectorAll('.a-bar.is-on').forEach(b => b.classList.remove('is-on'));
+      }
       tip.classList.remove('is-on');
     };
 
@@ -480,45 +579,38 @@
     hot.addEventListener('pointerleave', hide);
   }
 
-  /** Donut with a direct-labelled legend beside it. */
-  function donut(host, slices, centreLabel) {
-    const total = slices.reduce((s, x) => s + x.value, 0);
+  /* Plan mix: the paid headline, a 100% bar on the ordinal ramp, and one row
+     per tier. Replaces a donut whose 3% Max slice was a sliver nobody could
+     read. Free → Pro → Max is ordered, so the ramp, not categorical hues. */
+  function planMix(host, mix) {
+    const rows = [
+      { label: 'Free', value: mix.free || 0, color: ORD[0] },
+      { label: 'Pro',  value: mix.pro  || 0, color: ORD[1] },
+      { label: 'Max',  value: mix.max  || 0, color: ORD[2] },
+    ];
+    const total = rows.reduce((s, r) => s + r.value, 0);
     if (!total) return emptyChart(host, 'No devices yet.');
-
-    const S = 150, R = 62, r = 42, cx = S / 2, cy = S / 2;
-    const polar = (radius, a) => [cx + radius * Math.cos(a), cy + radius * Math.sin(a)];
-
-    let angle = -Math.PI / 2;
-    const arcs = slices.map((s) => {
-      if (!s.value) return '';
-      const sweep = (s.value / total) * Math.PI * 2;
-      /* A full circle can't be drawn as one arc — split it. */
-      const span = Math.min(sweep, Math.PI * 1.999);
-      const a0 = angle, a1 = angle + span;
-      angle = a1;
-      const [x0, y0] = polar(R, a0), [x1, y1] = polar(R, a1);
-      const [x2, y2] = polar(r, a1), [x3, y3] = polar(r, a0);
-      const large = span > Math.PI ? 1 : 0;
-      return `<path d="M${x0} ${y0} A${R} ${R} 0 ${large} 1 ${x1} ${y1} L${x2} ${y2} A${r} ${r} 0 ${large} 0 ${x3} ${y3} Z"
-                fill="${s.color}" stroke="var(--card-solid)" stroke-width="2"><title>${esc(s.label)}: ${esc(fmtFull(s.value))}</title></path>`;
-    }).join('');
-
-    const legend = slices.map(s => `
-      <div class="a-donut-row">
-        <span class="a-legend-swatch" style="background:${s.color}"></span>
-        <span class="a-donut-name">${esc(s.label)}</span>
-        <span class="a-donut-num">${esc(fmtFull(s.value))}</span>
-        <span class="a-donut-pct">${total ? ((s.value / total) * 100).toFixed(1) : '0.0'}%</span>
-      </div>`).join('');
+    const paid = rows[1].value + rows[2].value;
 
     host.innerHTML = `
-      <div class="a-donut-wrap">
-        <svg viewBox="0 0 ${S} ${S}" style="width:150px;flex:0 0 auto" role="img" aria-label="${esc(centreLabel)} breakdown">
-          ${arcs}
-          <text class="a-donut-center-val" x="${cx}" y="${cy - 2}">${esc(fmt(total))}</text>
-          <text class="a-donut-center-lbl" x="${cx}" y="${cy + 13}">${esc(centreLabel.toUpperCase())}</text>
-        </svg>
-        <div class="a-donut-legend">${legend}</div>
+      <div class="a-plans">
+        <div class="a-plans-head">
+          <div><div class="a-plans-big">${esc(fmtFull(paid))}</div><div class="a-plans-cap">paid devices</div></div>
+          <div><div class="a-plans-big">${esc(pct(paid, total))}</div><div class="a-plans-cap">of all installs</div></div>
+        </div>
+        <div class="a-segbar" role="img" aria-label="${esc(rows.map(r => `${r.label} ${pct(r.value, total)}`).join(', '))}">
+          ${rows.filter(r => r.value > 0).map(r =>
+            `<span style="flex-grow:${r.value};background:${r.color}" title="${esc(`${r.label}: ${fmtFull(r.value)}`)}"></span>`).join('')}
+        </div>
+        <div class="a-plans-rows">
+          ${rows.map(r => `
+            <div class="a-plans-row">
+              <span class="a-legend-swatch" style="background:${r.color}"></span>
+              <span class="a-plans-name">${esc(r.label)}</span>
+              <span class="a-plans-num">${esc(fmtFull(r.value))}</span>
+              <span class="a-plans-pct">${esc(pct(r.value, total))}</span>
+            </div>`).join('')}
+        </div>
       </div>`;
   }
 
@@ -540,25 +632,28 @@
     const tokens = (stats.daily_tokens || []).map(d => ({ date: d.date, value: d.tokens || 0 }));
     const tokens30 = tokens.reduce((s, d) => s + d.value, 0);
 
-    $('k-total').textContent  = fmt(stats.total_users);
-    $('k-dau').textContent    = fmt(stats.dau);
-    $('k-mau').textContent    = fmt(stats.mau);
-    /* Headline and sparkline must be the same measure — this tile is tokens, so
-       "Total AI Uses" (a lifetime count with no series behind it) lives in the
-       strip below instead. */
+    $('k-total').textContent  = fmtFull(stats.total_users);
+    $('k-dau').textContent    = fmtFull(stats.dau);
+    $('k-mau').textContent    = fmtFull(stats.mau);
+    /* Headline and sparkline must be the same measure, so this tile is the
+       30-day token sum its sparkline draws, not a lifetime count. */
     $('k-tokens').textContent = fmt(tokens30);
 
-    $('k-total-foot').textContent = `${fmtFull(stats.new_installs_7d)} new in the last 7 days`;
-    $('k-mau-foot').textContent   = stats.total_users
-      ? `${((stats.mau / stats.total_users) * 100).toFixed(1)}% of all installs`
+    const newInstalls = stats.new_installs_7d || 0;
+    $('k-total-foot').innerHTML =
+      `<span class="a-delta ${newInstalls ? 'is-up' : 'is-flat'}">+${esc(fmtFull(newInstalls))}</span> in the last 7 days`;
+    /* DAU/MAU is the stickiness ratio: how much of the monthly base comes back
+       on a given day. */
+    $('k-dau-foot').innerHTML = stats.mau
+      ? `<b>${esc(pct(stats.dau, stats.mau, 0))}</b> of monthly active`
       : '';
-
-    $('k-wau').textContent   = fmt(stats.wau);
-    $('k-ai').textContent    = fmt(stats.total_ai_uses);
-    $('k-kb').textContent    = fmt(stats.total_keyboard_opens);
-    $('k-app').textContent   = fmt(stats.total_app_opens);
-    $('k-voice').textContent = fmt(stats.total_voice_ai_uses);
-    $('k-lens').textContent  = fmt((stats.total_lens_translate || 0) + (stats.total_lens_reply || 0));
+    $('k-mau-foot').innerHTML = [
+      stats.total_users ? `<b>${esc(pct(stats.mau, stats.total_users))}</b> of installs` : '',
+      stats.wau != null ? `<b>${esc(fmtFull(stats.wau))}</b> weekly` : '',
+    ].filter(Boolean).join(' · ');
+    $('k-tokens-foot').innerHTML = tokens.length
+      ? `<b>${esc(fmt(Math.round(tokens30 / tokens.length)))}</b> per day on average`
+      : '';
 
     renderActiveChart();
     /* The sparkline always shows the full window — it's the tile's shape, not a
@@ -567,12 +662,8 @@
     barChart($('chartTokens'), tokens, { color: C2, label: 'tokens' });
     lineChart($('k-tokens-spark'), tokens, { color: C2, compact: true, label: 'tokens' });
 
-    const mix = stats.plan_mix || {};
-    donut($('chartPlans'), [
-      { label: 'Free', value: mix.free || 0, color: ORD[0] },
-      { label: 'Pro',  value: mix.pro  || 0, color: ORD[1] },
-      { label: 'Max',  value: mix.max  || 0, color: ORD[2] },
-    ], 'devices');
+    planMix($('chartPlans'), stats.plan_mix || {});
+    renderEngagement();
 
     renderCountries();
     populateCountryFilter();
@@ -599,10 +690,38 @@
     renderActiveChart();
   }
 
+  /* All-time engagement: the two open counters, then AI requests split by
+     feature. The bars wear the same per-feature colours as the AI usage
+     table, so a feature keeps one colour across the whole console. */
+  function renderEngagement() {
+    const host = $('engagePanel');
+    if (!host || !stats) return;
+    const tools = TOOLS.map(t => ({ ...t, value: stats[t.key] || 0 }));
+    const total = tools.reduce((s, t) => s + t.value, 0);
+    const max   = Math.max(...tools.map(t => t.value), 1);
+
+    host.innerHTML = `
+      <div class="a-engage">
+        <div class="a-engage-top">
+          <div><span class="a-engage-label">Keyboard opens</span><span class="a-engage-val">${esc(fmt(stats.total_keyboard_opens || 0))}</span></div>
+          <div><span class="a-engage-label">App opens</span><span class="a-engage-val">${esc(fmt(stats.total_app_opens || 0))}</span></div>
+        </div>
+        <div class="a-engage-sub"><span>AI requests by feature</span><span>${esc(fmtFull(total))} total</span></div>
+        <div class="a-barlist">
+          ${tools.map(t => `
+            <div class="a-barlist-row" title="${esc(`${t.label}: ${fmtFull(t.value)}`)}">
+              <span class="a-barlist-key"><span class="a-legend-swatch" style="background:${t.color}"></span>${esc(t.label)}</span>
+              <span class="a-barlist-track"><span class="a-barlist-fill" style="width:${((t.value / max) * 100).toFixed(1)}%;background:${t.color}"></span></span>
+              <span class="a-barlist-val">${esc(fmt(t.value))}<small>${esc(pct(t.value, total, 0))}</small></span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
   /* How many country rows the panel shows before the "Show all" toggle. The
      list itself is never truncated server-side — a market with one device is
      exactly the row you don't want silently dropped. */
-  const COUNTRY_PREVIEW = 12;
+  const COUNTRY_PREVIEW = 10;
   let countriesExpanded = false;
 
   function toggleCountries() {
@@ -620,7 +739,8 @@
     const host = $('countryPanel');
     const rows = Array.isArray(stats.countries) ? stats.countries : [];
     if (!rows.length) {
-      return emptyChart(host, 'No country data yet — it is stamped on a device’s next ping.');
+      host.innerHTML = '<div class="a-chart-empty">No country data yet. It is stamped on a device’s next ping.</div>';
+      return;
     }
 
     /* Bars scale against the top country, not the total, so a long tail after
@@ -630,49 +750,60 @@
     const live  = rows.reduce((n, r) => n + (r.active_7d || 0), 0);
 
     const visible = countriesExpanded ? rows : rows.slice(0, COUNTRY_PREVIEW);
-    const hidden  = rows.length - visible.length;
 
     /* Each bar is split active-7d / dormant rather than showing one lifetime
        total. A country's device count on its own says only "we were installed
        there once" — the split is what distinguishes a live market from a single
        device that ran the app one afternoon and never came back (which is what
-       a VPN exit, a store crawler or a review device looks like). The hover
-       title carries the engagement totals for the same reason. */
+       a VPN exit, a store crawler or a review device looks like). */
 
-    host.innerHTML = `
-      <div class="a-barlist${countriesExpanded && rows.length > COUNTRY_PREVIEW ? ' is-scroll' : ''}">
-        ${visible.map(r => {
-          const users  = r.users || 0;
-          const act    = Math.min(r.active_7d || 0, users);
-          const name   = regionName(r.country);
-          const title  = `${name} (${r.country}) · ${fmtFull(act)} of ${fmtFull(users)} active in 7d · `
-                       + `${fmtFull(r.kb_opens || 0)} keyboard opens · ${fmtFull(r.ai_uses || 0)} AI uses`;
-          return `
-          <button type="button" class="a-barlist-row is-clickable" data-country="${esc(r.country)}" title="${esc(title)}">
-            <span class="a-barlist-key">${esc(name)}</span>
-            <span class="a-barlist-track is-split">
+    const body = visible.map(r => {
+      const users = r.users || 0;
+      const act   = Math.min(r.active_7d || 0, users);
+      const name  = regionName(r.country);
+      return `
+        <tr class="is-clickable" data-country="${esc(r.country)}" tabindex="0"
+            title="${esc(`Show devices in ${name}`)}">
+          <td class="a-primary-cell"><span class="a-cc">${esc(r.country)}</span>${esc(name)}</td>
+          <td class="a-right a-num">${esc(fmtFull(users))}</td>
+          <td class="a-right a-num">${esc(fmtFull(act))}<small>${esc(pct(act, users, 0))}</small></td>
+          <td class="a-col-bar">
+            <span class="a-barlist-track is-split" aria-hidden="true">
               <span class="a-barlist-fill" style="width:${((act / max) * 100).toFixed(1)}%"></span>
               <span class="a-barlist-fill is-dim" style="width:${(((users - act) / max) * 100).toFixed(1)}%"></span>
             </span>
-            <span class="a-barlist-val">${esc(fmtFull(users))} <small>· ${esc(fmtFull(act))} active</small></span>
-          </button>`;
-        }).join('')}
+          </td>
+          <td class="a-right a-num">${esc(fmtFull(r.kb_opens || 0))}</td>
+          <td class="a-right a-num">${esc(fmtFull(r.ai_uses || 0))}</td>
+        </tr>`;
+    }).join('');
+
+    host.innerHTML = `
+      <div class="a-table-scroll">
+        <table class="a-table">
+          <thead><tr>
+            <th>Country</th><th class="a-right">Devices</th><th class="a-right">Active 7d</th>
+            <th class="a-col-bar">Activity</th><th class="a-right">Keyboard opens</th><th class="a-right">AI uses</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>
       </div>
-      ${rows.length > COUNTRY_PREVIEW ? `
-      <div class="a-barlist-more">
+      <div class="a-panel-foot">
+        <div class="a-legend">
+          <span class="a-legend-item"><span class="a-legend-swatch" style="background:${C1}"></span>Active in 7d</span>
+          <span class="a-legend-item"><span class="a-legend-swatch a-swatch-dim"></span>Dormant</span>
+          ${stats.countries_pending
+            ? `<span class="a-legend-item a-muted" title="${esc(`${fmtFull(stats.countries_pending)} device(s) have not pinged since country tracking shipped, so they carry no country yet. This table covers the ${fmtFull(shown)} reported so far; ${fmtFull(live)} of them were active in the last 7 days.`)}">${icon('info')}${esc(fmtFull(stats.countries_pending))} without a country yet</span>`
+            : ''}
+        </div>
+        ${rows.length > COUNTRY_PREVIEW ? `
         <button type="button" class="a-btn a-btn-ghost a-btn-sm" data-action="toggle-countries"
-                aria-expanded="${countriesExpanded}">
+                aria-expanded="${countriesExpanded}" style="margin-left:auto">
           ${countriesExpanded
             ? `Show top ${COUNTRY_PREVIEW}`
-            : `Show all ${esc(fmtFull(rows.length))} countries <small>· ${esc(fmtFull(hidden))} more</small>`}
-        </button>
-      </div>` : ''}
-      <div class="a-barlist-legend">
-        <span class="a-legend-item"><span class="a-legend-swatch" style="background:${C1}"></span>Active in 7d</span>
-        <span class="a-legend-item"><span class="a-legend-swatch a-swatch-dim"></span>Dormant</span>
-        <span class="a-legend-note">Click a country to see its devices</span>
-      </div>
-      ${stats.countries_pending ? `<p class="a-note">${esc(fmtFull(stats.countries_pending))} device(s) haven’t pinged since country tracking shipped, so they carry no country yet — this covers the ${esc(fmtFull(shown))} reported so far, not all installs. Of those, ${esc(fmtFull(live))} were active in the last 7 days.</p>` : ''}`;
+            : `Show all ${esc(fmtFull(rows.length))} countries`}
+        </button>` : ''}
+      </div>`;
   }
 
   /* The Devices country dropdown is filled from the same breakdown, so it can
@@ -935,16 +1066,30 @@
 
   /* ═══ Devices ════════════════════════════════════════════════ */
 
-  function skeleton(tbody, cols, rows = 6) {
+  /* First load of a table draws a skeleton. A refetch (filter, sort, page)
+     keeps the rows already on screen, dimmed, until the new ones land, so the
+     layout never jumps. `filled` marks a body that holds real rows. */
+  function skeleton(tbody, cols, rows = 8) {
+    if (tbody.dataset.filled === '1') { tbody.classList.add('is-stale'); return; }
     tbody.innerHTML = Array.from({ length: rows }, () =>
       `<tr class="a-skel-row">${Array.from({ length: cols }, (_, i) =>
-        `<td><span class="a-skel" style="width:${[70, 45, 35, 40, 60, 60, 30, 30, 45, 35, 35, 40][i] || 50}%"></span></td>`).join('')}</tr>`
+        `<td><span class="a-skel" style="width:${[70, 45, 35, 40, 60, 60, 30, 30, 45, 35, 40][i] || 50}%"></span></td>`).join('')}</tr>`
     ).join('');
   }
 
+  function fillBody(tbody, html) {
+    tbody.classList.remove('is-stale');
+    tbody.dataset.filled = '1';
+    tbody.innerHTML = html;
+  }
+
   function stateRow(tbody, cols, message, isError = false) {
+    tbody.classList.remove('is-stale');
+    tbody.dataset.filled = '';
     tbody.innerHTML = `<tr class="a-state-row${isError ? ' is-error' : ''}"><td colspan="${cols}">${esc(message)}</td></tr>`;
   }
+
+  const DEV_COLS = 11;
 
   async function loadDevices(p = 1, force = false) {
     page.dev = p;
@@ -957,7 +1102,7 @@
     if (country) params.set('country', country);
 
     const tbody = $('devBody');
-    skeleton(tbody, 12);
+    skeleton(tbody, DEV_COLS);
 
     try {
       const data = await request(`/api/admin/users?${params}`, { force });
@@ -969,38 +1114,58 @@
         badge.classList.remove('a-hidden');
       }
     } catch (e) {
-      stateRow(tbody, 12, e.message, true);
+      stateRow(tbody, DEV_COLS, e.message, true);
       $('devPager').innerHTML = '';
     }
   }
 
+  /* One column for the keyboard funnel instead of two Yes/No columns:
+     set as default, enabled but not default, or not set up. */
+  function keyboardStatus(d) {
+    if (d.keyboard_selected) return '<span class="a-status is-ok">Default</span>';
+    if (d.keyboard_enabled)  return '<span class="a-status is-warn">Enabled</span>';
+    return '<span class="a-status is-off">Not set up</span>';
+  }
+
   function renderDevices(devices) {
     const tbody = $('devBody');
-    if (!devices.length) return stateRow(tbody, 12, 'No devices match these filters.');
+    if (!devices.length) return stateRow(tbody, DEV_COLS, 'No devices match these filters.');
 
-    tbody.innerHTML = devices.map(d => `
+    fillBody(tbody, devices.map(d => `
       <tr class="is-clickable" data-device-id="${esc(d.device_id)}" tabindex="0">
-        <td class="a-primary-cell" title="${esc(d.device_id)}">${esc(d.device_name || 'Unknown')}</td>
+        <td class="a-primary-cell">
+          <span class="a-cell-title">${esc(d.device_name || 'Unknown')}</span>
+          <span class="a-cell-sub a-mono">${esc(d.device_id)}</span>
+        </td>
         <td>${planBadge(d)}</td>
-        <td${d.country ? ` title="${esc(regionName(d.country))}"` : ''}>${d.country ? esc(d.country) : '<span class="a-no">—</span>'}</td>
-        <td>${esc(d.android_version || '—')}</td>
+        <td${d.country ? ` title="${esc(regionName(d.country))}"` : ''}>${d.country ? `<span class="a-cc">${esc(d.country)}</span>` : '<span class="a-muted">—</span>'}</td>
+        <td class="a-num">${esc(d.android_version || '—')}</td>
         <td>${esc(fmtDate(d.install_date))}</td>
-        <td>${esc(fmtDate(d.last_use_date))}</td>
+        <td title="${esc(fmtDateTime(d.last_use_date))}">${esc(fmtDate(d.last_use_date))}</td>
         <td class="a-right a-num">${esc(fmtFull(d.total_app_opens || 0))}</td>
         <td class="a-right a-num">${esc(fmtFull(d.total_keyboard_opens || 0))}</td>
         <td class="a-right a-num">${esc(fmt(d.total_ai_tokens || 0))}</td>
-        <td>${d.keyboard_enabled  ? '<span class="a-yes">Yes</span>' : '<span class="a-no">No</span>'}</td>
-        <td>${d.keyboard_selected ? '<span class="a-yes">Yes</span>' : '<span class="a-no">No</span>'}</td>
+        <td>${keyboardStatus(d)}</td>
         <td>${esc(d.selected_theme || '—')}</td>
-      </tr>`).join('');
+      </tr>`).join(''));
   }
 
   function renderPager(host, p, target) {
     if (!p) { host.innerHTML = ''; return; }
+    const total = p.total || 0;
+    const limit = p.limit || 50;
+    const pages = p.total_pages || 1;
+    const from  = total ? (p.page - 1) * limit + 1 : 0;
+    const to    = Math.min(p.page * limit, total);
     host.innerHTML = `
-      <span class="a-pager-info">Page ${p.page} of ${p.total_pages || 1} · ${fmtFull(p.total)} total</span>
-      <button class="a-btn a-btn-ghost a-btn-sm" data-action="page" data-target="${target}" data-page="${p.page - 1}" ${p.page <= 1 ? 'disabled' : ''}>Previous</button>
-      <button class="a-btn a-btn-ghost a-btn-sm" data-action="page" data-target="${target}" data-page="${p.page + 1}" ${p.page >= (p.total_pages || 1) ? 'disabled' : ''}>Next</button>`;
+      <span class="a-pager-info">Showing <b>${fmtFull(from)}–${fmtFull(to)}</b> of <b>${fmtFull(total)}</b></span>
+      <span class="a-pager-pages">Page ${p.page} of ${pages}</span>
+      <div class="a-pager-btns">
+        <button class="a-icon-btn a-icon-btn-sm" data-action="page" data-target="${target}" data-page="${p.page - 1}"
+                aria-label="Previous page" ${p.page <= 1 ? 'disabled' : ''}>${icon('chevron-left')}</button>
+        <button class="a-icon-btn a-icon-btn-sm" data-action="page" data-target="${target}" data-page="${p.page + 1}"
+                aria-label="Next page" ${p.page >= pages ? 'disabled' : ''}>${icon('chevron-right')}</button>
+      </div>`;
   }
 
   /* ═══ Device drawer ══════════════════════════════════════════ */
@@ -1018,7 +1183,9 @@
   function openDrawer(title, bodyHtml, wide = false) {
     drawerEvents = null;
     $('drawerTitle').innerHTML = title;
+    $('drawerMeta').innerHTML  = '';
     $('drawerBody').innerHTML  = bodyHtml;
+    $('drawerBody').scrollTop  = 0;
     const d = $('drawer');
     d.classList.toggle('is-wide', wide);
     d.classList.add('is-open');
@@ -1032,6 +1199,35 @@
     $('scrim').classList.remove('is-open');
     drawerDeviceId = null;
     drawerEvents   = null;
+  }
+
+  const copyBtn = (text, what) =>
+    `<button class="a-icon-btn a-icon-btn-sm a-icon-btn-quiet" data-action="copy" data-copy="${esc(text)}"
+             aria-label="Copy ${esc(what)}" title="Copy ${esc(what)}">${icon('copy')}</button>`;
+
+  function drawerSection(title, inner, extraHead = '') {
+    return `<section class="a-dsec">
+      <div class="a-dsec-head"><h3>${esc(title)}</h3>${extraHead}</div>
+      ${inner}
+    </section>`;
+  }
+
+  const kvList = (rows) =>
+    `<dl class="a-kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl>`;
+
+  function metricCells(cells, compact = true) {
+    return `<div class="a-metrics${compact ? ' is-compact' : ''}" style="--n:${cells.length}">
+      ${cells.map(([label, value, title]) => `
+        <div class="a-metric"${title ? ` title="${esc(title)}"` : ''}>
+          <span class="a-metric-label">${esc(label)}</span>
+          <span class="a-metric-value">${value}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  function setDrawerTab(name) {
+    $$('#drawerBody .a-tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+    $$('#drawerBody .a-tabpanel').forEach(p => p.classList.toggle('a-hidden', p.dataset.panel !== name));
   }
 
   async function showDevice(deviceId) {
@@ -1050,21 +1246,25 @@
   function renderDevice({ device: d, recent_events: events, events_pagination: pg }) {
     if (!d) return;
     $('drawerTitle').innerHTML = `${esc(d.device_name || 'Unknown device')} ${planBadge(d)}`;
+    $('drawerMeta').innerHTML  = `<span class="a-mono">${esc(d.device_id)}</span>${copyBtn(d.device_id, 'device ID')}`
+      + (d.country ? `<span>·</span><span>${esc(regionName(d.country))}</span>` : '')
+      + (d.android_version ? `<span>·</span><span>Android ${esc(d.android_version)}</span>` : '');
 
     const tier      = effectiveTier(d);
     const paidValid = isPaidValid(d);
     const priorInstalls = Array.isArray(d.merged_device_ids) ? d.merged_device_ids.length : 0;
+    const budget = { free: config.free_daily_tokens ?? 10000, pro: 50000, max: 150000 }[tier];
 
-    const rows = [
-      ['Device ID',       `<span class="a-mono">${esc(d.device_id)}</span>`],
-      ['Effective tier',  `${TIER_LABEL[tier]} <span class="a-muted">· ${fmtFull({ free: 10000, pro: 50000, max: 150000 }[tier])} tokens/day</span>`],
+    const summary = metricCells([
+      ['Last active',     esc(fmtAgo(d.last_use_date)), fmtDateTime(d.last_use_date)],
+      ['Lifetime tokens', esc(fmt(d.total_ai_tokens || 0)), fmtFull(d.total_ai_tokens || 0)],
+      ['Keyboard opens',  esc(fmt(d.total_keyboard_opens || 0)), fmtFull(d.total_keyboard_opens || 0)],
+      ['App opens',       esc(fmt(d.total_app_opens || 0)), fmtFull(d.total_app_opens || 0)],
+    ]);
+
+    const planRows = [
+      ['Effective tier',  `${TIER_LABEL[tier]} <span class="a-muted">· ${esc(fmtFull(budget))} tokens/day</span>`],
       ['Self-reported',   esc(d.plan_tier || 'free')],
-      ['Country',         d.country ? `${esc(regionName(d.country))} <span class="a-muted">${esc(d.country)}</span>` : '—'],
-      ['Android',         esc(d.android_version || '—')],
-      ['First seen',      esc(fmtDateTime(d.created_at || d.install_date))],
-      ['Install date',    esc(fmtDate(d.install_date))],
-      ['Last active',     esc(fmtDateTime(d.last_use_date))],
-      ['Prior installs',  priorInstalls ? `${priorInstalls} <span class="a-muted">· merged on reinstall</span>` : '—'],
       ['Purchased tier',  d.paid_tier ? `${esc(TIER_LABEL[normTier(d.paid_tier)] || d.paid_tier)}${paidValid ? '' : ' <span class="a-muted">· expired</span>'}` : '—'],
       ['Purchased plan',  esc(d.premium_plan || '—')],
       ['Paid since',      esc(d.premium_since ? fmtDateTime(d.premium_since) : '—')],
@@ -1072,42 +1272,51 @@
       ['Recovery code',   d.recovery_code ? `<span class="a-mono">${esc(d.recovery_code)}</span>` : '—'],
       ['Restored from',   d.premium_restored_from ? `<span class="a-mono">${esc(d.premium_restored_from)}</span> <span class="a-muted">· ${esc(fmtDate(d.premium_restored_at))}</span>` : '—'],
       ['Admin override',  d.admin_plan_override ? `${esc(d.admin_plan_override)} <span class="a-muted">· set ${esc(fmtDateTime(d.admin_plan_override_at))}</span>` : '—'],
-      ['Keyboard enabled', d.keyboard_enabled  ? 'Yes' : 'No'],
-      ['Set as default',   d.keyboard_selected ? 'Yes' : 'No'],
-      ['Theme',            esc(d.selected_theme || '—')],
-      ['Lifetime tokens',  esc(fmtFull(d.total_ai_tokens || 0))],
-      ['App opens',        esc(fmtFull(d.total_app_opens || 0))],
-      ['Keyboard opens',   esc(fmtFull(d.total_keyboard_opens || 0))],
-      ['Keyboard AI',      esc(fmtFull(d.total_ai_uses || 0))],
-      ['Voice AI',         esc(fmtFull(d.total_voice_ai_uses || 0))],
-      ['Lens translate',   esc(fmtFull(d.total_lens_translate || 0))],
-      ['Lens reply',       esc(fmtFull(d.total_lens_reply || 0))],
     ];
 
-    let html = `<div class="a-drawer-section"><h3>Device</h3>
-      <dl class="a-kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl></div>`;
+    const deviceRows = [
+      ['Country',          d.country ? `${esc(regionName(d.country))} <span class="a-muted">${esc(d.country)}</span>` : '—'],
+      ['Android',          esc(d.android_version || '—')],
+      ['First seen',       esc(fmtDateTime(d.created_at || d.install_date))],
+      ['Install date',     esc(fmtDate(d.install_date))],
+      ['Last active',      esc(fmtDateTime(d.last_use_date))],
+      ['Prior installs',   priorInstalls ? `${priorInstalls} <span class="a-muted">· merged on reinstall</span>` : '—'],
+      ['Keyboard',         keyboardStatus(d)],
+      ['Theme',            esc(d.selected_theme || '—')],
+    ];
 
-    html += `<div class="a-drawer-section">
-      <h3>Change plan</h3>
+    /* Same per-feature colours as the AI usage table and the Overview card. */
+    const toolMax = Math.max(...TOOLS.map(t => d[t.key] || 0), 1);
+    const usage = `<div class="a-barlist">${TOOLS.map(t => {
+      const v = d[t.key] || 0;
+      return `<div class="a-barlist-row">
+        <span class="a-barlist-key"><span class="a-legend-swatch" style="background:${t.color}"></span>${esc(t.label)}</span>
+        <span class="a-barlist-track"><span class="a-barlist-fill" style="width:${((v / toolMax) * 100).toFixed(1)}%;background:${t.color}"></span></span>
+        <span class="a-barlist-val">${esc(fmtFull(v))}</span>
+      </div>`;
+    }).join('')}</div>`;
+
+    const planControl = `
       <p>Sets an admin override, applied on the device's next analytics ping. An override outranks the
          app's self-reported tier. Setting Free while a purchase is still valid does <em>not</em> lower the
-         budget — the server keeps honouring the paid tier until it expires.</p>
+         budget: the server keeps honouring the paid tier until it expires.</p>
       <div class="a-actions">
-        <button class="a-btn ${tier === 'free' ? 'a-btn-primary' : 'a-btn-ghost'} a-btn-sm" data-action="set-plan" data-plan="free">Free</button>
-        <button class="a-btn ${tier === 'pro'  ? 'a-btn-primary' : 'a-btn-ghost'} a-btn-sm" data-action="set-plan" data-plan="pro">Pro</button>
-        <button class="a-btn ${tier === 'max'  ? 'a-btn-primary' : 'a-btn-ghost'} a-btn-sm" data-action="set-plan" data-plan="max">Max</button>
+        <div class="a-seg" role="group" aria-label="Set plan">
+          ${['free', 'pro', 'max'].map(p => `
+            <button type="button" class="a-seg-btn${tier === p ? ' is-active' : ''}" data-action="set-plan" data-plan="${p}"
+                    aria-pressed="${tier === p}">${TIER_LABEL[p]}</button>`).join('')}
+        </div>
         ${d.admin_plan_override ? '<button class="a-btn a-btn-ghost a-btn-sm" data-action="clear-plan">Clear override</button>' : ''}
         <span class="a-action-status" id="planStatus"></span>
-      </div>
-    </div>`;
+      </div>`;
 
-    html += `<div class="a-drawer-section">
-      <h3 class="is-danger">Danger zone</h3>
-      <p>Permanently deletes ALL data for this user: device records (plan, premium expiry, recovery code,
-         daily token counters), events, crashes and payment records — including every reinstall on the same
-         hardware. This cannot be undone.</p>
+    const danger = `<div class="a-danger">
+      <h3>Delete all user data</h3>
+      <p>Permanently deletes device records (plan, premium expiry, recovery code, daily token counters),
+         events, crashes and payment records, including every reinstall on the same hardware.
+         This cannot be undone.</p>
       <div class="a-actions">
-        <button class="a-btn a-btn-danger a-btn-sm" data-action="delete-device">${icon('trash')}Delete all user data</button>
+        <button class="a-btn a-btn-danger a-btn-sm" data-action="delete-device">${icon('trash')}Delete permanently</button>
         <span class="a-action-status" id="deleteStatus"></span>
       </div>
     </div>`;
@@ -1115,25 +1324,41 @@
     const loaded = events ? events.length : 0;
     const total  = pg && Number.isFinite(pg.total) ? pg.total : loaded;
 
+    let activity;
     if (loaded) {
       drawerEvents = { page: (pg && pg.page) || 1, loaded, total, busy: false };
-      html += `<div class="a-drawer-section">
-        <h3>Activity · <span id="eventsCount">${fmtFull(loaded)}</span> of ${fmtFull(total)}</h3>
+      activity = `<section class="a-dsec">
+        <div class="a-dsec-head"><h3>Activity</h3>
+          <span class="a-muted"><span id="eventsCount">${fmtFull(loaded)}</span> of ${fmtFull(total)} events</span></div>
         <div class="a-events" id="eventsList">${events.map(eventRow).join('')}</div>
         <div class="a-actions a-events-more" id="eventsMore">${moreEventsBtn(loaded, total)}</div>
-      </div>`;
+      </section>`;
     } else {
-      html += '<div class="a-drawer-section"><h3>Activity</h3><p class="a-muted">No events recorded.</p></div>';
+      activity = '<div class="a-empty">' + icon('inbox') + '<p>No events recorded for this device.</p></div>';
     }
 
-    $('drawerBody').innerHTML = html;
+    $('drawerBody').innerHTML = `
+      <div class="a-tabs" role="tablist">
+        <button class="a-tab" role="tab" data-action="drawer-tab" data-tab="details" aria-selected="true">Details</button>
+        <button class="a-tab" role="tab" data-action="drawer-tab" data-tab="activity" aria-selected="false">
+          Activity <span class="a-tab-count">${esc(fmt(total))}</span></button>
+      </div>
+      <div class="a-tabpanel" data-panel="details">
+        <section class="a-dsec">${summary}</section>
+        ${drawerSection('Plan & billing', kvList(planRows))}
+        ${drawerSection('Change plan', planControl)}
+        ${drawerSection('Device', kvList(deviceRows))}
+        ${drawerSection('AI usage', usage)}
+        <section class="a-dsec">${danger}</section>
+      </div>
+      <div class="a-tabpanel a-hidden" data-panel="activity">${activity}</div>`;
   }
 
   function eventRow(e) {
     return `<div class="a-event">
       <span class="a-event-type">${esc(e.event_type)}</span>
       ${e.metadata ? `<span class="a-event-meta">${esc(e.metadata)}</span>` : ''}
-      <span class="a-event-time">${esc(fmtDateTime(e.timestamp))}</span>
+      <span class="a-event-time" title="${esc(fmtDateTime(e.timestamp))}">${esc(fmtDateTime(e.timestamp))}</span>
     </div>`;
   }
 
@@ -1225,7 +1450,7 @@
     if (!drawerDeviceId) return;
     const ok = await confirmAsk(
       'Delete all user data?',
-      'This removes the device records, events, crashes and payment records for this user — including every reinstall on the same hardware.\n\nThis cannot be undone.',
+      'This removes the device records, events, crashes and payment records for this user, including every reinstall on the same hardware.\n\nThis cannot be undone.',
       'Delete permanently', true,
     );
     if (!ok) return;
@@ -1263,13 +1488,17 @@
     </span></td>`;
   }
 
+  /* Identity rides the swatch; the label stays in text ink, never the series
+     colour (a light hue as text fails contrast on this surface). */
   function topTool(d) {
     let best = null, bestVal = 0;
     for (const t of TOOLS) {
       const v = d[t.key] || 0;
       if (v > bestVal) { bestVal = v; best = t; }
     }
-    return best ? `<span class="a-chip" style="background:${best.color}22;border:1px solid ${best.color}66;color:${best.color}">${esc(best.label)}</span>` : '<span class="a-no">—</span>';
+    return best
+      ? `<span class="a-legend-item"><span class="a-legend-swatch" style="background:${best.color}"></span>${esc(best.label)}</span>`
+      : '<span class="a-muted">—</span>';
   }
 
   async function loadAiTools(p = 1, force = false) {
@@ -1291,13 +1520,16 @@
       const maxes = {};
       for (const t of TOOLS) maxes[t.key] = Math.max(...devices.map(d => d[t.key] || 0), 1);
 
-      tbody.innerHTML = devices.map(d => `
-        <tr>
-          <td class="a-primary-cell" title="${esc(d.device_id)}">${esc(d.device_name || 'Unknown')}</td>
+      fillBody(tbody, devices.map(d => `
+        <tr class="is-clickable" data-device-id="${esc(d.device_id)}" tabindex="0">
+          <td class="a-primary-cell">
+            <span class="a-cell-title">${esc(d.device_name || 'Unknown')}</span>
+            <span class="a-cell-sub a-mono">${esc(d.device_id)}</span>
+          </td>
           ${TOOLS.map(t => cellBar(d[t.key] || 0, maxes[t.key], t.color)).join('')}
           <td>${topTool(d)}</td>
           <td class="a-right a-num">${esc(fmtFull(TOOLS.reduce((s, t) => s + (d[t.key] || 0), 0)))}</td>
-        </tr>`).join('');
+        </tr>`).join(''));
 
       renderPager($('aiPager'), data.pagination, 'ai');
     } catch (e) {
@@ -1309,74 +1541,80 @@
   /* ═══ API keys ═══════════════════════════════════════════════
      Health (check-keys) and limit status (key-limits) are separate endpoints —
      both live-ping Groq and are slow — but they describe the same keys, so they
-     render into one card per key. */
+     render into one row per key. */
 
   function renderKeys() {
-    const grid = $('keyGrid');
+    const body = $('keyBody');
     const byIndex = new Map();
     for (const k of keyHealth) byIndex.set(k.index, { ...byIndex.get(k.index), ...k });
     for (const k of keyLimits) byIndex.set(k.index, { ...byIndex.get(k.index), ...k, limitStatus: k.status });
 
     const keys = [...byIndex.values()].sort((a, b) => a.index - b.index);
 
-    if (!keys.length) {
-      grid.innerHTML = `<div class="a-empty">${icon('key')}<p>No key data loaded yet. Run a health check, or refresh the limit status.</p></div>`;
-      $('keySummary').innerHTML = '';
-      return;
-    }
-
-    grid.innerHTML = keys.map(k => {
-      const chips = [];
-
-      /* keyHealth rows carry `status` as health; keyLimits rows overwrite it and
-         we stash the limit meaning in `limitStatus`. Read them apart. */
-      const health = keyHealth.find(h => h.index === k.index);
-      if (health) {
-        if (health.status === 'working')        chips.push(`<span class="a-chip a-chip-ok">${icon('check')}Working</span>`);
-        else if (health.status === 'ratelimit') chips.push(`<span class="a-chip a-chip-warn">${icon('alert')}Rate limited</span>`);
-        else if (health.status === 'failed')    chips.push(`<span class="a-chip a-chip-bad">${icon('close')}Failed</span>`);
-      }
-      if (k.limitStatus === 'blocked')      chips.push(`<span class="a-chip a-chip-warn">${icon('lock')}Blocked</span>`);
-      else if (k.limitStatus === 'invalid') chips.push(`<span class="a-chip a-chip-bad">${icon('close')}Invalid key</span>`);
-      else if (k.limitStatus === 'available') chips.push(`<span class="a-chip a-chip-ok">${icon('check')}Available</span>`);
-      if (!chips.length) chips.push('<span class="a-chip a-chip-muted">Not checked</span>');
-
-      const meta = [];
-      if (health && health.latency != null) meta.push(`Latency <b>${esc(health.latency)} ms</b>`);
-      if (health && health.checkedAt)       meta.push(`Checked <b>${esc(fmtTime(health.checkedAt))}</b>`);
-      if (health && health.model)           meta.push(`Model <b>${esc(health.model)}</b>`);
-      if (k.limitStatus === 'blocked' && k.blocked_until) meta.push(`Until <b>${esc(fmtDateTime(k.blocked_until))}</b>`);
-
-      return `<article class="a-key-card">
-        <div class="a-key-card-top">
-          <span class="a-key-idx">${esc(k.index)}</span>
-          <span class="a-key-name">${esc(k.name || `Key ${k.index}`)}</span>
-        </div>
-        <span class="a-mono a-key-masked">${esc(k.masked || '—')}</span>
-        <div class="a-key-chips">${chips.join('')}</div>
-        ${meta.length ? `<div class="a-key-meta">${meta.join('')}</div>` : ''}
-        ${health && health.error ? `<p class="a-key-err">${esc(health.error)}</p>` : ''}
-        ${k.limitStatus === 'blocked' && k.key_hash
-          ? `<div><button class="a-btn a-btn-ghost a-btn-sm" data-action="unblock" data-hash="${esc(k.key_hash)}">Unblock now</button></div>` : ''}
-      </article>`;
-    }).join('');
-
     const working = keyHealth.filter(k => k.status === 'working' || k.status === 'ratelimit').length;
     const failed  = keyHealth.filter(k => k.status === 'failed').length;
     const blocked = keyLimits.filter(k => k.status === 'blocked').length;
+    const checked = keyHealth.length > 0;
+    const last    = keyHealth.map(k => k.checkedAt).filter(Boolean).sort().pop();
 
-    const summary = [`<span class="a-chip a-chip-muted">${keys.length} keys</span>`];
-    if (keyHealth.length) {
-      summary.push(`<span class="a-chip a-chip-ok">${icon('check')}${working} working</span>`);
-      if (failed)  summary.push(`<span class="a-chip a-chip-bad">${icon('close')}${failed} failed</span>`);
+    const cell = (label, value, state, sub) => `
+      <div class="a-metric">
+        <span class="a-metric-label">${esc(label)}</span>
+        <span class="a-metric-value${state ? ` is-${state}` : ''}">${value}</span>
+        ${sub ? `<span class="a-metric-sub">${esc(sub)}</span>` : ''}
+      </div>`;
+    $('keySummary').innerHTML =
+      cell('Keys configured', esc(fmtFull(keys.length)), '', keyLimits.length ? 'From the rate-limit ledger' : '')
+      + cell('Working', checked ? `${icon('check')}${esc(fmtFull(working))}` : '—', checked ? 'ok' : '',
+             checked ? `Checked ${fmtTime(last)}` : 'Run a health check')
+      + cell('Failed', checked ? `${failed ? icon('close') : ''}${esc(fmtFull(failed))}` : '—', failed ? 'bad' : '',
+             checked ? (failed ? 'Replace or remove these keys' : 'None') : 'Run a health check')
+      + cell('Blocked', `${blocked ? icon('lock') : ''}${esc(fmtFull(blocked))}`, blocked ? 'warn' : '',
+             blocked ? 'Auto-unblocks when the window ends' : 'None');
+
+    if (!keys.length) {
+      body.innerHTML = `<tr class="a-state-row"><td colspan="8"><div class="a-empty">${icon('key')}<p>No key data loaded yet. Run a health check, or refresh the limit status.</p></div></td></tr>`;
+      return;
     }
-    if (blocked) summary.push(`<span class="a-chip a-chip-warn">${icon('lock')}${blocked} blocked</span>`);
-    $('keySummary').innerHTML = summary.join('');
+
+    body.innerHTML = keys.map(k => {
+      /* keyHealth rows carry `status` as health; keyLimits rows overwrite it and
+         we stash the limit meaning in `limitStatus`. Read them apart. */
+      const health = keyHealth.find(h => h.index === k.index);
+      let healthChip = '<span class="a-chip a-chip-muted">Not checked</span>';
+      if (health) {
+        if (health.status === 'working')        healthChip = `<span class="a-chip a-chip-ok">${icon('check')}Working</span>`;
+        else if (health.status === 'ratelimit') healthChip = `<span class="a-chip a-chip-warn">${icon('alert')}Rate limited</span>`;
+        else if (health.status === 'failed')    healthChip = `<span class="a-chip a-chip-bad">${icon('close')}Failed</span>`;
+      }
+
+      let limitChip = '<span class="a-muted">—</span>';
+      if (k.limitStatus === 'blocked')        limitChip = `<span class="a-chip a-chip-warn">${icon('lock')}Blocked</span>`;
+      else if (k.limitStatus === 'invalid')   limitChip = `<span class="a-chip a-chip-bad">${icon('close')}Invalid key</span>`;
+      else if (k.limitStatus === 'available') limitChip = `<span class="a-chip a-chip-ok">${icon('check')}Available</span>`;
+
+      return `<tr>
+        <td class="a-num a-muted">${esc(k.index)}</td>
+        <td class="a-primary-cell">
+          <span class="a-cell-title">${esc(k.name || `Key ${k.index}`)}</span>
+          <span class="a-cell-sub a-mono">${esc(k.masked || '—')}</span>
+        </td>
+        <td>${healthChip}${health && health.error ? `<div class="a-cell-err">${esc(health.error)}</div>` : ''}</td>
+        <td>${limitChip}${k.limitStatus === 'blocked' && k.blocked_until
+          ? `<span class="a-cell-sub">until ${esc(fmtDateTime(k.blocked_until))}</span>` : ''}</td>
+        <td class="a-right a-num">${health && health.latency != null ? `${esc(fmtFull(health.latency))} ms` : '<span class="a-muted">—</span>'}</td>
+        <td><span class="a-mono">${esc((health && health.model) || '—')}</span></td>
+        <td>${health && health.checkedAt ? esc(fmtTime(health.checkedAt)) : '<span class="a-muted">—</span>'}</td>
+        <td class="a-right">${k.limitStatus === 'blocked' && k.key_hash
+          ? `<button class="a-btn a-btn-ghost a-btn-sm" data-action="unblock" data-hash="${esc(k.key_hash)}">Unblock</button>` : ''}</td>
+      </tr>`;
+    }).join('');
   }
 
   async function checkKeys() {
     const btn = $('checkKeysBtn');
     btn.disabled = true;
+    btn.classList.add('is-busy');
     try {
       const data = await request('/api/admin/check-keys', { ttl: 0 });
       keyHealth = data.results || [];
@@ -1386,12 +1624,14 @@
       toast(e.message, 'bad');
     } finally {
       btn.disabled = false;
+      btn.classList.remove('is-busy');
     }
   }
 
   async function checkLimits() {
     const btn = $('checkLimitsBtn');
     btn.disabled = true;
+    btn.classList.add('is-busy');
     try {
       const data = await request('/api/admin/key-limits', { ttl: 0 });
       keyLimits = data.keys || [];
@@ -1400,6 +1640,7 @@
       toast(e.message, 'bad');
     } finally {
       btn.disabled = false;
+      btn.classList.remove('is-busy');
     }
   }
 
@@ -1439,26 +1680,28 @@
       }
 
       if (!groups.length) {
-        tbody.innerHTML = `<tr><td colspan="6"><div class="a-empty">${icon('check')}<p>No crashes recorded. Nothing to triage.</p></div></td></tr>`;
+        stateRow(tbody, 6, '');
+        tbody.firstElementChild.firstElementChild.innerHTML =
+          `<div class="a-empty">${icon('check')}<p>No crashes recorded. Nothing to triage.</p></div>`;
         $('crashPager').innerHTML = '';
         return;
       }
 
-      tbody.innerHTML = groups.map(g => {
+      fillBody(tbody, groups.map(g => {
         const s = g.sample || {};
         const preview = (s.stack_trace_preview || '').split('\n')[0] || '';
         return `<tr class="is-clickable" data-crash-hash="${esc(g.group_hash)}" tabindex="0">
-          <td class="a-primary-cell" style="max-width:340px">
-            ${esc(s.message || '(no message)')}
-            ${preview ? `<div class="a-muted" style="font-weight:400;font-size:11px;overflow:hidden;text-overflow:ellipsis">${esc(preview)}</div>` : ''}
+          <td class="a-primary-cell" style="max-width:420px">
+            <span class="a-cell-title">${esc(s.message || '(no message)')}</span>
+            ${preview ? `<span class="a-cell-sub a-mono">${esc(preview)}</span>` : ''}
           </td>
           <td><span class="a-chip a-chip-muted">${esc(s.error_type || 'unknown')}</span></td>
           <td class="a-right a-num">${esc(fmtFull(g.occurrences || 0))}</td>
           <td class="a-right a-num">${esc(fmtFull(g.affected_devices || 0))}</td>
-          <td>${esc(fmtDateTime(g.last_seen))}</td>
-          <td>${esc(fmtDateTime(g.first_seen))}</td>
+          <td title="${esc(fmtDateTime(g.last_seen))}">${esc(fmtAgo(g.last_seen))}</td>
+          <td>${esc(fmtDate(g.first_seen))}</td>
         </tr>`;
-      }).join('');
+      }).join(''));
 
       renderPager($('crashPager'), data.pagination, 'crash');
     } catch (e) {
@@ -1481,10 +1724,13 @@
     if (!group) return;
     const s = group.sample || {};
     const list = occ || [];
-    const fatal = list.some(o => o.fatal);
+    const fatalCount = list.filter(o => o.fatal).length;
 
     $('drawerTitle').innerHTML =
-      `<span class="a-chip ${fatal ? 'a-chip-bad' : 'a-chip-warn'}" style="margin-right:8px">${icon('alert')}${fatal ? 'Fatal' : 'Handled'}</span>${esc(s.message || 'Unknown error')}`;
+      `<span class="a-chip ${fatalCount ? 'a-chip-bad' : 'a-chip-warn'}">${icon('alert')}${fatalCount ? 'Fatal' : 'Handled'}</span>${esc(s.message || 'Unknown error')}`;
+    $('drawerMeta').innerHTML =
+      `<span class="a-chip a-chip-muted">${esc(s.error_type || 'unknown')}</span>`
+      + `<span class="a-mono">${esc(group.group_hash)}</span>${copyBtn(group.group_hash, 'group hash')}`;
 
     /* Version and mode breakdowns come out of the same 20 occurrences the API
        already sends — the old console only listed the distinct values. */
@@ -1496,30 +1742,25 @@
     const versions = tally('app_version');
     const modes    = tally('mode');
 
-    const rows = [
-      ['Error type',       esc(s.error_type || '—')],
-      ['Total occurrences', esc(fmtFull(group.occurrences || 0))],
-      ['Affected devices',  esc(fmtFull(group.affected_devices || 0))],
-      ['First seen',        esc(fmtDateTime(group.first_seen))],
-      ['Last seen',         esc(fmtDateTime(group.last_seen))],
-      ['Fatal in sample',   `${list.filter(o => o.fatal).length} of ${list.length}`],
-      ['Group hash',        `<span class="a-mono">${esc(group.group_hash)}</span>`],
-    ];
-
-    let html = `<div class="a-drawer-section"><h3>Summary</h3>
-      <dl class="a-kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl></div>`;
+    let html = `<section class="a-dsec">${metricCells([
+      ['Occurrences',      esc(fmtFull(group.occurrences || 0))],
+      ['Devices affected', esc(fmtFull(group.affected_devices || 0))],
+      ['First seen',       esc(fmtDate(group.first_seen)), fmtDateTime(group.first_seen)],
+      ['Last seen',        esc(fmtAgo(group.last_seen)), fmtDateTime(group.last_seen)],
+    ])}</section>`;
 
     if (versions.length) {
       const max = Math.max(...versions.map(v => v[1]), 1);
-      html += `<div class="a-drawer-section"><h3>App versions · recent ${list.length}</h3>
+      const modeLine = modes.length
+        ? `<p class="a-note" style="margin-top:12px">Mode: ${modes.map(([m, n]) => `${esc(m)} ${n}`).join(' · ')}. Fatal in ${fatalCount} of ${list.length}.</p>`
+        : '';
+      html += drawerSection(`App versions · last ${list.length} reports`, `
         <div class="a-barlist">${versions.map(([v, n]) => `
           <div class="a-barlist-row">
-            <span class="a-barlist-key">${esc(v)}</span>
+            <span class="a-barlist-key a-mono">${esc(v)}</span>
             <span class="a-barlist-track"><span class="a-barlist-fill" style="width:${((n / max) * 100).toFixed(1)}%"></span></span>
             <span class="a-barlist-val">${n}</span>
-          </div>`).join('')}</div>
-        ${modes.length ? `<p class="a-note">Modes: ${modes.map(([m, n]) => `${esc(m)} (${n})`).join(' · ')}</p>` : ''}
-      </div>`;
+          </div>`).join('')}</div>${modeLine}`);
     }
 
     /* Occurrences per day across the sample — enough to tell "still happening"
@@ -1533,21 +1774,22 @@
     }
     if (byDay.size > 1) {
       const series = [...byDay.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([date, value]) => ({ date, value }));
-      html += `<div class="a-drawer-section"><h3>Occurrences over time</h3><div class="a-chart-wrap" id="crashSpark"></div></div>`;
-      setTimeout(() => { const el = $('crashSpark'); if (el) barChart(el, series, { color: C4, label: 'crashes' }); }, 0);
+      html += drawerSection('Reports per day', '<div class="a-chart-wrap" id="crashSpark"></div>');
+      setTimeout(() => { const el = $('crashSpark'); if (el) barChart(el, series, { color: C4, label: 'reports' }); }, 0);
     }
 
-    html += `<div class="a-drawer-section"><h3>Stack trace · sample</h3>
-      <pre class="a-stack">${esc(s.stack_trace || '(no stack trace)')}</pre></div>`;
+    html += drawerSection('Stack trace', `<pre class="a-trace">${esc(s.stack_trace || '(no stack trace)')}</pre>`,
+      s.stack_trace ? copyBtn(s.stack_trace, 'stack trace') : '');
 
     if (list.length) {
-      html += `<div class="a-drawer-section"><h3>Recent ${list.length} occurrence${list.length === 1 ? '' : 's'}</h3>
+      html += drawerSection(`Recent reports`, `
         <div class="a-events">${list.map(o => `
           <div class="a-event">
-            <span class="a-event-type">${esc(o.app_version || '?')}</span>
-            <span class="a-event-meta" title="${esc(o.device_id || '')}">${esc((o.device_id || '').slice(0, 8))}… · ${esc(o.mode || '?')}${o.fatal ? ' · fatal' : ''}</span>
+            <span class="a-event-type a-mono">${esc(o.app_version || '?')}</span>
+            <span class="a-event-meta" title="${esc(o.device_id || '')}">${esc((o.device_id || '').slice(0, 10))}… · ${esc(o.mode || '?')}</span>
+            ${o.fatal ? '<span class="a-chip a-chip-bad">Fatal</span>' : ''}
             <span class="a-event-time">${esc(fmtDateTime(o.timestamp))}</span>
-          </div>`).join('')}</div></div>`;
+          </div>`).join('')}</div>`);
     }
 
     $('drawerBody').innerHTML = html;
@@ -1565,7 +1807,7 @@
     try {
       data = await request('/api/admin/referrals?limit=25', { ttl: 60_000, force });
     } catch (e) {
-      $('refTopBody').innerHTML = `<tr><td colspan="6" class="a-empty">${esc(e.message)}</td></tr>`;
+      stateRow($('refTopBody'), 6, e.message, true);
       return;
     }
 
@@ -1579,9 +1821,9 @@
     $('refQualifiedFoot').textContent = f.qualify_rate == null
       ? 'No invites redeemed yet'
       : `${f.qualify_rate}% of redeemed codes`;
-    $('refClaimsFoot').textContent = data.enabled
-      ? 'Referrals are live'
-      : 'Referrals are switched off';
+    $('refClaimsFoot').innerHTML = data.enabled
+      ? '<span class="a-status is-ok">Program is live</span>'
+      : '<span class="a-status is-off">Program is switched off</span>';
 
     const live = data.live_grants || {};
     $('refLive').textContent = fmtFull(live.devices || 0);
@@ -1595,13 +1837,13 @@
       ? top.map(r => `
         <tr>
           <td class="a-primary-cell"><span class="a-mono">${esc(String(r.device_id || r.hw_id || '—').slice(0, 12))}</span></td>
-          <td class="a-num">${fmtFull(r.total || 0)}</td>
-          <td class="a-num">${fmtFull(r.qualified || 0)}</td>
-          <td class="a-num">${fmtFull(r.pending || 0)}</td>
-          <td>${r.capped ? `<span class="a-chip a-chip-warn">${fmtFull(r.capped)}</span>` : '<span class="a-muted">—</span>'}</td>
-          <td class="a-muted">${esc(r.last ? String(r.last).slice(0, 10) : '—')}</td>
+          <td class="a-right a-num">${fmtFull(r.total || 0)}</td>
+          <td class="a-right a-num">${fmtFull(r.qualified || 0)}<small>${esc(pct(r.qualified || 0, r.total || 0, 0))}</small></td>
+          <td class="a-right a-num">${fmtFull(r.pending || 0)}</td>
+          <td>${r.capped ? `<span class="a-chip a-chip-warn">${icon('alert')}${fmtFull(r.capped)}</span>` : '<span class="a-muted">—</span>'}</td>
+          <td>${esc(r.last ? fmtDate(r.last) : '—')}</td>
         </tr>`).join('')
-      : '<tr><td colspan="6" class="a-empty">Nobody has invited anyone yet.</td></tr>';
+      : '<tr class="a-state-row"><td colspan="6">Nobody has invited anyone yet.</td></tr>';
 
     const c = data.config || {};
     const rows = [
@@ -1628,7 +1870,9 @@
         ? await mock.handle('/api/updates')
         : await fetch(`${API_BASE}/api/updates`).then(r => r.json());
       $('liveVersion').textContent = data.version ? `v${data.version}` : '—';
-      $('liveMeta').textContent = [data.title, data.date ? `published ${data.date}` : ''].filter(Boolean).join(' · ');
+      $('liveMeta').textContent = [data.title, data.date ? `published ${fmtDate(data.date)}` : ''].filter(Boolean).join(' · ');
+      $('liveHighlights').innerHTML = (Array.isArray(data.highlights) ? data.highlights : [])
+        .map(h => `<li>${esc(h)}</li>`).join('');
       if (data.version && !$('uvVersion').value) {
         const parts = String(data.version).split('.').map(Number);
         parts[2] = (parts[2] || 0) + 1;
@@ -1637,6 +1881,7 @@
     } catch {
       $('liveVersion').textContent = '—';
       $('liveMeta').textContent = 'Could not read the published version.';
+      $('liveHighlights').innerHTML = '';
     }
 
     try {
@@ -1666,6 +1911,13 @@
     if (ft && !ft.value) ft.value = String(config.free_daily_tokens ?? 10000);
     const sf = $('sttFreeInput');
     if (sf && !sf.value) sf.value = String((config.stt_free_seconds ?? 180) / 60);
+
+    const tb = config.free_daily_tokens_bounds || { min: 2000, max: 50000 };
+    const sb = config.stt_free_seconds_bounds  || { min: 0, max: 900 };
+    $('freeTokensHint').textContent =
+      `Live: ${fmtFull(config.free_daily_tokens ?? 10000)}. Allowed ${fmtFull(tb.min)} to ${fmtFull(tb.max)}.`;
+    $('sttFreeHint').textContent =
+      `Live: ${(config.stt_free_seconds ?? 180) / 60} min. Allowed ${sb.min / 60} to ${sb.max / 60}.`;
 
     const gated = Array.isArray(config.gated_tools) ? config.gated_tools : [];
     $('gatedTools').innerHTML = GATED_TOOLS.map(name => `
@@ -1700,7 +1952,7 @@
       next ? 'Make Pro and Max purchasable?' : 'Hide the paid plans?',
       next
         ? 'Both paid tiers become purchasable for every user. The Google Play service-account creds must already be set in Vercel, or checkout will fail.'
-        : 'Pro and Max go back to “Coming Soon” for every user. Existing purchases stay valid — only new checkouts are blocked.',
+        : 'Pro and Max go back to “Coming Soon” for every user. Existing purchases stay valid; only new checkouts are blocked.',
       next ? 'Enable paid plans' : 'Disable paid plans',
     );
     if (!ok) return;
@@ -1726,7 +1978,7 @@
       next ? 'Turn referrals on?' : 'Turn referrals off?',
       next
         ? 'Every device gets an invite code and can redeem one. Bonuses already granted keep running either way.'
-        : 'The invite screen and the in-app prompt disappear and no new code can be redeemed. Bonuses already granted are NOT revoked — they run to their expiry.',
+        : 'The invite screen and the in-app prompt disappear and no new code can be redeemed. Bonuses already granted are NOT revoked: they run to their expiry.',
       next ? 'Enable referrals' : 'Disable referrals',
     );
     if (!ok) return;
@@ -1761,7 +2013,7 @@
       `Set the Free tier to ${fmtFull(next)} tokens/day?`,
       `Currently ${fmtFull(current)}. This applies to every device on its next ping.` +
       (lowering
-        ? ' Users on an app build older than the server-budget fix will keep showing the old number and their AI calls will fail in between — check adoption first.'
+        ? ' Users on an app build older than the server-budget fix will keep showing the old number and their AI calls will fail in between. Check adoption first.'
         : ''),
       lowering ? 'Lower the cap' : 'Raise the cap',
     );
@@ -1887,6 +2139,8 @@
     $$('.a-nav-item').forEach(b => b.classList.toggle('is-active', b.dataset.section === name));
     $$('.a-section').forEach(s => s.classList.toggle('is-active', s.id === `sec-${name}`));
     $('pageTitle').textContent = SECTION_TITLES[name];
+    $('pageDesc').textContent  = SECTION_DESCS[name] || '';
+    document.title = `${SECTION_TITLES[name]} · TypeAura Admin`;
     closeNav();
 
     /* Lazy: a section fetches on first visit, then reads its cache. */
@@ -1930,7 +2184,7 @@
     $('app').classList.remove('is-on');
     $('loginScreen').style.display = '';
     setHealth('down', 'Signed out');
-    toast('Session rejected — sign in again.', 'bad');
+    toast('Session rejected. Sign in again.', 'bad');
   }
 
   async function signIn(password) {
@@ -2064,7 +2318,7 @@
       return `<li><div class="a-ask-q-head"><code>${esc(q.tool)}(${esc(q.collection || '')})</code>${meta}</div>` +
         (args ? `<pre>${esc(args)}</pre>` : '') + '</li>';
     }).join('');
-    return `<details class="a-ask-queries"><summary>${queries.length} quer${queries.length === 1 ? 'y' : 'ies'} used</summary><ol>${items}</ol></details>`;
+    return `<details class="a-ask-queries"><summary>${icon('chevron-right')}${queries.length} quer${queries.length === 1 ? 'y' : 'ies'} used</summary><ol>${items}</ol></details>`;
   }
 
   function renderAsk() {
@@ -2073,16 +2327,25 @@
     $('askChips').classList.toggle('a-hidden', askLog.length > 0);
 
     if (!askLog.length) {
-      log.innerHTML = `<div class="a-empty">${icon('sparkles')}<p>Devices, events, AI usage, tokens, crashes, payments — poochho, main query likh ke jawab dunga.</p></div>`;
+      log.innerHTML = `<div class="a-ask-empty">
+        <div class="a-ask-empty-icon">${icon('sparkles')}</div>
+        <h3>Ask your data</h3>
+        <p>Devices, events, AI usage, tokens, crashes, payments. Poochho, main query likh ke jawab dunga.</p>
+      </div>`;
       return;
     }
 
+    /* The analyst answers as plain text beside an avatar, not in a bubble:
+       answers carry tables and lists, and a bubble squeezes them. */
+    const bot = (inner) =>
+      `<div class="a-ask-msg is-bot"><span class="a-ask-avatar">${icon('sparkles')}</span><div class="a-ask-body">${inner}</div></div>`;
+
     log.innerHTML = askLog.map((m) => {
       if (m.role === 'user') return `<div class="a-ask-msg is-user"><div class="a-ask-bubble">${esc(m.content).replace(/\n/g, '<br>')}</div></div>`;
-      if (m.error) return `<div class="a-ask-msg is-bot"><div class="a-ask-bubble is-error">${esc(m.error)}</div>${askQueriesHtml(m.queries)}</div>`;
-      return `<div class="a-ask-msg is-bot"><div class="a-ask-bubble">${askMarkdown(m.content)}</div>${askQueriesHtml(m.queries)}</div>`;
+      if (m.error) return bot(`<div class="a-ask-bubble is-error">${esc(m.error)}</div>${askQueriesHtml(m.queries)}`);
+      return bot(`<div class="a-ask-bubble">${askMarkdown(m.content)}</div>${askQueriesHtml(m.queries)}`);
     }).join('') + (askBusy
-      ? '<div class="a-ask-msg is-bot"><div class="a-ask-bubble a-ask-typing"><span></span><span></span><span></span></div></div>'
+      ? bot('<div class="a-ask-bubble a-ask-typing"><span></span><span></span><span></span></div>')
       : '');
 
     log.scrollTop = log.scrollHeight;
@@ -2095,6 +2358,7 @@
     askLog.push({ role: 'user', content: q });
     askBusy = true;
     $('askInput').value = '';
+    growAsk();
     $('askSend').disabled = true;
     renderAsk();
 
@@ -2119,12 +2383,29 @@
     }
   }
 
+  /* The composer grows with what is typed, up to its CSS max-height. */
+  function growAsk() {
+    const el = $('askInput');
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 180)}px`;
+  }
+
   function newAsk() {
     if (askBusy) return;
     askLog = [];
     askSave();
     renderAsk();
     $('askInput').focus();
+  }
+
+  async function copyText(text) {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Copied to clipboard.', 'ok');
+    } catch {
+      toast('Copy failed. The browser blocked clipboard access.', 'bad');
+    }
   }
 
   /* ═══ Events ═════════════════════════════════════════════════ */
@@ -2168,6 +2449,8 @@
         case 'clear-plan':    clearPlan(); break;
         case 'delete-device': deleteDevice(); break;
         case 'more-events':   loadMoreEvents(); break;
+        case 'drawer-tab':    setDrawerTab(el.dataset.tab); break;
+        case 'copy':          copyText(el.dataset.copy); break;
         case 'check-keys':    checkKeys(); break;
         case 'check-limits':  checkLimits(); break;
         case 'unblock':       unblockKey(el.dataset.hash); break;
@@ -2203,6 +2486,7 @@
       e.preventDefault();
       sendAsk($('askInput').value);
     });
+    $('askInput').addEventListener('input', growAsk);
     /* Enter sends, Shift+Enter is a newline — the usual chat contract. */
     $('askInput').addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
@@ -2222,11 +2506,12 @@
         return;
       }
       if (e.key !== 'Enter' && e.key !== ' ') return;
-      const row = e.target.closest && e.target.closest('[data-device-id], [data-crash-hash]');
+      const row = e.target.closest && e.target.closest('tr[data-device-id], tr[data-crash-hash], tr[data-country]');
       if (!row) return;
       e.preventDefault();
-      if (row.dataset.deviceId) showDevice(row.dataset.deviceId);
-      else showCrash(row.dataset.crashHash);
+      if (row.dataset.deviceId)       showDevice(row.dataset.deviceId);
+      else if (row.dataset.crashHash) showCrash(row.dataset.crashHash);
+      else                            showCountry(row.dataset.country);
     });
 
     /* Purely local — the whole country list is already in hand, so filtering
@@ -2261,7 +2546,7 @@
         token = 'mock';
         enterApp();
         setHealth('warn', 'Mock data');
-        toast('Mock mode — no backend calls.', 'info');
+        toast('Mock mode. No backend calls.', 'info');
         return;
       } catch {
         toast('Mock fixtures failed to load.', 'bad');
