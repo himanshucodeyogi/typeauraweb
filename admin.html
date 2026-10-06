@@ -547,24 +547,41 @@
           <div class="a-panel-head">
             <div class="a-panel-titles">
               <h2>AI provider</h2>
-              <p class="a-sub">Who answers every AI call: keyboard, app tools, Lens, website demo and Ask AI. Same model on both (gpt-oss-120b). AI voice stays on Groq Whisper either way.</p>
+              <p class="a-sub">Which upstream answers each kind of AI call. Ask AI (this console) always tries Groq first, to keep its long query loops off paid credits.</p>
             </div>
           </div>
           <div class="a-panel-body a-rows">
 
             <div class="a-switch-row">
               <div class="a-switch-copy">
-                <div class="a-switch-title">Primary provider</div>
+                <div class="a-switch-title">Text AI</div>
                 <p class="a-switch-desc">
-                  Groq: free keys, rotated, rate-limited per minute. OpenRouter: prepaid credits, pinned
-                  to Crusoe (bf16). Warm servers pick up a switch within 5 minutes.
+                  Keyboard, app tools, Lens and the website demo, on gpt-oss-120b. Groq: free keys, rotated,
+                  rate-limited per minute. OpenRouter: prepaid credits, pinned to Crusoe (bf16).
                 </p>
                 <p class="a-switch-desc" id="aiProviderKeys"></p>
               </div>
               <div class="a-switch-side is-wide">
-                <div class="a-seg" role="group" aria-label="AI provider" id="aiProviderSeg">
-                  <button type="button" class="a-seg-btn" data-action="set-provider" data-provider="groq" aria-pressed="false">Groq</button>
-                  <button type="button" class="a-seg-btn" data-action="set-provider" data-provider="openrouter" aria-pressed="false">OpenRouter</button>
+                <div class="a-seg" role="group" aria-label="Text AI provider" id="aiProviderSeg">
+                  <button type="button" class="a-seg-btn" data-action="set-provider" data-kind="ai" data-provider="groq" aria-pressed="false">Groq</button>
+                  <button type="button" class="a-seg-btn" data-action="set-provider" data-kind="ai" data-provider="openrouter" aria-pressed="false">OpenRouter</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="a-switch-row">
+              <div class="a-switch-copy">
+                <div class="a-switch-title">AI voice</div>
+                <p class="a-switch-desc">
+                  Whisper large-v3-turbo for dictation. Groq: free keys. OpenRouter: about $0.0002 per audio
+                  minute on DeepInfra, its cheapest host (OpenRouter picks the host for transcription; it
+                  cannot be pinned).
+                </p>
+              </div>
+              <div class="a-switch-side is-wide">
+                <div class="a-seg" role="group" aria-label="AI voice provider" id="sttProviderSeg">
+                  <button type="button" class="a-seg-btn" data-action="set-provider" data-kind="stt" data-provider="groq" aria-pressed="false">Groq</button>
+                  <button type="button" class="a-seg-btn" data-action="set-provider" data-kind="stt" data-provider="openrouter" aria-pressed="false">OpenRouter</button>
                 </div>
               </div>
             </div>
@@ -573,9 +590,9 @@
               <div class="a-switch-copy">
                 <div class="a-switch-title">Fall back to the other provider</div>
                 <p class="a-switch-desc">
-                  When the primary cannot answer (no key, every key rate-limited, out of credits, a server
-                  error), the same request is retried once on the other. Timeouts are not retried. With
-                  Groq as primary, this spends OpenRouter credits whenever the free keys run dry.
+                  For text and voice alike: when the chosen provider cannot answer (no key, every key
+                  rate-limited, out of credits, a server error), the request is retried once on the other.
+                  Warm servers pick up any change here within 5 minutes.
                 </p>
               </div>
               <div class="a-switch-side">

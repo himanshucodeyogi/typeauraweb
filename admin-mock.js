@@ -144,10 +144,11 @@ let config = {
   free_daily_tokens: 5000,
   stt_free_seconds: 180,
   ai_provider: 'openrouter',
+  stt_provider: 'groq',
   ai_fallback: true,
   ai_providers: {
     groq: { configured: true, keys: 4 },
-    openrouter: { configured: true, route: 'crusoe/bf16' },
+    openrouter: { configured: true, route: 'crusoe/bf16', stt_model: 'openai/whisper-large-v3-turbo' },
   },
   referral: {
     referrer_bonus: 5000, referee_bonus: 2000, bonus_days: 3,

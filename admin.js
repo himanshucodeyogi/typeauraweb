@@ -70,7 +70,7 @@
   let stats  = null;
   let activeRange = 30;                // days shown in the daily-active chart
   let config = { premium_enabled: false, byok_enabled: true, gif_enabled: true, gated_tools: [],
-                 ai_provider: 'groq', ai_fallback: true };
+                 ai_provider: 'groq', stt_provider: 'groq', ai_fallback: true };
   let keyHealth = [];                  // from check-keys
   let keyLimits = [];                  // from key-limits
   let orHealth  = undefined;           // check-keys' `openrouter`: undefined = not run, null = no key
@@ -1942,14 +1942,16 @@
 
   const PROVIDER_LABEL = { groq: 'Groq', openrouter: 'OpenRouter' };
 
+  /* The two provider switches: text AI and AI voice, each its own config field. */
+  const PROVIDER_FIELD = { ai: 'ai_provider', stt: 'stt_provider' };
+
   function renderProvider() {
-    const current = config.ai_provider || 'groq';
     const avail = config.ai_providers || {};
     /* A provider with no key in Vercel can't be picked: the backend refuses it
        anyway, and greying it out says why before the click. */
-    $$('#aiProviderSeg .a-seg-btn').forEach(b => {
+    $$('#aiProviderSeg .a-seg-btn, #sttProviderSeg .a-seg-btn').forEach(b => {
       const name = b.dataset.provider;
-      const on = name === current;
+      const on = name === (config[PROVIDER_FIELD[b.dataset.kind]] || 'groq');
       const missing = avail[name] && avail[name].configured === false;
       b.classList.toggle('is-active', on);
       b.setAttribute('aria-pressed', String(on));
@@ -2012,30 +2014,34 @@
     }
   }
 
-  async function setProvider(name) {
-    const current = config.ai_provider || 'groq';
-    if (!PROVIDER_LABEL[name] || name === current) return;
+  async function setProvider(kind, name) {
+    const field = PROVIDER_FIELD[kind];
+    if (!field || !PROVIDER_LABEL[name] || name === (config[field] || 'groq')) return;
     const label = PROVIDER_LABEL[name];
+    const voice = kind === 'stt';
     const ok = await confirmAsk(
-      `Switch AI to ${label}?`,
-      name === 'openrouter'
-        ? 'Every AI call is answered by OpenRouter (Crusoe, bf16) and spends credits. Warm servers switch within 5 minutes. Keep an eye on the spend under API keys.'
-        : 'Every AI call goes back to the free Groq keys, which rate-limit under load. With fallback on, OpenRouter still answers whatever Groq cannot.',
+      voice ? `Move AI voice to ${label}?` : `Switch text AI to ${label}?`,
+      voice
+        ? (name === 'openrouter'
+          ? 'Dictation is transcribed through OpenRouter (Whisper turbo, mostly on DeepInfra) and spends credits, about $0.0002 per audio minute. Warm servers switch within 5 minutes.'
+          : 'Dictation goes back to the free Groq keys. With fallback on, OpenRouter still transcribes whatever Groq cannot.')
+        : (name === 'openrouter'
+          ? 'Keyboard, app tools, Lens and the website demo are answered by OpenRouter (Crusoe, bf16) and spend credits. Warm servers switch within 5 minutes. Keep an eye on the spend under API keys.'
+          : 'Text AI goes back to the free Groq keys, which rate-limit under load. With fallback on, OpenRouter still answers whatever Groq cannot.'),
       `Use ${label}`,
     );
     if (!ok) return;
-    writeConfig({ ai_provider: name }, `AI now runs on ${label}.`,
+    writeConfig({ [field]: name }, `${voice ? 'AI voice' : 'Text AI'} now runs on ${label}.`,
       'Saved. Every server uses it within 5 minutes.');
   }
 
   async function toggleAiFallback() {
     const next = !(config.ai_fallback !== false);
-    const other = PROVIDER_LABEL[(config.ai_provider || 'groq') === 'groq' ? 'openrouter' : 'groq'];
     const ok = await confirmAsk(
       next ? 'Turn provider fallback on?' : 'Turn provider fallback off?',
       next
-        ? `A call the primary cannot answer is retried once on ${other}.`
-        : `Calls the primary cannot answer fail instead of going to ${other}. Users see "AI servers are busy".`,
+        ? 'A text or voice call the chosen provider cannot answer is retried once on the other.'
+        : 'Calls the chosen provider cannot answer fail instead of going to the other. Users see "AI servers are busy".',
       next ? 'Enable fallback' : 'Disable fallback',
     );
     if (!ok) return;
@@ -2553,7 +2559,7 @@
         case 'unblock':       unblockKey(el.dataset.hash); break;
         case 'publish':       publishUpdate(); break;
         case 'toggle-premium': togglePremium(); break;
-        case 'set-provider':  setProvider(el.dataset.provider); break;
+        case 'set-provider':  setProvider(el.dataset.kind, el.dataset.provider); break;
         case 'toggle-ai-fallback': toggleAiFallback(); break;
         case 'toggle-byok':   toggleByok(); break;
         case 'toggle-gif':    toggleGif(); break;
