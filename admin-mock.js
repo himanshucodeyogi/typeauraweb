@@ -143,6 +143,12 @@ let config = {
   referral_enabled: true,
   free_daily_tokens: 5000,
   stt_free_seconds: 180,
+  ai_provider: 'openrouter',
+  ai_fallback: true,
+  ai_providers: {
+    groq: { configured: true, keys: 4 },
+    openrouter: { configured: true, route: 'crusoe/bf16' },
+  },
   referral: {
     referrer_bonus: 5000, referee_bonus: 2000, bonus_days: 3,
     max_bonus: 25000, max_per_day: 5, max_lifetime: 20,
@@ -180,6 +186,13 @@ const keyLimits = [
   { index: 3, name: 'Key 3', masked: 'gsk_ghi••••••••••••3d40', key_hash: 'eeee5555ffff6666', status: 'blocked',   blocked_until: iso(-0.02) },
   { index: 4, name: 'Key 4', masked: 'gsk_jkl••••••••••••88ee', key_hash: 'gggg7777hhhh8888', status: 'invalid',   blocked_until: null },
 ];
+
+const openRouterHealth = {
+  name: 'OpenRouter', masked: 'sk-or-v1-a1b••••••••••••9c0d', model: 'openai/gpt-oss-120b', route: 'crusoe/bf16',
+  status: 'working', latency: 688, error: null,
+  credits: { usage: 3.4127, usage_daily: 0.0841, usage_monthly: 1.2093, limit: null, limit_remaining: null },
+  checkedAt: new Date().toISOString(),
+};
 
 let published = { version: '3.0.0', title: 'Play Store launch', highlights: ['Glide typing', 'Floating Lens'], date: day(6) };
 
@@ -322,7 +335,7 @@ export default {
       return { groups, pagination: { page: 1, limit: 50, total: groups.length, total_pages: 1 } };
     }
 
-    if (route === '/api/admin/check-keys') return { results: keyHealth };
+    if (route === '/api/admin/check-keys') return { results: keyHealth, openrouter: openRouterHealth };
 
     if (route === '/api/admin/key-limits') {
       if (method === 'DELETE') {

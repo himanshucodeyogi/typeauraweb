@@ -50,7 +50,7 @@
     ask:      'Plain-language questions, answered with read-only queries on live data',
     devices:  'Every install, its plan and how it is used. Click a row for details.',
     aitools:  'Which AI features each device leans on',
-    apikeys:  'Groq key health and rate-limit status',
+    apikeys:  'Groq and OpenRouter key health, limits and spend',
     crashes:  'Crash reports from the app and the keyboard, grouped by cause',
     referrals: 'Invite funnel, top referrers and program settings',
     releases: 'Publish app updates and change remote config',
@@ -69,9 +69,11 @@
 
   let stats  = null;
   let activeRange = 30;                // days shown in the daily-active chart
-  let config = { premium_enabled: false, byok_enabled: true, gif_enabled: true, gated_tools: [] };
+  let config = { premium_enabled: false, byok_enabled: true, gif_enabled: true, gated_tools: [],
+                 ai_provider: 'groq', ai_fallback: true };
   let keyHealth = [];                  // from check-keys
   let keyLimits = [];                  // from key-limits
+  let orHealth  = undefined;           // check-keys' `openrouter`: undefined = not run, null = no key
 
   /* ═══ DOM helpers ════════════════════════════════════════════ */
 
@@ -1611,6 +1613,42 @@
     }).join('');
   }
 
+  /* Credits are US dollars. Sub-dollar spend is the normal case (a few cents a
+     day), so it keeps four decimals instead of rounding to $0.00. */
+  const fmtUsd = (v) => (v === null || v === undefined ? '—'
+    : `$${Number(v).toFixed(Math.abs(v) < 1 ? 4 : 2)}`);
+
+  function renderOpenRouter() {
+    const body = $('orBody');
+    const empty = (text) => {
+      body.innerHTML = `<tr class="a-state-row"><td colspan="9"><div class="a-empty">${icon('key')}<p>${esc(text)}</p></div></td></tr>`;
+    };
+    if (orHealth === undefined) return empty('Run a health check to see the key, its spend and the route.');
+    if (orHealth === null) return empty('No OpenRouter key on the backend. Set OPENROUTER_API_KEY in Vercel and redeploy.');
+
+    const h = orHealth;
+    let chip = `<span class="a-chip a-chip-bad">${icon('close')}Failed</span>`;
+    if (h.status === 'working')        chip = `<span class="a-chip a-chip-ok">${icon('check')}Working</span>`;
+    else if (h.status === 'ratelimit') chip = `<span class="a-chip a-chip-warn">${icon('alert')}Rate limited</span>`;
+    const c = h.credits || {};
+    const muted = '<span class="a-muted">—</span>';
+
+    body.innerHTML = `<tr>
+      <td class="a-primary-cell">
+        <span class="a-cell-title">${esc(h.name || 'OpenRouter')}</span>
+        <span class="a-cell-sub a-mono">${esc(h.masked || '—')}</span>
+      </td>
+      <td>${chip}${h.error ? `<div class="a-cell-err">${esc(h.error)}</div>` : ''}</td>
+      <td class="a-right a-num">${h.credits ? esc(fmtUsd(c.usage_daily)) : muted}</td>
+      <td class="a-right a-num">${h.credits ? esc(fmtUsd(c.usage_monthly)) : muted}</td>
+      <td class="a-right a-num">${h.credits ? esc(fmtUsd(c.usage)) : muted}</td>
+      <td class="a-right a-num">${c.limit_remaining != null ? esc(fmtUsd(c.limit_remaining)) : '<span class="a-muted">No cap</span>'}</td>
+      <td class="a-right a-num">${h.latency != null ? `${esc(fmtFull(h.latency))} ms` : muted}</td>
+      <td><span class="a-mono">${esc(h.model || '—')}</span><span class="a-cell-sub a-mono">${esc(h.route || '')}</span></td>
+      <td>${h.checkedAt ? esc(fmtTime(h.checkedAt)) : muted}</td>
+    </tr>`;
+  }
+
   async function checkKeys() {
     const btn = $('checkKeysBtn');
     btn.disabled = true;
@@ -1618,8 +1656,10 @@
     try {
       const data = await request('/api/admin/check-keys', { ttl: 0 });
       keyHealth = data.results || [];
-      if (!keyHealth.length) toast('No Groq keys configured on the backend.', 'bad');
+      orHealth  = data.openrouter ?? null;
+      if (!keyHealth.length && !orHealth) toast('No AI keys configured on the backend.', 'bad');
       renderKeys();
+      renderOpenRouter();
     } catch (e) {
       toast(e.message, 'bad');
     } finally {
@@ -1900,7 +1940,33 @@
     st.dataset.on  = String(on);
   }
 
+  const PROVIDER_LABEL = { groq: 'Groq', openrouter: 'OpenRouter' };
+
+  function renderProvider() {
+    const current = config.ai_provider || 'groq';
+    const avail = config.ai_providers || {};
+    /* A provider with no key in Vercel can't be picked: the backend refuses it
+       anyway, and greying it out says why before the click. */
+    $$('#aiProviderSeg .a-seg-btn').forEach(b => {
+      const name = b.dataset.provider;
+      const on = name === current;
+      const missing = avail[name] && avail[name].configured === false;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', String(on));
+      b.disabled = missing && !on;
+      b.title = missing ? 'No key set in Vercel' : '';
+    });
+    renderSwitch('aiFallback', config.ai_fallback !== false);
+
+    const g = avail.groq, o = avail.openrouter;
+    $('aiProviderKeys').textContent = (g || o) ? 'Keys in Vercel: ' + [
+      g ? (g.configured ? `Groq ${fmtFull(g.keys)} ${g.keys === 1 ? 'key' : 'keys'}` : 'Groq not set') : null,
+      o ? (o.configured ? 'OpenRouter set' : 'OpenRouter not set (OPENROUTER_API_KEY)') : null,
+    ].filter(Boolean).join(' · ') : '';
+  }
+
   function renderConfig() {
+    renderProvider();
     renderSwitch('premium', config.premium_enabled === true);
     renderSwitch('byok',    config.byok_enabled    !== false);
     renderSwitch('gif',     config.gif_enabled     !== false);
@@ -1927,7 +1993,7 @@
       </button>`).join('');
   }
 
-  async function writeConfig(patch, message) {
+  async function writeConfig(patch, message, saved = 'Saved. Devices apply it on their next ping.') {
     const status = $('configStatus');
     status.className = 'a-action-status';
     status.textContent = 'Saving…';
@@ -1937,13 +2003,44 @@
       invalidate('/api/admin/set-config');
       renderConfig();
       status.className = 'a-action-status is-ok';
-      status.textContent = 'Saved. Devices apply it on their next ping.';
+      status.textContent = saved;
       toast(message, 'ok');
     } catch (e) {
       status.className = 'a-action-status is-bad';
       status.textContent = e.message;
       renderConfig();
     }
+  }
+
+  async function setProvider(name) {
+    const current = config.ai_provider || 'groq';
+    if (!PROVIDER_LABEL[name] || name === current) return;
+    const label = PROVIDER_LABEL[name];
+    const ok = await confirmAsk(
+      `Switch AI to ${label}?`,
+      name === 'openrouter'
+        ? 'Every AI call is answered by OpenRouter (Crusoe, bf16) and spends credits. Warm servers switch within 5 minutes. Keep an eye on the spend under API keys.'
+        : 'Every AI call goes back to the free Groq keys, which rate-limit under load. With fallback on, OpenRouter still answers whatever Groq cannot.',
+      `Use ${label}`,
+    );
+    if (!ok) return;
+    writeConfig({ ai_provider: name }, `AI now runs on ${label}.`,
+      'Saved. Every server uses it within 5 minutes.');
+  }
+
+  async function toggleAiFallback() {
+    const next = !(config.ai_fallback !== false);
+    const other = PROVIDER_LABEL[(config.ai_provider || 'groq') === 'groq' ? 'openrouter' : 'groq'];
+    const ok = await confirmAsk(
+      next ? 'Turn provider fallback on?' : 'Turn provider fallback off?',
+      next
+        ? `A call the primary cannot answer is retried once on ${other}.`
+        : `Calls the primary cannot answer fail instead of going to ${other}. Users see "AI servers are busy".`,
+      next ? 'Enable fallback' : 'Disable fallback',
+    );
+    if (!ok) return;
+    writeConfig({ ai_fallback: next }, `Provider fallback ${next ? 'enabled' : 'disabled'}.`,
+      'Saved. Every server uses it within 5 minutes.');
   }
 
   async function togglePremium() {
@@ -2122,7 +2219,7 @@
     /* Limit status is loaded on arrival so the section isn't an empty shell;
        the full health check stays explicit because it live-tests every key
        against Groq and is the slower of the two. */
-    apikeys:  () => checkLimits(),
+    apikeys:  () => { renderOpenRouter(); return checkLimits(); },
     crashes:  (f) => loadCrashes(page.crash, f),
     referrals: (f) => loadReferrals(f),
     releases: (f) => loadReleases(f),
@@ -2456,6 +2553,8 @@
         case 'unblock':       unblockKey(el.dataset.hash); break;
         case 'publish':       publishUpdate(); break;
         case 'toggle-premium': togglePremium(); break;
+        case 'set-provider':  setProvider(el.dataset.provider); break;
+        case 'toggle-ai-fallback': toggleAiFallback(); break;
         case 'toggle-byok':   toggleByok(); break;
         case 'toggle-gif':    toggleGif(); break;
         case 'toggle-referral': toggleReferral(); break;

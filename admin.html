@@ -333,6 +333,29 @@
             </table>
           </div>
         </div>
+
+        <!-- Filled by the same "Run health check" as the Groq table: one tiny
+             completion through the pinned route, plus the key's spend. -->
+        <div class="a-panel">
+          <div class="a-panel-head">
+            <div class="a-panel-titles">
+              <h2>OpenRouter</h2>
+              <p class="a-sub">Prepaid credits, routed only to Crusoe (bf16). Spend is in US dollars; the account balance itself is on openrouter.ai.</p>
+            </div>
+          </div>
+          <div class="a-table-scroll">
+            <table class="a-table">
+              <thead>
+                <tr>
+                  <th>Key</th><th>Health</th><th class="a-right">Today</th><th class="a-right">This month</th>
+                  <th class="a-right">All time</th><th class="a-right">Key limit left</th><th class="a-right">Latency</th>
+                  <th>Route</th><th>Checked</th>
+                </tr>
+              </thead>
+              <tbody id="orBody"></tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- ─── Crashes ────────────────────────────────────────── -->
@@ -516,6 +539,52 @@
           </div>
           <p class="a-action-status" id="configStatus"></p>
         </div>
+
+        <!-- Server-side only: devices never see which provider answered. Read
+             by backend/lib/ai-provider.js through the config cache, so a
+             switch reaches every warm server within 5 minutes. -->
+        <section class="a-panel">
+          <div class="a-panel-head">
+            <div class="a-panel-titles">
+              <h2>AI provider</h2>
+              <p class="a-sub">Who answers every AI call: keyboard, app tools, Lens, website demo and Ask AI. Same model on both (gpt-oss-120b). AI voice stays on Groq Whisper either way.</p>
+            </div>
+          </div>
+          <div class="a-panel-body a-rows">
+
+            <div class="a-switch-row">
+              <div class="a-switch-copy">
+                <div class="a-switch-title">Primary provider</div>
+                <p class="a-switch-desc">
+                  Groq: free keys, rotated, rate-limited per minute. OpenRouter: prepaid credits, pinned
+                  to Crusoe (bf16). Warm servers pick up a switch within 5 minutes.
+                </p>
+                <p class="a-switch-desc" id="aiProviderKeys"></p>
+              </div>
+              <div class="a-switch-side is-wide">
+                <div class="a-seg" role="group" aria-label="AI provider" id="aiProviderSeg">
+                  <button type="button" class="a-seg-btn" data-action="set-provider" data-provider="groq" aria-pressed="false">Groq</button>
+                  <button type="button" class="a-seg-btn" data-action="set-provider" data-provider="openrouter" aria-pressed="false">OpenRouter</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="a-switch-row">
+              <div class="a-switch-copy">
+                <div class="a-switch-title">Fall back to the other provider</div>
+                <p class="a-switch-desc">
+                  When the primary cannot answer (no key, every key rate-limited, out of credits, a server
+                  error), the same request is retried once on the other. Timeouts are not retried. With
+                  Groq as primary, this spends OpenRouter credits whenever the free keys run dry.
+                </p>
+              </div>
+              <div class="a-switch-side">
+                <span class="a-switch-state" id="aiFallbackState">—</span>
+                <button class="a-switch" id="aiFallbackSwitch" role="switch" aria-checked="false" aria-label="Fall back to the other provider" data-action="toggle-ai-fallback"></button>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section class="a-panel">
           <div class="a-panel-head">

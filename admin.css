@@ -1194,6 +1194,8 @@ tbody.is-stale { opacity: 0.45; transition: opacity .15s ease; pointer-events: n
   transition: background .15s ease, color .15s ease;
 }
 .a-seg-btn:hover { color: var(--a-text); }
+.a-seg-btn:disabled { opacity: .45; cursor: not-allowed; }
+.a-seg-btn:disabled:hover { color: var(--a-text-3); }
 .a-seg-btn.is-active {
   background: var(--a-raised);
   color: var(--a-text);
@@ -2115,7 +2117,7 @@ tbody.is-stale { opacity: 0.45; transition: opacity .15s ease; pointer-events: n
   .a-switch-row { flex-wrap: wrap; gap: 12px; }
   /* A full-basis control can't share the line, so it wraps under the copy
      instead of squeezing it into a one-word column. */
-  .a-limit { margin-left: 0; flex: 1 1 100%; }
+  .a-limit, .a-switch-side.is-wide { margin-left: 0; flex: 1 1 100%; }
   .a-form-row { grid-template-columns: minmax(0, 1fr); }
   .a-drawer, .a-drawer.is-wide { width: 100vw; }
   .a-toasts { right: 12px; left: 12px; bottom: 12px; max-width: none; }
