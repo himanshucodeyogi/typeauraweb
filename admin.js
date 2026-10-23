@@ -1255,7 +1255,7 @@
     const tier      = effectiveTier(d);
     const paidValid = isPaidValid(d);
     const priorInstalls = Array.isArray(d.merged_device_ids) ? d.merged_device_ids.length : 0;
-    const budget = { free: config.free_daily_tokens ?? 10000, pro: 50000, max: 150000 }[tier];
+    const budget = { free: config.free_daily_tokens ?? 10000, pro: 200000, max: 500000 }[tier];
 
     const summary = metricCells([
       ['Last active',     esc(fmtAgo(d.last_use_date)), fmtDateTime(d.last_use_date)],
