@@ -7,6 +7,11 @@
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#050516" />
   <link rel="icon" type="image/png" href="img/icon.png" />
+  <!-- The first admin call fires as soon as the JS boots. Opening the TLS
+       connection with the page load saves a round trip on sign-in and on every
+       section after it. crossorigin matches the fetch (CORS) connection. -->
+  <link rel="preconnect" href="https://typeaurabackend.vercel.app" crossorigin />
+  <link rel="dns-prefetch" href="https://typeaurabackend.vercel.app" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
