@@ -44,6 +44,18 @@
     releases: 'Releases & config',
   };
 
+  /* Icon shown beside the page title, and in the command palette. */
+  const SECTION_ICONS = {
+    overview: 'grid',
+    ask:      'sparkles',
+    devices:  'device',
+    aitools:  'zap',
+    apikeys:  'key',
+    crashes:  'bug',
+    referrals: 'gift',
+    releases: 'rocket',
+  };
+
   /* One line under the topbar title, so each view says what it is for. */
   const SECTION_DESCS = {
     overview: 'Installs, activity and AI spend across every device',
@@ -445,7 +457,8 @@
            aria-label="${esc(label)} over the last ${data.length} days, from ${esc(fmtDayLabel(data[0].date))} to ${esc(fmtDayLabel(last.date))}">
         <defs>
           <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="${color}" stop-opacity="${compact ? 0.22 : 0.2}"/>
+            <stop offset="0%"   stop-color="${color}" stop-opacity="${compact ? 0.26 : 0.23}"/>
+            <stop offset="58%"  stop-color="${color}" stop-opacity="${compact ? 0.08 : 0.07}"/>
             <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
           </linearGradient>
         </defs>
@@ -499,19 +512,26 @@
 
     const axes = yAxis(top, step, y, padL, W - padR);
     const xLabels = xAxis(data, (i) => x(i) + bw / 2, plotW, W, padL, padR, H - 8);
+    const gid = `bg${Math.random().toString(36).slice(2, 8)}`;
 
     /* 4px rounded data end, square at the baseline. */
     const bars = data.map((d, i) => {
       const h = d.value > 0 ? Math.max(2, base - y(d.value)) : 0;
       if (!h) return '';
       const x0 = x(i), y0 = base - h, r = Math.min(4, bw / 2, h);
-      return `<path class="a-bar" data-i="${i}" fill="${color}" d="M${x0.toFixed(1)} ${base} V${(y0 + r).toFixed(1)} `
+      return `<path class="a-bar" data-i="${i}" fill="url(#${gid})" d="M${x0.toFixed(1)} ${base} V${(y0 + r).toFixed(1)} `
         + `Q${x0.toFixed(1)} ${y0.toFixed(1)} ${(x0 + r).toFixed(1)} ${y0.toFixed(1)} H${(x0 + bw - r).toFixed(1)} `
         + `Q${(x0 + bw).toFixed(1)} ${y0.toFixed(1)} ${(x0 + bw).toFixed(1)} ${(y0 + r).toFixed(1)} V${base} Z"/>`;
     }).join('');
 
     host.innerHTML = `
       <svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${esc(label)} per day">
+        <defs>
+          <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="${color}" stop-opacity="0.98"/>
+            <stop offset="100%" stop-color="${color}" stop-opacity="0.58"/>
+          </linearGradient>
+        </defs>
         ${axes.grid}<g class="a-bars">${bars}</g>${axes.labels}${xLabels}
         <rect class="a-hot" x="${padL}" y="0" width="${plotW}" height="${base}"/>
       </svg>
@@ -1114,6 +1134,8 @@
         const badge = $('navCountDevices');
         badge.textContent = fmt(data.pagination.total);
         badge.classList.remove('a-hidden');
+        const fullTotal = $('devFullTotal');
+        if (fullTotal) fullTotal.textContent = `${fmtFull(data.pagination.total)} devices`;
       }
     } catch (e) {
       stateRow(tbody, DEV_COLS, e.message, true);
@@ -2233,6 +2255,8 @@
 
   function go(name) {
     if (!SECTION_TITLES[name]) return;
+    /* Full screen belongs to Devices; any other destination leaves it. */
+    if (name !== 'devices') setDevFull(false);
     section = name;
 
     /* The section lives in the URL so a view is linkable and survives a reload
@@ -2243,6 +2267,8 @@
     $$('.a-section').forEach(s => s.classList.toggle('is-active', s.id === `sec-${name}`));
     $('pageTitle').textContent = SECTION_TITLES[name];
     $('pageDesc').textContent  = SECTION_DESCS[name] || '';
+    const pageIconUse = $('pageIcon')?.querySelector('use');
+    if (pageIconUse) pageIconUse.setAttribute('href', `#i-${SECTION_ICONS[name] || 'grid'}`);
     document.title = `${SECTION_TITLES[name]} · TypeAura Admin`;
     closeNav();
 
@@ -2256,6 +2282,107 @@
 
   const openNav  = () => { $('sidebar').classList.add('is-open'); $('navBackdrop').classList.add('is-open'); };
   const closeNav = () => { $('sidebar').classList.remove('is-open'); $('navBackdrop').classList.remove('is-open'); };
+
+  /* ─── Devices full screen ───────────────────────────────────────
+     The desktop table is capped in height so the pager stays visible, which
+     leaves only a handful of rows on a laptop. This hands the window to the
+     list: the sidebar and topbar step aside and the table takes every pixel
+     between the slim header and the pager. Esc always comes back. */
+
+  function devFullActive() {
+    return document.body.classList.contains('is-dev-full');
+  }
+
+  function setDevFull(on) {
+    const active = typeof on === 'boolean' ? on : !devFullActive();
+    document.body.classList.toggle('is-dev-full', active);
+    const btn = $('devExpandBtn');
+    if (btn) btn.setAttribute('aria-pressed', String(active));
+    if (active) {
+      closeCommand();
+      /* Desktop only: focusing on a phone would pop the soft keyboard over the
+         list the moment it opens. */
+      if (window.matchMedia('(min-width: 901px)').matches) {
+        setTimeout(() => $('devSearch').focus(), 40);
+      }
+    }
+  }
+
+  /* ─── Command palette ───────────────────────────────────────────
+     A fast way through the console: Ctrl/Cmd+K opens it, type filters the
+     eight sections, Up/Down move and Enter opens. No network calls. */
+
+  const CMD_ITEMS = Object.keys(SECTION_TITLES).map((name) => ({
+    name,
+    title: SECTION_TITLES[name],
+    desc: SECTION_DESCS[name] || '',
+    icon: SECTION_ICONS[name] || 'grid',
+  }));
+  let cmdMatches = CMD_ITEMS;
+  let cmdIndex = 0;
+
+  function renderCommand(query = '') {
+    const q = query.trim().toLowerCase();
+    cmdMatches = q
+      ? CMD_ITEMS.filter(it => `${it.title} ${it.desc}`.toLowerCase().includes(q))
+      : CMD_ITEMS;
+    if (!cmdMatches.length) {
+      $('commandList').innerHTML = '<div class="a-cmdk-empty">No section matches that search.</div>';
+      return;
+    }
+    cmdIndex = Math.min(cmdIndex, cmdMatches.length - 1);
+    $('commandList').innerHTML = cmdMatches.map((it, i) => `
+      <button type="button" class="a-cmdk-item${i === cmdIndex ? ' is-on' : ''}"
+              role="option" aria-selected="${i === cmdIndex}" data-command="${esc(it.name)}">
+        <span class="a-cmdk-item-icon">${icon(it.icon)}</span>
+        <span class="a-cmdk-item-copy">
+          <span class="a-cmdk-item-title">${esc(it.title)}</span>
+          <span class="a-cmdk-item-desc">${esc(it.desc)}</span>
+        </span>
+        <span class="a-cmdk-item-mark">↵</span>
+      </button>`).join('');
+  }
+
+  function openCommand() {
+    const box = $('commandPalette');
+    if (!box || box.classList.contains('is-open')) return;
+    if (!$('app').classList.contains('is-on')) return;
+    $('commandInput').value = '';
+    cmdIndex = 0;
+    renderCommand('');
+    box.classList.add('is-open');
+    box.setAttribute('aria-hidden', 'false');
+    setTimeout(() => $('commandInput').focus(), 30);
+  }
+
+  function closeCommand() {
+    const box = $('commandPalette');
+    if (!box || !box.classList.contains('is-open')) return;
+    box.classList.remove('is-open');
+    box.setAttribute('aria-hidden', 'true');
+  }
+
+  function moveCommand(delta) {
+    if (!cmdMatches.length) return;
+    cmdIndex = (cmdIndex + delta + cmdMatches.length) % cmdMatches.length;
+    $$('.a-cmdk-item').forEach((el, i) => {
+      const on = i === cmdIndex;
+      el.classList.toggle('is-on', on);
+      el.setAttribute('aria-selected', String(on));
+    });
+    $$('.a-cmdk-item')[cmdIndex]?.scrollIntoView({ block: 'nearest' });
+  }
+
+  function pickCommand(name) {
+    if (!SECTION_TITLES[name]) return;
+    closeCommand();
+    go(name);
+  }
+
+  function runCommand() {
+    const item = cmdMatches[cmdIndex];
+    if (item) pickCommand(item.name);
+  }
 
   async function refreshCurrent() {
     const btn = $('refreshBtn');
@@ -2284,6 +2411,8 @@
     askLog = [];
     cache.clear();
     loaded.clear();
+    closeCommand();
+    setDevFull(false);
     $('app').classList.remove('is-on');
     $('loginScreen').style.display = '';
     setHealth('down', 'Signed out');
@@ -2525,6 +2654,31 @@
       if (pw) signIn(pw);
     });
 
+    $('togglePassword').addEventListener('click', () => {
+      const input = $('adminPassword');
+      const btn = $('togglePassword');
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      btn.setAttribute('aria-pressed', String(show));
+      btn.innerHTML = icon(show ? 'eye-off' : 'eye');
+      input.focus();
+    });
+
+    $('commandInput').addEventListener('input', (e) => {
+      cmdIndex = 0;
+      renderCommand(e.target.value);
+    });
+
+    $('commandList').addEventListener('click', (e) => {
+      const item = e.target.closest('[data-command]');
+      if (item) pickCommand(item.dataset.command);
+    });
+
+    $('commandPalette').addEventListener('click', (e) => {
+      if (e.target === $('commandPalette')) closeCommand();
+    });
+
     document.addEventListener('click', (e) => {
       const nav = e.target.closest('.a-nav-item');
       if (nav) return go(nav.dataset.section);
@@ -2544,6 +2698,9 @@
       switch (el.dataset.action) {
         case 'logout':        onUnauthorized(); break;
         case 'refresh':       refreshCurrent(); break;
+        case 'open-command':  openCommand(); break;
+        case 'dev-full':      setDevFull(true); break;
+        case 'dev-full-exit': setDevFull(false); $('devExpandBtn')?.focus(); break;
         case 'toggle-nav':    $('sidebar').classList.contains('is-open') ? closeNav() : openNav(); break;
         case 'close-nav':     closeNav(); break;
         case 'close-drawer':  closeDrawer(); break;
@@ -2602,11 +2759,32 @@
 
     /* Rows are focusable, so they must also open on Enter/Space. */
     document.addEventListener('keydown', (e) => {
+      const cmdOpen = $('commandPalette').classList.contains('is-open');
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        /* Only the console owns this shortcut; on the login screen leave the
+           browser's own Ctrl+K alone. */
+        if (!cmdOpen && !$('app').classList.contains('is-on')) return;
+        e.preventDefault();
+        if (cmdOpen) closeCommand(); else openCommand();
+        return;
+      }
+      if (cmdOpen) {
+        if (e.key === 'Escape')      { e.preventDefault(); closeCommand(); return; }
+        if (e.key === 'ArrowDown')   { e.preventDefault(); moveCommand(1); return; }
+        if (e.key === 'ArrowUp')     { e.preventDefault(); moveCommand(-1); return; }
+        if (e.key === 'Enter')       { e.preventDefault(); runCommand(); return; }
+        /* Keep the palette focus while it is open; the input still receives
+           every printable key. */
+        return;
+      }
+
       if (e.key === 'Escape') {
         if ($('dialog').classList.contains('is-open')) return closeDialog(false);
         /* Above the drawer in the stack, so it closes first if both are open. */
         if ($('readiness').classList.contains('is-open')) return closeReadiness();
         if ($('drawer').classList.contains('is-open')) return closeDrawer();
+        if (devFullActive()) return setDevFull(false);
         closeNav();
         return;
       }

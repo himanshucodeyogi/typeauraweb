@@ -44,6 +44,7 @@
   <symbol id="i-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8M12 8v13"/><path d="M12 8H7.5a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8zM12 8h4.5a2.5 2.5 0 0 0 0-5C13 3 12 8 12 8z"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
   <symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
+  <symbol id="i-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4a6 6 0 0 1 8 0 6 6 0 0 0 8 0v9a6 6 0 0 1-8 0 6 6 0 0 0-8 0"/></symbol>
   <symbol id="i-gif" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M11 10a2 2 0 1 0 0 4h1v-2M15 9v6M18 9h3M18 12h2.5"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
@@ -52,29 +53,62 @@
   <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3 4.2M6.2 6.2C3.5 8 2 12 2 12s3.5 7 10 7c1.2 0 2.3-.2 3.3-.6"/></symbol>
 </svg>
 
 <!-- ═══ Login ══════════════════════════════════════════════════ -->
 <div class="a-login" id="loginScreen">
-  <div class="a-login-card">
-    <div class="a-login-brand">
-      <span class="a-brand-mark"><svg><use href="#i-keyboard"/></svg></span>
-      <span class="a-login-word">TypeAura</span>
-      <span class="a-login-tag">Admin</span>
+  <div class="a-login-shell">
+
+    <aside class="a-login-aside">
+      <div class="a-login-brand">
+        <span class="a-brand-mark"><svg><use href="#i-keyboard"/></svg></span>
+        <span class="a-login-word">TypeAura</span>
+        <span class="a-login-tag">Admin</span>
+      </div>
+
+      <div class="a-login-pitch">
+        <span class="a-eyebrow">Operations console</span>
+        <h1>One place to run<br><span>TypeAura.</span></h1>
+        <p>Installs, AI spend, crashes, keys and releases. Live from the same backend the app talks to.</p>
+      </div>
+
+      <ul class="a-login-points">
+        <li><span class="a-login-point-icon"><svg><use href="#i-users"/></svg></span><span><b>Every device</b>Plan, usage and activity in one view.</span></li>
+        <li><span class="a-login-point-icon"><svg><use href="#i-sparkles"/></svg></span><span><b>Ask AI</b>Plain-language questions over live data.</span></li>
+        <li><span class="a-login-point-icon"><svg><use href="#i-shield"/></svg></span><span><b>Read-only by design</b>No private fields, no data dumps.</span></li>
+      </ul>
+
+      <div class="a-login-status"><span class="a-health-dot"></span><span>Backend status is checked on sign-in</span></div>
+    </aside>
+
+    <div class="a-login-card">
+      <div class="a-login-form-head">
+        <span class="a-eyebrow">Admin access</span>
+        <h2>Welcome back</h2>
+        <p>Private operator access. The session lives in this browser tab only.</p>
+      </div>
+
+      <form class="a-login-form" id="loginForm" autocomplete="off">
+        <label class="a-field">
+          <span class="a-field-label">Admin password</span>
+          <span class="a-pass-wrap">
+            <input type="password" class="a-input" id="adminPassword" placeholder="Enter your password"
+                   autocomplete="current-password" />
+            <button type="button" class="a-pass-toggle" id="togglePassword" aria-label="Show password" aria-pressed="false">
+              <svg><use href="#i-eye"/></svg>
+            </button>
+          </span>
+        </label>
+        <p class="a-error-text a-hidden" id="loginError" role="alert"></p>
+        <button type="submit" class="a-btn a-btn-primary a-btn-block a-btn-lg" id="loginBtn">Sign in</button>
+      </form>
+
+      <p class="a-login-foot"><svg><use href="#i-shield"/></svg>Failed attempts are rate limited per IP.</p>
     </div>
-    <h1>Sign in to the console</h1>
-    <p>Private operator access. The session lives in this browser tab only.</p>
-    <form class="a-login-form" id="loginForm" autocomplete="off">
-      <label class="a-field">
-        <span class="a-field-label">Admin password</span>
-        <input type="password" class="a-input" id="adminPassword" placeholder="Enter password"
-               autocomplete="current-password" />
-      </label>
-      <p class="a-error-text a-hidden" id="loginError" role="alert"></p>
-      <button type="submit" class="a-btn a-btn-primary a-btn-block" id="loginBtn">Sign in</button>
-    </form>
+
   </div>
-  <p class="a-login-foot"><svg><use href="#i-shield"/></svg>Failed attempts are rate limited per IP.</p>
 </div>
 
 <!-- ═══ App shell ══════════════════════════════════════════════ -->
@@ -90,6 +124,12 @@
         <div class="a-brand-sub">Admin console</div>
       </div>
     </div>
+
+    <button type="button" class="a-jump" data-action="open-command" aria-label="Jump to a section">
+      <svg><use href="#i-search"/></svg>
+      <span>Jump to a section</span>
+      <kbd>Ctrl K</kbd>
+    </button>
 
     <nav class="a-nav" aria-label="Sections">
       <div class="a-nav-group">
@@ -124,6 +164,7 @@
       <button class="a-icon-btn a-burger" data-action="toggle-nav" aria-label="Open navigation">
         <svg><use href="#i-menu"/></svg>
       </button>
+      <span class="a-page-icon" id="pageIcon" aria-hidden="true"><svg><use href="#i-grid"/></svg></span>
       <div class="a-topbar-titles">
         <h1 id="pageTitle">Overview</h1>
         <p class="a-topbar-sub" id="pageDesc"></p>
@@ -139,24 +180,24 @@
       <!-- ─── Overview ───────────────────────────────────────── -->
       <section class="a-section is-active" id="sec-overview">
         <div class="a-kpi-row">
-          <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-label">Total installs</span><svg class="a-kpi-icon"><use href="#i-users"/></svg></div>
+          <article class="a-kpi is-violet">
+            <div class="a-kpi-top"><span class="a-kpi-label">Total installs</span><span class="a-kpi-chip"><svg><use href="#i-users"/></svg></span></div>
             <div class="a-kpi-value" id="k-total">—</div>
             <div class="a-kpi-foot" id="k-total-foot"></div>
           </article>
-          <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-label">Daily active</span><svg class="a-kpi-icon"><use href="#i-activity"/></svg></div>
+          <article class="a-kpi is-cyan">
+            <div class="a-kpi-top"><span class="a-kpi-label">Daily active</span><span class="a-kpi-chip"><svg><use href="#i-activity"/></svg></span></div>
             <div class="a-kpi-value" id="k-dau">—</div>
             <div class="a-kpi-foot" id="k-dau-foot"></div>
             <div class="a-kpi-spark" id="k-dau-spark"></div>
           </article>
-          <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-label">Monthly active</span><svg class="a-kpi-icon"><use href="#i-clock"/></svg></div>
+          <article class="a-kpi is-green">
+            <div class="a-kpi-top"><span class="a-kpi-label">Monthly active</span><span class="a-kpi-chip"><svg><use href="#i-clock"/></svg></span></div>
             <div class="a-kpi-value" id="k-mau">—</div>
             <div class="a-kpi-foot" id="k-mau-foot"></div>
           </article>
-          <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-label">AI tokens · 30 days</span><svg class="a-kpi-icon"><use href="#i-zap"/></svg></div>
+          <article class="a-kpi is-pink">
+            <div class="a-kpi-top"><span class="a-kpi-label">AI tokens · 30 days</span><span class="a-kpi-chip"><svg><use href="#i-zap"/></svg></span></div>
             <div class="a-kpi-value" id="k-tokens">—</div>
             <div class="a-kpi-foot" id="k-tokens-foot"></div>
             <div class="a-kpi-spark" id="k-tokens-spark"></div>
@@ -227,6 +268,24 @@
 
       <!-- ─── Devices ────────────────────────────────────────── -->
       <section class="a-section" id="sec-devices">
+        <!-- Only shown in full-screen mode, so the sidebar and topbar can go
+             away without losing the page identity or a way back. -->
+        <div class="a-dev-full-head">
+          <span class="a-page-icon" aria-hidden="true"><svg><use href="#i-device"/></svg></span>
+          <div class="a-dev-full-titles">
+            <h2>Devices</h2>
+            <p>Every install, its plan and how it is used</p>
+          </div>
+          <span class="a-dev-full-total" id="devFullTotal"></span>
+          <span class="a-dev-full-hint"><kbd>esc</kbd> exit</span>
+          <button class="a-btn a-btn-ghost a-btn-sm" data-action="refresh" title="Reload the device list">
+            <svg><use href="#i-refresh"/></svg><span>Refresh</span>
+          </button>
+          <button class="a-btn a-btn-ghost a-btn-sm" data-action="dev-full-exit" aria-label="Exit full screen">
+            <svg><use href="#i-collapse"/></svg><span>Exit full screen</span>
+          </button>
+        </div>
+
         <div class="a-panel">
           <div class="a-toolbar">
             <label class="a-search">
@@ -258,6 +317,11 @@
               <option value="total_keyboard_opens">Sort: Keyboard opens</option>
               <option value="total_app_opens">Sort: App opens</option>
             </select>
+            <button class="a-btn a-btn-ghost a-btn-sm a-dev-expand" id="devExpandBtn"
+                    data-action="dev-full" aria-pressed="false" title="Show the device list full screen"
+                    aria-label="Show the device list full screen">
+              <svg><use href="#i-expand"/></svg><span>Full screen</span>
+            </button>
           </div>
           <div class="a-table-scroll is-tall">
             <table class="a-table">
@@ -395,23 +459,23 @@
              installs that ever set the keyboard up. If it collapses, either the
              bar is wrong or the invites are not real people. -->
         <div class="a-kpi-row">
-          <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-label">Codes redeemed</span><svg class="a-kpi-icon"><use href="#i-gift"/></svg></div>
+          <article class="a-kpi is-violet">
+            <div class="a-kpi-top"><span class="a-kpi-label">Codes redeemed</span><span class="a-kpi-chip"><svg><use href="#i-gift"/></svg></span></div>
             <div class="a-kpi-value" id="refClaims">—</div>
             <div class="a-kpi-foot" id="refClaimsFoot"></div>
           </article>
-          <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-label">Qualified</span><svg class="a-kpi-icon"><use href="#i-check"/></svg></div>
+          <article class="a-kpi is-green">
+            <div class="a-kpi-top"><span class="a-kpi-label">Qualified</span><span class="a-kpi-chip"><svg><use href="#i-check"/></svg></span></div>
             <div class="a-kpi-value" id="refQualified">—</div>
             <div class="a-kpi-foot" id="refQualifiedFoot"></div>
           </article>
-          <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-label">Waiting on setup</span><svg class="a-kpi-icon"><use href="#i-clock"/></svg></div>
+          <article class="a-kpi is-orange">
+            <div class="a-kpi-top"><span class="a-kpi-label">Waiting on setup</span><span class="a-kpi-chip"><svg><use href="#i-clock"/></svg></span></div>
             <div class="a-kpi-value" id="refPending">—</div>
             <div class="a-kpi-foot">Referrer is not paid until these qualify</div>
           </article>
-          <article class="a-kpi">
-            <div class="a-kpi-top"><span class="a-kpi-label">Bonuses running</span><svg class="a-kpi-icon"><use href="#i-zap"/></svg></div>
+          <article class="a-kpi is-cyan">
+            <div class="a-kpi-top"><span class="a-kpi-label">Bonuses running</span><span class="a-kpi-chip"><svg><use href="#i-zap"/></svg></span></div>
             <div class="a-kpi-value" id="refLive">—</div>
             <div class="a-kpi-foot" id="refLiveFoot"></div>
           </article>
@@ -801,6 +865,25 @@
     <div class="a-dialog-actions">
       <button class="a-btn a-btn-ghost" data-action="dialog-cancel">Cancel</button>
       <button class="a-btn a-btn-primary" id="dialogConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Command palette ═══════════════════════════════════════ -->
+<div class="a-cmdk" id="commandPalette" role="dialog" aria-modal="true" aria-labelledby="commandTitle" aria-hidden="true">
+  <div class="a-cmdk-box">
+    <h2 class="a-sr" id="commandTitle">Jump to a section</h2>
+    <div class="a-cmdk-inputrow">
+      <svg><use href="#i-search"/></svg>
+      <input id="commandInput" type="text" placeholder="Search sections…" autocomplete="off"
+             spellcheck="false" aria-controls="commandList" aria-autocomplete="list" />
+      <kbd>esc</kbd>
+    </div>
+    <div class="a-cmdk-list" id="commandList" role="listbox" aria-label="Sections"></div>
+    <div class="a-cmdk-foot">
+      <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+      <span><kbd>↵</kbd> open</span>
+      <span class="a-cmdk-brand">TypeAura Admin</span>
     </div>
   </div>
 </div>
