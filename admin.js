@@ -271,10 +271,46 @@
   }
 
   const cache = new Map();             // path → { at, data }
+  const inflight = new Map();          // 'GET path' → Promise already on the wire
   const DEFAULT_TTL = 60_000;
+
+  /* Overview is the landing view and its body changes slowly (the endpoint has
+     its own two-minute cache). Keeping the last one in sessionStorage lets a
+     reload paint real numbers immediately; the auth probe that follows replaces
+     them, and the "Updated" stamp stays honest about the snapshot's age while
+     it is on screen. Cleared on sign-out so it can't outlive the session. */
+  const STATS_KEY = 'ta_admin_stats';
+  const STATS_MAX_AGE = 24 * 60 * 60 * 1000;
+
+  function readStatsSnapshot() {
+    try {
+      const raw = sessionStorage.getItem(STATS_KEY);
+      if (!raw) return null;
+      const { at, data } = JSON.parse(raw);
+      if (!data || !at || Date.now() - at > STATS_MAX_AGE) return null;
+      return data;
+    } catch { return null; }
+  }
+
+  function saveStatsSnapshot(data) {
+    if (!data) return;
+    try { sessionStorage.setItem(STATS_KEY, JSON.stringify({ at: Date.now(), data })); }
+    catch { /* full or blocked — the live request still works */ }
+  }
+
+  function applyStats(data) {
+    stats = data;
+    /* Mock fixtures must not become the snapshot a real operator sees on the
+       next load of this tab. */
+    if (!mock) saveStatsSnapshot(data);
+  }
 
   let mock = null;                     // populated only when ?mock=1
 
+  /* One GET, one trip. Sections ask for overlapping bodies (Devices and AI
+     usage both read /api/admin/users), and a hover-prefetch can be followed by
+     a click before the first call lands; both wait on the same promise instead
+     of doubling the cost. Writes are never shared — a POST has side effects. */
   async function request(path, { method = 'GET', body, ttl = DEFAULT_TTL, force = false } = {}) {
     const cacheable = method === 'GET' && ttl > 0;
 
@@ -283,38 +319,58 @@
       if (hit && Date.now() - hit.at < ttl) return hit.data;
     }
 
-    let data;
-    if (mock) {
-      data = await mock.handle(path, method, body);
-    } else {
-      const res = await fetch(`${API_BASE}${path}`, {
-        method,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          ...(body ? { 'Content-Type': 'application/json' } : {}),
-        },
-        ...(body ? { body: JSON.stringify(body) } : {}),
-      });
+    const key = `${method} ${path}`;
+    if (method === 'GET' && inflight.has(key)) return inflight.get(key);
 
-      if (res.status === 401) { onUnauthorized(); throw new ApiError('Session rejected. Sign in again.', 401); }
-      if (res.status === 429) {
-        const wait = Number(res.headers.get('Retry-After')) || 0;
-        setHealth('warn', 'Rate limited');
-        throw new ApiError(wait ? `Rate limited. Try again in ${wait}s.` : 'Rate limited. Try again shortly.', 429);
+    const job = (async () => {
+      let data;
+      if (mock) {
+        data = await mock.handle(path, method, body);
+      } else {
+        const res = await fetch(`${API_BASE}${path}`, {
+          method,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            ...(body ? { 'Content-Type': 'application/json' } : {}),
+          },
+          ...(body ? { body: JSON.stringify(body) } : {}),
+        });
+
+        if (res.status === 401) { onUnauthorized(); throw new ApiError('Session rejected. Sign in again.', 401); }
+        if (res.status === 429) {
+          const wait = Number(res.headers.get('Retry-After')) || 0;
+          setHealth('warn', 'Rate limited');
+          throw new ApiError(wait ? `Rate limited. Try again in ${wait}s.` : 'Rate limited. Try again shortly.', 429);
+        }
+
+        data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new ApiError(data.error || `Request failed (${res.status})`, res.status);
       }
 
-      data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new ApiError(data.error || `Request failed (${res.status})`, res.status);
-    }
+      if (cacheable) cache.set(path, { at: Date.now(), data });
+      if (!mock) setHealth('ok', 'Backend healthy');
+      return data;
+    })();
 
-    if (cacheable) cache.set(path, { at: Date.now(), data });
-    if (!mock) setHealth('ok', 'Backend healthy');
-    return data;
+    if (method === 'GET') {
+      inflight.set(key, job);
+      /* Clear on both outcomes. A `.finally()` here would add a second
+         unhandled-rejection path for callers that don't await the original. */
+      const done = () => { if (inflight.get(key) === job) inflight.delete(key); };
+      job.then(done, done);
+    }
+    return job;
   }
 
-  /* Any write invalidates the reads it could have changed. */
+  /* Any write invalidates the reads it could have changed. A read already on
+     the wire started before the write, so drop it from the dedupe map as well:
+     a caller that arrives after the write must start a fresh request, not join
+     one holding pre-write data. Whoever was already awaiting it still gets it. */
   function invalidate(prefix) {
     for (const key of cache.keys()) if (key.startsWith(prefix)) cache.delete(key);
+    for (const key of inflight.keys()) {
+      if (key.startsWith(`GET ${prefix}`)) inflight.delete(key);
+    }
   }
 
   function setHealth(state, text) {
@@ -640,7 +696,7 @@
 
   async function loadOverview(force = false) {
     try {
-      stats = await request('/api/admin/stats', { ttl: 120_000, force });
+      applyStats(await request('/api/admin/stats', { ttl: 120_000, force }));
       renderOverview();
     } catch (e) {
       toast(e.message, 'bad');
@@ -1925,33 +1981,42 @@
   }
 
   async function loadReleases(force = false) {
-    /* /api/updates is public and unauthenticated — reading the live version
-       costs nothing from the admin budget. There is no admin GET for it. */
-    try {
-      const data = mock
-        ? await mock.handle('/api/updates')
-        : await fetch(`${API_BASE}/api/updates`).then(r => r.json());
-      $('liveVersion').textContent = data.version ? `v${data.version}` : '—';
-      $('liveMeta').textContent = [data.title, data.date ? `published ${fmtDate(data.date)}` : ''].filter(Boolean).join(' · ');
-      $('liveHighlights').innerHTML = (Array.isArray(data.highlights) ? data.highlights : [])
-        .map(h => `<li>${esc(h)}</li>`).join('');
-      if (data.version && !$('uvVersion').value) {
-        const parts = String(data.version).split('.').map(Number);
-        parts[2] = (parts[2] || 0) + 1;
-        $('uvVersion').value = parts.join('.');
+    /* The published version is a public endpoint and the config is a separate
+       admin read. Neither depends on the other, so they fly together instead of
+       paying two round trips back to back. */
+    const live = (async () => {
+      /* /api/updates is public and unauthenticated — reading the live version
+         costs nothing from the admin budget. There is no admin GET for it. */
+      try {
+        const data = mock
+          ? await mock.handle('/api/updates')
+          : await fetch(`${API_BASE}/api/updates`).then(r => r.json());
+        $('liveVersion').textContent = data.version ? `v${data.version}` : '—';
+        $('liveMeta').textContent = [data.title, data.date ? `published ${fmtDate(data.date)}` : ''].filter(Boolean).join(' · ');
+        $('liveHighlights').innerHTML = (Array.isArray(data.highlights) ? data.highlights : [])
+          .map(h => `<li>${esc(h)}</li>`).join('');
+        if (data.version && !$('uvVersion').value) {
+          const parts = String(data.version).split('.').map(Number);
+          parts[2] = (parts[2] || 0) + 1;
+          $('uvVersion').value = parts.join('.');
+        }
+      } catch {
+        $('liveVersion').textContent = '—';
+        $('liveMeta').textContent = 'Could not read the published version.';
+        $('liveHighlights').innerHTML = '';
       }
-    } catch {
-      $('liveVersion').textContent = '—';
-      $('liveMeta').textContent = 'Could not read the published version.';
-      $('liveHighlights').innerHTML = '';
-    }
+    })();
 
-    try {
-      config = await request('/api/admin/set-config', { ttl: 30_000, force });
-      renderConfig();
-    } catch (e) {
-      toast(e.message, 'bad');
-    }
+    const settings = (async () => {
+      try {
+        config = await request('/api/admin/set-config', { ttl: 30_000, force });
+        renderConfig();
+      } catch (e) {
+        toast(e.message, 'bad');
+      }
+    })();
+
+    await Promise.all([live, settings]);
   }
 
   function renderSwitch(id, on) {
@@ -2253,8 +2318,53 @@
     releases: (f) => loadReleases(f),
   };
 
+  /* ─── Speculative loading ───────────────────────────────────────
+     A hover is not a click, but it is the best predictor we have: warm the
+     section's body while the pointer is still moving, so the click paints from
+     cache. API keys is deliberately excluded — its loader live-pings every
+     Groq key, which is slow and spends the provider's rate budget. */
+  const prefetchTimers = {};
+
+  function warmSection(name) {
+    /* API keys live-pings every Groq key; never spend that speculatively. A
+       pending hover timer can also outlive a sign-out, so require the app. */
+    if (!$('app').classList.contains('is-on')) return;
+    if (!SECTION_TITLES[name] || name === 'apikeys' || loaded.has(name)) return;
+    loaded.add(name);
+    if (name === 'aitools') renderAiLegend();
+    Promise.resolve(LOADERS[name](false)).catch(() => {});
+  }
+
+  function prefetch(name) {
+    if (!name || name === section || name === 'apikeys') return;
+    if (!SECTION_TITLES[name] || loaded.has(name)) return;
+    if (!$('app').classList.contains('is-on')) return;
+    clearTimeout(prefetchTimers[name]);
+    prefetchTimers[name] = setTimeout(() => {
+      if (name !== section) warmSection(name);
+    }, 120);
+  }
+
+  /* The palette has no hover selection, so give its highlighted row the same
+     head start. A pause is enough to tell "reading the list" from "arrowing
+     through it", and the timer is cancelled on the next move. */
+  let cmdPrefetchTimer = null;
+  function prefetchCommand() {
+    clearTimeout(cmdPrefetchTimer);
+    const item = cmdMatches[cmdIndex];
+    if (!item) return;
+    cmdPrefetchTimer = setTimeout(() => {
+      if ($('commandPalette').classList.contains('is-open') && cmdMatches[cmdIndex] === item) {
+        warmSection(item.name);
+      }
+    }, 220);
+  }
+
   function go(name) {
     if (!SECTION_TITLES[name]) return;
+    /* A click settles the destination; drop speculative timers aimed at the
+       sections the pointer crossed on its way here. */
+    for (const key of Object.keys(prefetchTimers)) clearTimeout(prefetchTimers[key]);
     /* Full screen belongs to Devices; any other destination leaves it. */
     if (name !== 'devices') setDevFull(false);
     section = name;
@@ -2341,6 +2451,7 @@
         </span>
         <span class="a-cmdk-item-mark">↵</span>
       </button>`).join('');
+    prefetchCommand();
   }
 
   function openCommand() {
@@ -2371,6 +2482,7 @@
       el.setAttribute('aria-selected', String(on));
     });
     $$('.a-cmdk-item')[cmdIndex]?.scrollIntoView({ block: 'nearest' });
+    prefetchCommand();
   }
 
   function pickCommand(name) {
@@ -2408,8 +2520,11 @@
     token = '';
     sessionStorage.removeItem('ta_admin');
     try { sessionStorage.removeItem(ASK_KEY); } catch { /* ignore */ }
+    try { sessionStorage.removeItem(STATS_KEY); } catch { /* ignore */ }
     askLog = [];
+    stats = null;
     cache.clear();
+    inflight.clear();
     loaded.clear();
     closeCommand();
     setDevFull(false);
@@ -2430,7 +2545,7 @@
     try {
       /* The stats call doubles as the auth probe, and its body populates the
          Overview — so a sign-in costs exactly one request. */
-      stats = await request('/api/admin/stats', { ttl: 120_000, force: true });
+      applyStats(await request('/api/admin/stats', { ttl: 120_000, force: true }));
       sessionStorage.setItem('ta_admin', password);
       enterApp();
     } catch (e) {
@@ -2675,6 +2790,23 @@
       if (item) pickCommand(item.dataset.command);
     });
 
+    $('commandList').addEventListener('pointerover', (e) => {
+      const item = e.target.closest('[data-command]');
+      if (item) prefetch(item.dataset.command);
+    });
+
+    /* Sidebar hover/focus warms the section behind the link. `prefetch` waits
+       120ms first, so sweeping the pointer past an item costs nothing. */
+    document.addEventListener('pointerover', (e) => {
+      const nav = e.target.closest('.a-nav-item');
+      if (nav) prefetch(nav.dataset.section);
+    });
+
+    document.addEventListener('focusin', (e) => {
+      const nav = e.target.closest('.a-nav-item');
+      if (nav) prefetch(nav.dataset.section);
+    });
+
     $('commandPalette').addEventListener('click', (e) => {
       if (e.target === $('commandPalette')) closeCommand();
     });
@@ -2840,9 +2972,28 @@
     const saved = sessionStorage.getItem('ta_admin');
     if (saved) {
       token = saved;
+
+      /* Repaint the last overview while the auth probe flies, so a reload lands
+         on real numbers instead of skeletons. A token that has since been
+         rejected still falls back to the login screen via onUnauthorized. */
+      const snapshot = readStatsSnapshot();
+      if (snapshot) { stats = snapshot; enterApp(); }
+
       request('/api/admin/stats', { ttl: 120_000 })
-        .then((data) => { stats = data; enterApp(); })
-        .catch(() => { token = ''; sessionStorage.removeItem('ta_admin'); });
+        .then((data) => {
+          applyStats(data);
+          if ($('app').classList.contains('is-on')) renderOverview();
+          else enterApp();
+        })
+        .catch((e) => {
+          /* 401 already reset the UI in onUnauthorized. Anything else (offline,
+             5xx) keeps a shown snapshot usable rather than dropping the token. */
+          if (e && e.status === 401) return;
+          if (!$('app').classList.contains('is-on')) {
+            token = '';
+            sessionStorage.removeItem('ta_admin');
+          }
+        });
     }
   }
 
