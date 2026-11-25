@@ -44,6 +44,8 @@ const devices = Array.from({ length: 137 }, (_, i) => {
   const max  = paid && i % 33 === 0;
   const installedDaysAgo = between(1, 300);
   const tokens = between(0, 240000);
+  const isLimitHit = !paid && (i % 7 === 3);
+  const usedToday = isLimitHit ? between(10000, 14200) : between(0, 4500);
   return {
     device_id: `dev_${String(i).padStart(4, '0')}_${Math.abs(Math.floor(rnd() * 1e9)).toString(36)}`,
     device_name: DEVICE_NAMES[i % DEVICE_NAMES.length],
@@ -73,6 +75,10 @@ const devices = Array.from({ length: 137 }, (_, i) => {
     total_lens_translate: between(0, 320),
     total_lens_reply:     between(0, 140),
     total_ai_tokens:      tokens,
+    tokens_used_today:    usedToday,
+    daily_token_limit:    paid ? (max ? 500000 : 200000) : 10000,
+    daily_limit_reached:  isLimitHit,
+    free_limit_reached:   isLimitHit,
   };
 });
 
@@ -253,6 +259,7 @@ function paginate(list, params) {
   let rows = list;
   if (search) rows = rows.filter(d => (d.device_name + d.device_id).toLowerCase().includes(search));
   if (country) rows = rows.filter(d => d.country === country);
+  if (filter === 'limit_reached') rows = rows.filter(d => d.daily_limit_reached || (!['pro', 'max'].includes(d.plan_tier) && (d.tokens_used_today || 0) >= 10000));
   if (filter === 'plan_free') rows = rows.filter(d => d.plan_tier === 'free');
   if (filter === 'plan_pro')  rows = rows.filter(d => d.plan_tier === 'pro');
   if (filter === 'plan_max')  rows = rows.filter(d => d.plan_tier === 'max');

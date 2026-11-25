@@ -1242,11 +1242,17 @@ code {
 .a-table td.a-primary-cell { color: var(--a-text); font-weight: 500; max-width: 260px; }
 /* Two-line cell: name over a muted identifier. */
 .a-cell-title {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
   color: var(--a-text);
   font-weight: 500;
+}
+.a-cell-name {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .a-cell-sub {
   display: block;
@@ -1258,6 +1264,45 @@ code {
   text-overflow: ellipsis;
 }
 .a-cell-err { margin-top: 4px; color: #FCA5A5; font-size: 12px; white-space: normal; max-width: 260px; }
+
+/* Visual highlight when device has reached daily token limit */
+.a-table tr.has-limit-hit td:first-child {
+  border-left: 3px solid var(--red);
+}
+
+/* Daily token limit reached badge */
+.a-limit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--a-r-xs);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.42);
+  color: #FCA5A5;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  vertical-align: middle;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.a-limit-badge svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.5;
+  color: var(--red);
+  flex-shrink: 0;
+}
+
+.a-limit-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--red);
+  font-weight: 500;
+  margin-top: 1px;
+}
 
 /* Refetching keeps the previous rows on screen, dimmed, instead of flashing
    a skeleton and jumping the layout. */
@@ -1445,6 +1490,40 @@ tbody.is-stale { opacity: 0.45; transition: opacity .15s ease; pointer-events: n
 .a-plan-flags svg { width: 14px; height: 14px; display: block; }
 .a-flag-paid     { color: var(--green); }
 .a-flag-override { color: var(--orange); }
+.a-flag-limit    { color: var(--red); display: inline-flex; align-items: center; }
+
+.a-limit-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--a-r-sm);
+  color: #FEE2E2;
+}
+.a-limit-banner-icon {
+  color: var(--red);
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+.a-limit-banner-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+.a-limit-banner-text {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.a-limit-banner-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #FCA5A5;
+  margin-bottom: 2px;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    TOGGLE SWITCH & SETTING ROWS

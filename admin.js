@@ -205,6 +205,30 @@
 
   const isPaidValid = (d) => !!(d && d.premium_until && new Date(d.premium_until) > new Date());
 
+  function isDailyLimitReached(d) {
+    if (d && typeof d.daily_limit_reached === 'boolean') {
+      return d.daily_limit_reached && (d.free_limit_reached ?? (effectiveTier(d) === 'free'));
+    }
+    if (!d) return false;
+    const tier = effectiveTier(d);
+    if (tier !== 'free') return false;
+    const offset = (Number.isInteger(d.tz_offset_min) && d.tz_offset_min >= -720 && d.tz_offset_min <= 840) ? d.tz_offset_min : 330;
+    const today = new Date(Date.now() + offset * 60000).toISOString().slice(0, 10);
+    const used = d.tokens_used_today ?? (d['ai_tokens_' + today] || 0);
+    const limit = d.daily_token_limit ?? (config.free_daily_tokens || 10000);
+    return limit > 0 && used >= limit;
+  }
+
+  function getDailyTokens(d) {
+    const offset = (Number.isInteger(d.tz_offset_min) && d.tz_offset_min >= -720 && d.tz_offset_min <= 840) ? d.tz_offset_min : 330;
+    const today = new Date(Date.now() + offset * 60000).toISOString().slice(0, 10);
+    const used = d.tokens_used_today ?? (d['ai_tokens_' + today] || 0);
+    const tier = effectiveTier(d);
+    const defaultLimit = tier === 'free' ? (config.free_daily_tokens || 10000) : (tier === 'pro' ? 200000 : 500000);
+    const limit = d.daily_token_limit ?? defaultLimit;
+    return { used, limit, day: today };
+  }
+
   function planBadge(d) {
     const tier  = effectiveTier(d);
     const legacyByok = d.plan_tier === 'byok' || d.plan_byok_active;
@@ -220,6 +244,10 @@
       flags.push(`<span class="a-flag-override" title="Admin override: ${esc(d.admin_plan_override)}">${icon('shield')}</span>`);
     }
     if (legacyByok) flags.push('<span class="a-plan a-plan-byok" title="Legacy BYOK key stored">BYOK</span>');
+    if (isDailyLimitReached(d)) {
+      const dt = getDailyTokens(d);
+      flags.push(`<span class="a-flag-limit" title="Daily free AI token limit reached: ${esc(fmtFull(dt.used))} / ${esc(fmtFull(dt.limit))} tokens used today">${icon('alert')}</span>`);
+    }
 
     if (flags.length) html += `<span class="a-plan-flags">${flags.join('')}</span>`;
     return html;
@@ -1211,10 +1239,20 @@
     const tbody = $('devBody');
     if (!devices.length) return stateRow(tbody, DEV_COLS, 'No devices match these filters.');
 
-    fillBody(tbody, devices.map(d => `
-      <tr class="is-clickable" data-device-id="${esc(d.device_id)}" tabindex="0">
+    fillBody(tbody, devices.map(d => {
+      const isLimitHit = isDailyLimitReached(d);
+      const dt = getDailyTokens(d);
+      const limitBadge = isLimitHit
+        ? `<span class="a-limit-badge" title="Daily free AI token limit reached: ${esc(fmtFull(dt.used))} / ${esc(fmtFull(dt.limit))} tokens used today">${icon('alert')} Limit reached</span>`
+        : '';
+      const tokensTodaySub = isLimitHit
+        ? `<small class="a-limit-sub" title="Used today: ${esc(fmtFull(dt.used))} / ${esc(fmtFull(dt.limit))} tokens">(${esc(fmt(dt.used))} today)</small>`
+        : '';
+
+      return `
+      <tr class="is-clickable${isLimitHit ? ' has-limit-hit' : ''}" data-device-id="${esc(d.device_id)}" tabindex="0">
         <td class="a-primary-cell">
-          <span class="a-cell-title">${esc(d.device_name || 'Unknown')}</span>
+          <span class="a-cell-title">${limitBadge}<span class="a-cell-name">${esc(d.device_name || 'Unknown')}</span></span>
           <span class="a-cell-sub a-mono">${esc(d.device_id)}</span>
         </td>
         <td>${planBadge(d)}</td>
@@ -1224,10 +1262,11 @@
         <td title="${esc(fmtDateTime(d.last_use_date))}">${esc(fmtDate(d.last_use_date))}</td>
         <td class="a-right a-num">${esc(fmtFull(d.total_app_opens || 0))}</td>
         <td class="a-right a-num">${esc(fmtFull(d.total_keyboard_opens || 0))}</td>
-        <td class="a-right a-num">${esc(fmt(d.total_ai_tokens || 0))}</td>
+        <td class="a-right a-num">${esc(fmt(d.total_ai_tokens || 0))}${tokensTodaySub}</td>
         <td>${keyboardStatus(d)}</td>
         <td>${esc(d.selected_theme || '—')}</td>
-      </tr>`).join(''));
+      </tr>`;
+    }).join(''));
   }
 
   function renderPager(host, p, target) {
@@ -1325,7 +1364,13 @@
 
   function renderDevice({ device: d, recent_events: events, events_pagination: pg }) {
     if (!d) return;
-    $('drawerTitle').innerHTML = `${esc(d.device_name || 'Unknown device')} ${planBadge(d)}`;
+    const isLimitHit = isDailyLimitReached(d);
+    const dt = getDailyTokens(d);
+    const limitBadge = isLimitHit
+      ? ` <span class="a-limit-badge" title="Daily free AI token limit reached: ${esc(fmtFull(dt.used))} / ${esc(fmtFull(dt.limit))} tokens used today">${icon('alert')} Limit reached</span>`
+      : '';
+
+    $('drawerTitle').innerHTML = `${esc(d.device_name || 'Unknown device')} ${planBadge(d)}${limitBadge}`;
     $('drawerMeta').innerHTML  = `<span class="a-mono">${esc(d.device_id)}</span>${copyBtn(d.device_id, 'device ID')}`
       + (d.country ? `<span>·</span><span>${esc(regionName(d.country))}</span>` : '')
       + (d.android_version ? `<span>·</span><span>Android ${esc(d.android_version)}</span>` : '');
@@ -1333,7 +1378,7 @@
     const tier      = effectiveTier(d);
     const paidValid = isPaidValid(d);
     const priorInstalls = Array.isArray(d.merged_device_ids) ? d.merged_device_ids.length : 0;
-    const budget = { free: config.free_daily_tokens ?? 10000, pro: 200000, max: 500000 }[tier];
+    const budget = dt.limit;
 
     const summary = metricCells([
       ['Last active',     esc(fmtAgo(d.last_use_date)), fmtDateTime(d.last_use_date)],
@@ -1344,6 +1389,7 @@
 
     const planRows = [
       ['Effective tier',  `${TIER_LABEL[tier]} <span class="a-muted">· ${esc(fmtFull(budget))} tokens/day</span>`],
+      ['Today tokens',    `${esc(fmtFull(dt.used))} / ${esc(fmtFull(dt.limit))}${isLimitHit ? ' <span class="a-error-text">· Limit reached</span>' : ''}`],
       ['Self-reported',   esc(d.plan_tier || 'free')],
       ['Purchased tier',  d.paid_tier ? `${esc(TIER_LABEL[normTier(d.paid_tier)] || d.paid_tier)}${paidValid ? '' : ' <span class="a-muted">· expired</span>'}` : '—'],
       ['Purchased plan',  esc(d.premium_plan || '—')],
@@ -1417,6 +1463,15 @@
       activity = '<div class="a-empty">' + icon('inbox') + '<p>No events recorded for this device.</p></div>';
     }
 
+    const limitBanner = isLimitHit ? `
+      <div class="a-limit-banner">
+        <div class="a-limit-banner-icon">${icon('alert')}</div>
+        <div class="a-limit-banner-text">
+          <strong>Daily Free AI Token Limit Reached</strong>
+          <span>This device has used <b>${esc(fmtFull(dt.used))}</b> of its <b>${esc(fmtFull(dt.limit))}</b> daily tokens today (${esc(dt.day)}). AI requests will return HTTP 429 (daily_limit) until daily reset at midnight.</span>
+        </div>
+      </div>` : '';
+
     $('drawerBody').innerHTML = `
       <div class="a-tabs" role="tablist">
         <button class="a-tab" role="tab" data-action="drawer-tab" data-tab="details" aria-selected="true">Details</button>
@@ -1424,6 +1479,7 @@
           Activity <span class="a-tab-count">${esc(fmt(total))}</span></button>
       </div>
       <div class="a-tabpanel" data-panel="details">
+        ${limitBanner}
         <section class="a-dsec">${summary}</section>
         ${drawerSection('Plan & billing', kvList(planRows))}
         ${drawerSection('Change plan', planControl)}
@@ -1600,16 +1656,24 @@
       const maxes = {};
       for (const t of TOOLS) maxes[t.key] = Math.max(...devices.map(d => d[t.key] || 0), 1);
 
-      fillBody(tbody, devices.map(d => `
-        <tr class="is-clickable" data-device-id="${esc(d.device_id)}" tabindex="0">
+      fillBody(tbody, devices.map(d => {
+        const isLimitHit = isDailyLimitReached(d);
+        const dt = getDailyTokens(d);
+        const limitBadge = isLimitHit
+          ? `<span class="a-limit-badge" title="Daily free AI token limit reached: ${esc(fmtFull(dt.used))} / ${esc(fmtFull(dt.limit))} tokens used today">${icon('alert')} Limit reached</span>`
+          : '';
+
+        return `
+        <tr class="is-clickable${isLimitHit ? ' has-limit-hit' : ''}" data-device-id="${esc(d.device_id)}" tabindex="0">
           <td class="a-primary-cell">
-            <span class="a-cell-title">${esc(d.device_name || 'Unknown')}</span>
+            <span class="a-cell-title">${limitBadge}<span class="a-cell-name">${esc(d.device_name || 'Unknown')}</span></span>
             <span class="a-cell-sub a-mono">${esc(d.device_id)}</span>
           </td>
           ${TOOLS.map(t => cellBar(d[t.key] || 0, maxes[t.key], t.color)).join('')}
           <td>${topTool(d)}</td>
           <td class="a-right a-num">${esc(fmtFull(TOOLS.reduce((s, t) => s + (d[t.key] || 0), 0)))}</td>
-        </tr>`).join(''));
+        </tr>`;
+      }).join(''));
 
       renderPager($('aiPager'), data.pagination, 'ai');
     } catch (e) {
