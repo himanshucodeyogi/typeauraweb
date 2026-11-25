@@ -39,27 +39,42 @@
 
   /* ─── Material-style icons (match the real keyboard's Icon set) ─── */
   const ICONS = {
-    grid:      'M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z',
-    translate: 'M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z',
-    text:      'M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z',
-    settings:  'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z',
-    clipboard: 'M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z',
-    mic:       'M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1.2-9.1c0-.66.54-1.2 1.2-1.2s1.2.54 1.2 1.2l-.01 6.2c0 .66-.53 1.2-1.19 1.2s-1.2-.54-1.2-1.2V4.9zM17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z',
-    shift:     'M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z',
-    backspace: 'M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z',
-    emoji:     'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z',
-    return:    'M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7z',
+    grid:        'M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z',
+    translate:   'M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z',
+    improve:     'M3 10h11v2H3v-2zm0-4h11v2H3V6zm0 8h7v2H3v-2zm14.59-3.41L19 12l-6 6h-1.41v-1.41l6-6zM20.71 10.29c.39-.39.39-1.02 0-1.41l-1.59-1.59c-.39-.39-1.02-.39-1.41 0l-1.3 1.3 3 3 1.3-1.3z',
+    ask_ai:      'M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3v6c0 1.66 1.34 3 3 3h16c1.66 0 3-1.34 3-3v-6c0-1.66-1.34-3-3-3zm-2 10H6V7h12v12zm-9-6c-.83 0-1.5-.67-1.5-1.5S8.17 10 9 10s1.5.67 1.5 1.5S9.83 13 9 13zm6 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm-7.5 3h9v1.5h-9V16z',
+    more:        'M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z',
+    text:        'M2.5 4v3h5v12h3V7h5V4h-13zm19 5h-9v3h3v7h3v-7h3V9z',
+    settings:    'M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z',
+    clipboard:   'M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z',
+    mic_none:    'M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z',
+    mic:         'M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z',
+    shift:       'M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z',
+    backspace:   'M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z',
+    emoji:       'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z',
+    return:      'M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7z',
+    add_below:   'M14 10H3v2h11v-2zm0-4H3v2h11V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM3 16h7v-2H3v2z',
+    theme:       'M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.59 10.56 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z',
+    edit:        'M17 5h-2V3h2v2zm4 4h-2v2h2V9zm0-4h-2V3c1.1 0 2 .9 2 2zm-4 14h-2v2h2v-2zm4-4h-2v2h2v-2zm0 4h-2v2c1.1 0 2-.9 2-2zM9 5H7V3h2v2zM5 9H3v2h2V9zm0-4H3c0-1.1.9-2 2-2v2zm4 14H7v2h2v-2zm-4-4H3v2h2v-2zm0 4H3c0 1.1.9 2 2 2v-2zm1-8h10v6H6v-6z',
+    send:        'M2.01 21L23 12 2.01 3 2 10l15 2-15 2z',
   };
   // lens_blur is drawn from dots rather than a single path
   const LENS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.4"/><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="18" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/><circle cx="7.4" cy="7.4" r="1.1"/><circle cx="16.6" cy="7.4" r="1.1"/><circle cx="7.4" cy="16.6" r="1.1"/><circle cx="16.6" cy="16.6" r="1.1"/></svg>';
 
   function svg(name) {
     if (name === 'lens') return LENS_SVG;
-    return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`;
+    return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[name] || ''}"/></svg>`;
   }
 
   function fillIcons(root = document) {
-    root.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = svg(el.dataset.icon); });
+    root.querySelectorAll('[data-icon]').forEach(el => {
+      const wrap = el.querySelector('.kb-tool-icon') || el.querySelector('.kb-mic-svg');
+      if (wrap) {
+        wrap.innerHTML = svg(el.dataset.icon);
+      } else {
+        el.innerHTML = svg(el.dataset.icon);
+      }
+    });
   }
 
   /* ───────────────────────── tiny helpers ───────────────────────── */
@@ -83,10 +98,11 @@
      instant, reliable and free of API cost. Real AI runs only when the user
      drives the keyboard themselves (i.e. the tour is not active). */
   const SCRIPT = {
-    lensHindi:   'अरे! कल कॉफ़ी के लिए फ्री हो? ☕',
-    lensReplies: ["Yes, I'm totally free! ☕", 'Sure! What time works?', "Aw, I'm a bit busy tomorrow 😅"],
-    translateEn: "Let's meet tomorrow morning.",
-    quickFormal: 'Is our plan for tomorrow confirmed?',
+    lensHindi:    'अरे! कल कॉफ़ी के लिए फ्री हो? ☕',
+    lensReplies:  ["Yes, I'm totally free! ☕", 'Sure! What time works?', "Aw, I'm a bit busy tomorrow 😅"],
+    translateEn:  "Let's meet tomorrow morning.",
+    quickFormal:  'Is our plan for tomorrow confirmed?',
+    quickImprove: "Let's meet tomorrow morning, is that okay?",
   };
 
   /* Bumped every time the tour resets the stage (new chapter, restart, end).
@@ -278,31 +294,378 @@
   }
   function clearSuggestions() { setSuggestions(null); }
 
+  function showThinking(label = 'Thinking…') {
+    suggestStrip.innerHTML = `
+      <div class="kb-thinking-strip">
+        <span class="kb-thinking-shimmer"></span>
+        <span class="kb-thinking-text">${escapeHtml(label)}</span>
+      </div>
+    `;
+  }
+
+  function setRewriteResult(result, label = '✨') {
+    suggestStrip.innerHTML = `
+      <div class="kb-result-strip">
+        <button type="button" class="kb-chip kb-chip--result" title="Tap to replace">
+          <span class="kb-chip-label">${escapeHtml(label)}</span>
+          <span class="kb-chip-text">${escapeHtml(result)}</span>
+        </button>
+        <button type="button" class="kb-add-below-btn" title="Add below existing text">
+          <svg viewBox="0 0 24 24"><path d="${ICONS.add_below}"/></svg>
+          Add below
+        </button>
+        <button type="button" class="kb-strip-close" title="Dismiss">×</button>
+      </div>
+    `;
+    const resBtn = suggestStrip.querySelector('.kb-chip--result');
+    const addBtn = suggestStrip.querySelector('.kb-add-below-btn');
+    const closeBtn = suggestStrip.querySelector('.kb-strip-close');
+
+    resBtn.addEventListener('click', () => {
+      keyboard.setBuffer(result);
+      clearSuggestions();
+      keyboard.shift = false;
+      keyboard._refreshLetters();
+    });
+
+    addBtn.addEventListener('click', () => {
+      const current = keyboard.buffer.trim();
+      const combined = current ? `${current}\n${result}` : result;
+      keyboard.setBuffer(combined);
+      clearSuggestions();
+      keyboard.shift = false;
+      keyboard._refreshLetters();
+      toast('Added below message ⬇️');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      clearSuggestions();
+    });
+  }
+
   /* ───────────────────────── toolbar actions ───────────────────────── */
   function setActiveTool(action) {
-    $$('.icon-btn').forEach(b => b.classList.toggle('active', b.dataset.action === action));
+    $$('.icon-btn, .kb-tool-btn').forEach(b => {
+      const match = b.dataset.action === action || (action === 'tools' && b.dataset.action === 'quick') || (action === 'quick' && b.dataset.action === 'tools');
+      b.classList.toggle('active', match);
+    });
+    const micBtn = $('.kb-tool-mic');
+    if (micBtn) {
+      const isListening = action === 'mic';
+      micBtn.classList.toggle('listening', isListening);
+      const lbl = $('#kbMicLabel');
+      if (lbl) lbl.textContent = isListening ? 'Stop' : 'Mic';
+      const micWrap = micBtn.querySelector('.kb-mic-svg');
+      if (micWrap) micWrap.innerHTML = svg(isListening ? 'mic' : 'mic_none');
+    }
   }
 
   async function handleToolbar(action) {
     switch (action) {
+      case 'tools':
+      case 'quick':     return toggleQuickActions();
+      case 'improve':   return runImprove();
+      case 'ask_ai':    return toggleAskAi();
       case 'translate': return runTranslate();
       case 'lens':      return toggleLensBall();
-      case 'quick':     return toggleQuickActions();
+      case 'more':      return toggleMoreTools();
       case 'mic':       return toggleVoiceInput();
-      case 'fonts':     return toast('Fancy fonts are available in the installed app: Aᴀ 𝓪𝓫𝓬 𝕒𝕓𝕔');
-      case 'clipboard': return toast('Clipboard history is available in the installed app 📋');
-      case 'settings':  return toast('Opens the full TypeAura app on your phone ⚙');
+      case 'clip':
+      case 'clipboard': return handleClip();
+      case 'fonts':     return handleFonts();
+      case 'edit':      return handleEdit();
+      case 'themes':    return toast('25 themes available in the app: AMOLED, Minimal, Silk, Sunset… 🎨');
+      case 'settings':  return toast('Quick settings: height, sound, vibration & languages ⚙');
     }
   }
 
-  /* ── AI Quick Actions panel (in-keyboard, mirrors lib/main.dart) ── */
+  function closeAllPanels() {
+    if (kbPanel && !kbPanel.hidden) closeQuickActions();
+    if (kbMoreSheet && !kbMoreSheet.hidden) closeMoreTools();
+    if (kbChatPanel && !kbChatPanel.hidden) closeAskAi();
+  }
+
+  /* ── 1. Improve: one-tap rewrite ── */
+  async function runImprove() {
+    const text = keyboard.buffer.trim();
+    if (!text) { toast('Type a message first, then tap Improve ✨'); return; }
+    closeAllPanels();
+    setActiveTool('improve');
+    showThinking('Improving wording…');
+    try {
+      const { result } = await callDemoOrScript('quick_action', text, { action: 'Improve' }, { result: SCRIPT.quickImprove });
+      setRewriteResult(result, '✨');
+    } catch (err) {
+      toast(err.message);
+      clearSuggestions();
+    } finally {
+      setActiveTool(null);
+    }
+  }
+
+  /* ── 2. More Tools overflow sheet ── */
+  const kbMoreSheet = document.getElementById('kbMoreSheet');
+
+  function toggleMoreTools() {
+    if (!kbMoreSheet.hidden) { closeMoreTools(); return; }
+    closeAllPanels();
+    setActiveTool('more');
+    kbMoreSheet.innerHTML = `
+      <div class="kb-sheet-head">
+        <span class="kb-sheet-title">More tools</span>
+        <button type="button" class="kb-sheet-close" aria-label="Close">×</button>
+      </div>
+      <div class="kb-sheet-grid">
+        <button type="button" class="kb-sheet-item" data-sheet-action="lens">
+          <span class="kb-sheet-icon">${svg('lens')}</span>
+          <span class="kb-sheet-label">Lens</span>
+        </button>
+        <button type="button" class="kb-sheet-item" data-sheet-action="clip">
+          <span class="kb-sheet-icon"><svg viewBox="0 0 24 24"><path d="${ICONS.clipboard}"/></svg></span>
+          <span class="kb-sheet-label">Clip</span>
+        </button>
+        <button type="button" class="kb-sheet-item" data-sheet-action="fonts">
+          <span class="kb-sheet-icon"><svg viewBox="0 0 24 24"><path d="${ICONS.text}"/></svg></span>
+          <span class="kb-sheet-label">Fonts</span>
+        </button>
+        <button type="button" class="kb-sheet-item" data-sheet-action="edit">
+          <span class="kb-sheet-icon"><svg viewBox="0 0 24 24"><path d="${ICONS.edit}"/></svg></span>
+          <span class="kb-sheet-label">Edit</span>
+        </button>
+        <button type="button" class="kb-sheet-item" data-sheet-action="themes">
+          <span class="kb-sheet-icon"><svg viewBox="0 0 24 24"><path d="${ICONS.theme}"/></svg></span>
+          <span class="kb-sheet-label">Themes</span>
+        </button>
+        <button type="button" class="kb-sheet-item" data-sheet-action="settings">
+          <span class="kb-sheet-icon"><svg viewBox="0 0 24 24"><path d="${ICONS.settings}"/></svg></span>
+          <span class="kb-sheet-label">Settings</span>
+        </button>
+      </div>
+    `;
+    kbKeys.hidden = true;
+    kbMoreSheet.hidden = false;
+    kbMoreSheet.querySelector('.kb-sheet-close').addEventListener('click', closeMoreTools);
+    kbMoreSheet.querySelectorAll('[data-sheet-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const act = btn.dataset.sheetAction;
+        closeMoreTools();
+        handleToolbar(act);
+      });
+    });
+  }
+
+  function closeMoreTools() {
+    kbMoreSheet.hidden = true;
+    kbMoreSheet.innerHTML = '';
+    kbKeys.hidden = false;
+    setActiveTool(null);
+  }
+
+  function handleClip() {
+    const samples = [
+      'kal subah 10 baje milte hain ☕',
+      'Yes, the project is ready for review!',
+      'Thanks for the quick update 👍',
+    ];
+    setSuggestions(samples.map(text => ({
+      label: '📋', text,
+      onClick: (c) => { keyboard.setBuffer(c.text); clearSuggestions(); toast('Pasted from clipboard 📋'); }
+    })));
+    toast('Clipboard: tap any recent snippet to paste 📋');
+  }
+
+  const FONT_STYLES = [
+    { name: 'Bold', map: (s) => s.replace(/[a-zA-Z]/g, c => { const code = c.charCodeAt(0); return String.fromCodePoint(code >= 97 ? 0x1D41A + code - 97 : 0x1D400 + code - 65); }) },
+    { name: 'Script', map: (s) => s.replace(/[a-zA-Z]/g, c => { const code = c.charCodeAt(0); return String.fromCodePoint(code >= 97 ? 0x1D4EA + code - 97 : 0x1D4D0 + code - 65); }) },
+  ];
+  let currentFontIdx = 0;
+
+  function handleFonts() {
+    const text = keyboard.buffer;
+    if (!text) {
+      toast('Type something first, then tap Fonts to restyle: Aᴀ 𝓪𝓫𝓬 𝕒𝕓𝕔 ✨');
+      return;
+    }
+    const style = FONT_STYLES[currentFontIdx % FONT_STYLES.length];
+    currentFontIdx++;
+    keyboard.setBuffer(style.map(text));
+    toast(`Converted to ${style.name} font! ✨ (20+ styles in app)`);
+  }
+
+  function handleEdit() {
+    toast('Edit panel: select all, cut, copy and cursor arrows (Available in app) ✂️');
+  }
+
+  /* ── 3. Ask AI in-keyboard chat panel ── */
+  const kbChatPanel = document.getElementById('kbChatPanel');
+  let chatHistory = [];
+
+  function toggleAskAi() {
+    if (!kbChatPanel.hidden) { closeAskAi(); return; }
+    closeAllPanels();
+    setActiveTool('ask_ai');
+    renderAskAiPanel();
+    kbKeys.hidden = true;
+    kbChatPanel.hidden = false;
+  }
+
+  function closeAskAi() {
+    kbChatPanel.hidden = true;
+    kbKeys.hidden = false;
+    setActiveTool(null);
+  }
+
+  const STARTER_PROMPTS = [
+    '💡 3 ways to reply politely',
+    '📝 Write a short leave request',
+    '✨ How to say thank you warmly',
+  ];
+
+  function renderAskAiPanel() {
+    kbChatPanel.innerHTML = `
+      <div class="kb-chat-head">
+        <div class="kb-chat-title-wrap">
+          <svg viewBox="0 0 24 24"><path d="${ICONS.ask_ai}"/></svg>
+          <span>Ask AI</span>
+        </div>
+        <div class="kb-chat-actions">
+          <button type="button" class="kb-chat-btn-new" id="kbChatNew">New chat</button>
+          <button type="button" class="kb-chat-close" id="kbChatClose" aria-label="Close">×</button>
+        </div>
+      </div>
+      <div class="kb-chat-messages" id="kbChatMsgs"></div>
+      <div class="kb-chat-inputrow">
+        <input type="text" class="kb-chat-input" id="kbChatInput" placeholder="Ask anything…" />
+        <button type="button" class="kb-chat-send" id="kbChatSendBtn" aria-label="Send">
+          <svg viewBox="0 0 24 24"><path d="${ICONS.send}"/></svg>
+        </button>
+      </div>
+    `;
+
+    const inputEl = kbChatPanel.querySelector('#kbChatInput');
+    const sendBtn = kbChatPanel.querySelector('#kbChatSendBtn');
+    const closeBtn = kbChatPanel.querySelector('#kbChatClose');
+    const newBtn = kbChatPanel.querySelector('#kbChatNew');
+
+    closeBtn.addEventListener('click', closeAskAi);
+    newBtn.addEventListener('click', () => {
+      chatHistory = [];
+      renderAskAiMessages();
+    });
+
+    sendBtn.addEventListener('click', () => sendAskAi(inputEl.value));
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); sendAskAi(inputEl.value); }
+    });
+
+    renderAskAiMessages();
+  }
+
+  function renderAskAiMessages() {
+    const msgsEl = document.getElementById('kbChatMsgs');
+    if (!msgsEl) return;
+    msgsEl.innerHTML = '';
+    if (!chatHistory.length) {
+      const starters = document.createElement('div');
+      starters.className = 'kb-chat-starters';
+      starters.innerHTML = STARTER_PROMPTS.map(p => `<button type="button" class="kb-chat-prompt-chip">${escapeHtml(p)}</button>`).join('');
+      starters.querySelectorAll('.kb-chat-prompt-chip').forEach(chip => {
+        chip.addEventListener('click', () => sendAskAi(chip.textContent.replace(/^[^\w]+/, '')));
+      });
+      msgsEl.appendChild(starters);
+      return;
+    }
+
+    chatHistory.forEach(msg => {
+      const el = document.createElement('div');
+      if (msg.role === 'user') {
+        el.className = 'kb-msg-user';
+        el.textContent = msg.content;
+      } else {
+        el.className = 'kb-msg-ai';
+        el.innerHTML = `
+          <div class="kb-msg-text" style="white-space: pre-wrap;">${escapeHtml(msg.content)}</div>
+          <div class="kb-msg-actions">
+            <button type="button" class="kb-msg-act-btn" data-act="insert">Insert</button>
+            <button type="button" class="kb-msg-act-btn" data-act="add-below">+ Add below</button>
+            <button type="button" class="kb-msg-act-btn" data-act="copy">Copy</button>
+          </div>
+        `;
+        el.querySelector('[data-act="insert"]').addEventListener('click', () => {
+          keyboard.setBuffer(msg.content);
+          closeAskAi();
+          toast('Inserted into message ✨');
+        });
+        el.querySelector('[data-act="add-below"]').addEventListener('click', () => {
+          const cur = keyboard.buffer.trim();
+          keyboard.setBuffer(cur ? cur + '\n\n' + msg.content : msg.content);
+          closeAskAi();
+          toast('Added below message ⬇️');
+        });
+        el.querySelector('[data-act="copy"]').addEventListener('click', () => {
+          if (navigator.clipboard) navigator.clipboard.writeText(msg.content).catch(() => {});
+          toast('Copied to clipboard 📋');
+        });
+      }
+      msgsEl.appendChild(el);
+    });
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  async function sendAskAi(question) {
+    question = (question || '').trim();
+    if (!question) return;
+    const inputEl = document.getElementById('kbChatInput');
+    if (inputEl) inputEl.value = '';
+
+    chatHistory.push({ role: 'user', content: question });
+    renderAskAiMessages();
+
+    const loadingMsg = { role: 'assistant', content: 'Thinking…' };
+    chatHistory.push(loadingMsg);
+    renderAskAiMessages();
+
+    try {
+      const fallbackReplies = {
+        'reply': "1. Sure, sounds like a plan! Let me know the time.\n2. Thanks for asking, I'd love to join.\n3. Looking forward to catching up soon!",
+        'leave': "Hi, I will not be able to come in tomorrow due to personal work. I will be available on email if anything urgent comes up. Thank you.",
+        'thank': "Thank you so much! Really appreciate your help and kindness with this.",
+      };
+      let scriptReply = "Here are three polite options you can send:\n1. That sounds great, let's do it!\n2. Thanks for asking, see you then.\n3. Perfect, looking forward to it!";
+      const qLower = question.toLowerCase();
+      if (qLower.includes('leave')) scriptReply = fallbackReplies.leave;
+      else if (qLower.includes('thank')) scriptReply = fallbackReplies.thank;
+      else if (qLower.includes('reply')) scriptReply = fallbackReplies.reply;
+
+      const data = await callDemoOrScript('chat', question, {}, { result: scriptReply });
+      const answer = data.result || scriptReply;
+      chatHistory[chatHistory.length - 1] = { role: 'assistant', content: answer };
+      renderAskAiMessages();
+    } catch (err) {
+      chatHistory[chatHistory.length - 1] = { role: 'assistant', content: err.message || 'Could not fetch AI reply. Try again.' };
+      renderAskAiMessages();
+    }
+  }
+
+  /* ── 4. AI Quick Actions panel (in-keyboard, mirrors lib/main.dart) ── */
   const QUICK_TOOLS = [
-    ['✍️', 'Fix Grammar'], ['💬', 'Make Casual'], ['👔', 'Make Formal'],
-    ['🔄', 'Hinglish→EN'], ['🇮🇳', 'EN→Hinglish'], ['✂️', 'Shorten'],
+    ['✨', 'Improve'],
+    ['✍️', 'Fix Grammar'],
+    ['💬', 'Make Casual'],
+    ['👔', 'Make Formal'],
+    ['🔄', 'Hinglish→EN'],
+    ['🇮🇳', 'EN→Hinglish'],
+    ['✂️', 'Shorten'],
   ];
   const CONVERTERS = [
     ['❤️', 'Loving'], ['🙏', 'Polite'], ['😊', 'Friendly'], ['😠', 'Assertive'],
     ['😅', 'Apologetic'], ['😄', 'Funny'], ['🎉', 'Celebratory'], ['💼', 'Professional'],
+  ];
+  const WRITER_TOOLS = [
+    ['🤖', 'Ask AI'],
+    ['📸', 'Insta SEO'],
+    ['🎬', 'YouTube SEO'],
+    ['✉️', 'Write Email'],
   ];
 
   const kbKeys  = document.getElementById('kbKeys');
@@ -314,13 +677,16 @@
 
   function toggleQuickActions() {
     if (!kbPanel.hidden) { closeQuickActions(); return; }
-    setActiveTool('quick');
+    closeAllPanels();
+    setActiveTool('tools');
     kbPanel.innerHTML = `
       <div class="qa-scroll">
         <div class="qa-header">⚡ QUICK TOOLS</div>
         <div class="qa-grid">${QUICK_TOOLS.map(qaTile).join('')}</div>
         <div class="qa-header">💬 MESSAGE CONVERTERS</div>
         <div class="qa-grid">${CONVERTERS.map(qaTile).join('')}</div>
+        <div class="qa-header">✨ AI WRITER</div>
+        <div class="qa-grid">${WRITER_TOOLS.map(qaTile).join('')}</div>
       </div>
       <div class="qa-bottom">
         <button type="button" class="key key--special qa-abc" data-qa-abc>ABC</button>
@@ -342,18 +708,19 @@
   }
 
   async function runQuickAction(label) {
+    if (label === 'Ask AI') { closeQuickActions(); toggleAskAi(); return; }
+    if (label === 'Improve') { closeQuickActions(); runImprove(); return; }
     const text = keyboard.buffer.trim();
     if (!text) { toast('Type a message first, then pick a Quick Tool ⚡'); return; }
+    closeQuickActions();
+    showThinking(`Running ${label}…`);
     try {
       const { result } = await callDemoOrScript('quick_action', text, { action: label }, { result: SCRIPT.quickFormal });
-      closeQuickActions();
-      setSuggestions([{
-        label: '✨', text: result,
-        onClick: (c) => { keyboard.setBuffer(c.text); clearSuggestions(); keyboard.shift = false; keyboard._refreshLetters(); },
-      }]);
+      setRewriteResult(result, '⚡');
       tour.notify('quick-done');
     } catch (err) {
       toast(err.message);
+      clearSuggestions();
     }
   }
 
@@ -496,16 +863,16 @@
   /* ── feature 2: Hinglish ↔ English translate (single variant) ── */
   async function runTranslate() {
     if (!keyboard.buffer.trim()) { toast('Type something first, then tap Translate ⇄'); return; }
+    closeAllPanels();
     setActiveTool('translate');
+    showThinking('Translating to English…');
     try {
       const { result } = await callDemoOrScript('translate', keyboard.buffer.trim(), { targetLang: 'English' }, { result: SCRIPT.translateEn });
-      setSuggestions([{
-        label: '⇄', text: result,
-        onClick: (c) => { keyboard.setBuffer(c.text); clearSuggestions(); keyboard.shift = false; keyboard._refreshLetters(); },
-      }]);
+      setRewriteResult(result, '⇄');
       tour.notify('translate-done');
     } catch (err) {
       toast(err.message);
+      clearSuggestions();
     } finally {
       setActiveTool(null);
     }
@@ -861,8 +1228,8 @@
       steps: [
         { target: null, run: () => autoType('bro kal ka plan pakka hai na'),
           tip: { en: 'Say you typed a rough message…', hi: 'मान लीजिए आपने एक रफ़ मैसेज टाइप किया…' } },
-        { target: () => $('.icon-btn[data-action="quick"]'), run: () => { if (kbPanel.hidden) toggleQuickActions(); },
-          tip: { en: 'Open ▦ Quick Tools to see all 14 one-tap actions.', hi: 'सभी 14 वन-टैप एक्शन देखने के लिए ▦ क्विक टूल्स खोलें।' } },
+        { target: () => $('[data-action="tools"], [data-action="quick"]'), run: () => { if (kbPanel.hidden) toggleQuickActions(); },
+          tip: { en: 'Open Tools to see all one-tap AI actions.', hi: 'सभी वन-टैप AI एक्शन देखने के लिए Tools खोलें।' } },
         { target: null, run: autoQuickAction,
           tip: { en: 'Tap one, like “Make Formal”, and AI rewrites it instantly.', hi: 'कोई एक दबाएँ, जैसे “Make Formal”, और AI तुरंत उसे फिर से लिख देता है।' } },
       ],
@@ -916,7 +1283,10 @@
       clearSuggestions();
       clearTimeout(riyaTimer);
       const t = chatBody.querySelector('.bubble.typing'); if (t) t.remove();
-      if (kbPanel && !kbPanel.hidden) { kbPanel.hidden = true; kbPanel.innerHTML = ''; kbKeys.hidden = false; }
+      if (kbPanel && !kbPanel.hidden) { kbPanel.hidden = true; kbPanel.innerHTML = ''; }
+      if (kbMoreSheet && !kbMoreSheet.hidden) { kbMoreSheet.hidden = true; kbMoreSheet.innerHTML = ''; }
+      if (kbChatPanel && !kbChatPanel.hidden) { kbChatPanel.hidden = true; }
+      kbKeys.hidden = false;
     },
 
     _enterChapter() {

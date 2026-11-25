@@ -211,20 +211,51 @@
 
             <!-- ───────────── TypeAura keyboard replica ───────────── -->
             <div class="kb" id="keyboard">
-              <!-- toolbar -->
-              <div class="kb-toolbar">
-                <button type="button" class="icon-btn" data-action="quick"     data-icon="grid"      title="AI Quick Tools"></button>
-                <button type="button" class="icon-btn" data-action="translate" data-icon="translate" title="Hinglish ↔ English"></button>
-                <button type="button" class="icon-btn" data-action="lens"      data-icon="lens"      title="Floating Lens"></button>
-                <button type="button" class="icon-btn" data-action="fonts"     data-icon="text"      title="Fonts"></button>
-                <button type="button" class="icon-btn" data-action="settings"  data-icon="settings"  title="Open app"></button>
-                <button type="button" class="icon-btn" data-action="clipboard" data-icon="clipboard" title="Clipboard"></button>
-                <span class="kb-toolbar-spacer"></span>
-                <span class="kb-spinner" id="kbSpinner" hidden></span>
-                <button type="button" class="icon-btn" data-action="mic"       data-icon="mic"       title="Voice typing"></button>
+              <!-- toolbar: 3 zones (Zone 1: Tools lead, Zone 2: 4 pinned tools + More, Zone 3: Mic) -->
+              <div class="kb-toolbar" id="kbToolbar">
+                <!-- Zone 1: Tools (lead, pinned brand mark) -->
+                <button type="button" class="kb-tool-btn kb-tool-lead icon-btn" data-action="tools" title="AI Tools">
+                  <span class="kb-tool-icon kb-tool-icon--logo">
+                    <img src="img/logo-mark.png" alt="" class="kb-lead-logo" />
+                  </span>
+                  <span class="kb-tool-label">Tools</span>
+                </button>
+
+                <!-- Zone 2: Pinned tools + More -->
+                <div class="kb-toolbar-middle" id="kbToolbarMiddle">
+                  <button type="button" class="kb-tool-btn icon-btn" data-action="improve" data-icon="improve" title="Improve: rewrite clearer">
+                    <span class="kb-tool-icon"></span>
+                    <span class="kb-tool-label">Improve</span>
+                  </button>
+                  <button type="button" class="kb-tool-btn icon-btn" data-action="ask_ai" data-icon="ask_ai" title="Ask AI: in-keyboard chat">
+                    <span class="kb-tool-icon"></span>
+                    <span class="kb-tool-label">Ask AI</span>
+                  </button>
+                  <button type="button" class="kb-tool-btn icon-btn" data-action="translate" data-icon="translate" title="Translate: Hinglish ↔ English">
+                    <span class="kb-tool-icon"></span>
+                    <span class="kb-tool-label">Translate</span>
+                  </button>
+                  <button type="button" class="kb-tool-btn icon-btn" data-action="lens" data-icon="lens" title="Floating Lens: translate screen">
+                    <span class="kb-tool-icon"></span>
+                    <span class="kb-tool-label">Lens</span>
+                  </button>
+                  <button type="button" class="kb-tool-btn icon-btn" data-action="more" data-icon="more" title="More tools">
+                    <span class="kb-tool-icon"></span>
+                    <span class="kb-tool-label">More</span>
+                  </button>
+                </div>
+
+                <!-- Zone 3: Mic (pinned) -->
+                <button type="button" class="kb-tool-btn kb-tool-mic icon-btn" data-action="mic" data-icon="mic_none" title="Voice typing">
+                  <span class="kb-tool-icon kb-mic-icon-wrap">
+                    <span class="kb-mic-pulse"></span>
+                    <span class="kb-mic-svg"></span>
+                  </span>
+                  <span class="kb-tool-label" id="kbMicLabel">Mic</span>
+                </button>
               </div>
 
-              <!-- suggestions strip -->
+              <!-- suggestions strip (typing suggestions, thinking state, rewrites with + Add below, and voice listening) -->
               <div class="kb-suggestions" id="suggestStrip">
                 <span class="kb-brand">TypeAura · By Himanshu Kashyap</span>
               </div>
@@ -240,11 +271,19 @@
                   <button type="button" class="key key--special key--sym" data-key="?123">?123</button>
                   <button type="button" class="key key--special key--comma" data-key=",">,</button>
                   <button type="button" class="key key--special key--emoji" data-key="emoji" data-icon="emoji" aria-label="Emoji"></button>
-                  <button type="button" class="key key--space" data-key=" " aria-label="Space"></button>
+                  <button type="button" class="key key--space" data-key=" " aria-label="Space">
+                    <span class="key-space-label">TypeAura</span>
+                  </button>
                   <button type="button" class="key key--special key--period" data-key=".">.</button>
                   <button type="button" class="key key--special key--enter" data-key="enter" data-icon="return" aria-label="Enter"></button>
                 </div>
               </div>
+
+              <!-- More tools overflow sheet -->
+              <div class="kb-more-sheet" id="kbMoreSheet" hidden></div>
+
+              <!-- Ask AI chat panel -->
+              <div class="kb-chat-panel" id="kbChatPanel" hidden></div>
 
               <!-- AI Quick Actions panel (replaces the keys when open) -->
               <div class="kb-panel" id="kbPanel" hidden></div>
